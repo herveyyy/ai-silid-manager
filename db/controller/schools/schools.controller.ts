@@ -1,7 +1,6 @@
 import { SchoolsService } from "@/db/service/schools.service";
-import { GetAllSchoolsUsecase } from "@/db/usecase/schools/get_all_schools.usecase";
 import { ISchools } from "./schools.interface";
-import { SchoolDTO } from "@/lib/admin-types";
+import type { SchoolDTO } from "@/lib/types/admin-types";
 
 export class SchoolsController implements ISchools {
     constructor(private readonly schoolsService: SchoolsService) {}

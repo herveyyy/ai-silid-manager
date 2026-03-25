@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { schools } from "@/drizzle/schema";
-import type { SchoolDTO } from "@/lib/admin-types";
+import type { SchoolDTO } from "@/lib/types/admin-types";
 
 export class GetAllSchoolsUsecase {
     private db = db;
@@ -16,6 +16,11 @@ export class GetAllSchoolsUsecase {
                     site: schools.site,
                     createdAt: schools.createdAt,
                     updatedAt: schools.updatedAt,
+                    aiFeat: schools.aiFeat,
+                    unlimitedStorage: schools.unlimitedStorage,
+                    unlimitedToken: schools.unlimitedToken,
+                    tokenLimit: schools.tokenLimit,
+                    storageLimit: schools.storageLimit,
                 })
                 .from(schools);
 

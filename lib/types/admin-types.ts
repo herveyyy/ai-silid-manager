@@ -20,8 +20,14 @@ export type AttachmentParentType =
 export type InsertSchool = typeof schools.$inferInsert;
 export type SelectSchool = typeof schools.$inferSelect;
 /** `schools` */
-export type School = SelectSchool;
-export type SchoolDTO = Omit<SelectSchool, "password" | "secret" | "apiKey">;
+export type School = SelectSchool & {
+    aiFeat: boolean;
+    unlimitedStorage: boolean;
+    unlimitedToken: boolean;
+    tokenLimit: number;
+    storageLimit: number;
+};
+export type SchoolDTO = Omit<School, "password" | "secret" | "apiKey">;
 
 /** Admin quotas and usage (mock / future API — not in `schools` table yet). */
 export type SchoolAdminMetrics = {

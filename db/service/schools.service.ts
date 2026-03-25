@@ -1,4 +1,4 @@
-import { SchoolDTO } from "@/lib/admin-types";
+import { SchoolDTO } from "@/lib/types/admin-types";
 import { GetAllSchoolsUsecase } from "../usecase/schools/get_all_schools.usecase";
 
 export class SchoolsService {

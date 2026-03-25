@@ -8,6 +8,7 @@ import {
   mockPromptLogs,
   totalAttachmentBytes,
 } from "@/lib/admin-mock-data";
+import { createSchoolsController } from "@/db/route";
 
 export default async function DashboardPage() {
   const schoolsController = createSchoolsController();

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { SchoolDTO } from "@/lib/admin-types";
+import type { SchoolDTO } from "@/lib/types/admin-types";
 
 function shortId(id: string): string {
   return `${id.slice(0, 8)}…`;

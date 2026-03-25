@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Attachment, AttachmentParentType } from "@/lib/admin-types";
+import type { Attachment, AttachmentParentType } from "@/lib/types/admin-types";
 import {
   formatBytes,
   mockAttachments,
@@ -41,7 +41,7 @@ export function StorageConsole() {
         <div className="space-y-4">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
                 Allocated capacity
               </p>
               <p className="mt-1 font-mono text-xl text-foreground">
@@ -49,7 +49,7 @@ export function StorageConsole() {
               </p>
             </div>
             <div className="text-right">
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
                 Used (attachments.file_size aggregate)
               </p>
               <p className="mt-1 font-mono text-xl tabular-nums text-foreground">
@@ -58,7 +58,7 @@ export function StorageConsole() {
             </div>
           </div>
           <label className="block">
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--muted)]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
               Adjust ceiling
             </span>
             <input
@@ -67,19 +67,19 @@ export function StorageConsole() {
               max={500}
               value={ceilingGb}
               onChange={(e) => setCeilingGb(Number(e.target.value))}
-              className="mt-3 w-full accent-[var(--accent)]"
+              className="mt-3 w-full accent-(--accent)"
             />
           </label>
           <div
-            className="h-2 w-full border bg-[var(--background)]"
+            className="h-2 w-full border bg-background"
             style={{ borderColor: "var(--border)" }}
           >
             <div
-              className={`h-full ${pct > 90 ? "bg-[var(--danger)]" : "bg-[var(--success)]"}`}
+              className={`h-full ${pct > 90 ? "bg-(--danger)" : "bg-(--success)"}`}
               style={{ width: `${pct}%` }}
             />
           </div>
-          <p className="font-mono text-[11px] text-[var(--muted)]">
+          <p className="font-mono text-[11px] text-(--muted)">
             Utilization {pct.toFixed(1)}% · schema: `attachments.file_size` (numeric)
           </p>
         </div>
@@ -95,10 +95,10 @@ export function StorageConsole() {
             .map(([k, v]) => (
               <li
                 key={k}
-                className="flex justify-between border-b py-2 text-[var(--muted-strong)]"
+                className="flex justify-between border-b py-2 text-(--muted-strong)"
                 style={{ borderColor: "var(--border)" }}
               >
-                <span className="uppercase text-[var(--muted)]">{k}</span>
+                <span className="uppercase text-(--muted)">{k}</span>
                 <span className="tabular-nums text-foreground">{formatBytes(v ?? 0)}</span>
               </li>
             ))}
@@ -109,7 +109,7 @@ export function StorageConsole() {
         title="Attachment registry"
         subtitle="attachments · manage flags (frontend-only)"
       >
-        <div className="mb-4 flex flex-wrap gap-3 font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--muted)]">
+        <div className="mb-4 flex flex-wrap gap-3 font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
           <span>Soft-deleted rows: {softDeleted}</span>
           <span>·</span>
           <span>Unused & active: {unusedMarked}</span>
@@ -118,7 +118,7 @@ export function StorageConsole() {
           <table className="w-full min-w-[720px] border-collapse font-mono text-[11px]">
             <thead>
               <tr
-                className="border-b text-left text-[var(--muted)]"
+                className="border-b text-left text-(--muted)"
                 style={{ borderColor: "var(--border-strong)" }}
               >
                 <th className="pb-2 pr-4 font-normal uppercase tracking-[0.15em]">
@@ -142,7 +142,7 @@ export function StorageConsole() {
               {rows.map((r) => (
                 <tr
                   key={r.id}
-                  className="border-b text-[var(--muted-strong)]"
+                  className="border-b text-(--muted-strong)"
                   style={{ borderColor: "var(--border)" }}
                 >
                   <td className="py-2 pr-4 text-foreground">{r.fileName}</td>
