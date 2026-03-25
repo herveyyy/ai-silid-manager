@@ -1,39 +1,43 @@
 "use client";
 
+import { signIn } from "next-auth/react";
+
 export function LoginForm() {
+  const credentialsAction = (formData: FormData) => {
+    signIn("credentials", {
+      email: String(formData.get("email") ?? ""),
+      password: String(formData.get("password") ?? ""),
+    });
+  };
+
   return (
-    <form
-      className="space-y-8"
-      onSubmit={(e) => {
-        e.preventDefault();
-      }}
-    >
+    <form className="space-y-8" action={credentialsAction}>
       <div className="space-y-2">
         <label
-          htmlFor="identification"
-          className="block font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--muted)]"
+          htmlFor="credentials-email"
+          className="block font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted)"
         >
-          Identification
+          Email
         </label>
         <input
-          id="identification"
-          name="identification"
-          type="text"
-          autoComplete="username"
+          id="credentials-email"
+          name="email"
+          type="email"
+          autoComplete="email"
           className="theme-input w-full border bg-transparent px-3 py-2.5 text-sm outline-none transition-colors focus:ring-0"
         />
       </div>
 
       <div className="space-y-2">
         <label
-          htmlFor="access_key"
-          className="block font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--muted)]"
+          htmlFor="credentials-password"
+          className="block font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted)"
         >
-          Access_key
+          Password
         </label>
         <input
-          id="access_key"
-          name="access_key"
+          id="credentials-password"
+          name="password"
           type="password"
           autoComplete="current-password"
           className="theme-input w-full border bg-transparent px-3 py-2.5 text-sm outline-none transition-colors focus:ring-0"
@@ -45,7 +49,7 @@ export function LoginForm() {
         className="theme-button-secondary w-full border py-3.5 text-center text-xs font-semibold uppercase tracking-[0.35em] transition-colors duration-150 focus-visible:outline focus-visible:outline-offset-2"
         style={{ outlineColor: "var(--foreground)" }}
       >
-        Initialize login
+        Sign in
       </button>
     </form>
   );

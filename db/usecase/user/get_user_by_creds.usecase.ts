@@ -1,23 +1,31 @@
 import { db } from "@/db";
 import { users } from "@/drizzle/schema";
+import { verifyPassword } from "@/lib/auth/password";
 import { SelectUser } from "@/lib/types/user-types";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export class GetUserByCredsUsecase {
     private db = db;
 
-    async execute(email: string, password: string): Promise<SelectUser> {
+    async execute(email: string, password: string): Promise<SelectUser | null> {
         try {
-            const user = await this.db
+            const foundUsers = await this.db
                 .select()
                 .from(users)
-                .where(
-                    and(eq(users.email, email), eq(users.password, password)),
-                );
-            if (user.length === 0) {
-                throw new Error("User not found");
+                .where(eq(users.email, email))
+                .limit(1);
+
+            const user = foundUsers[0];
+            if (!user) {
+                return null;
             }
-            return user[0];
+
+            const isPasswordValid = await verifyPassword(password, user.password);
+            if (!isPasswordValid) {
+                return null;
+            }
+
+            return user;
         } catch (error) {
             console.error(error);
             throw new Error("Failed to get user by credentials");
