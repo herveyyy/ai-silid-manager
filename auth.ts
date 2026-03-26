@@ -4,6 +4,12 @@ import { db } from "./db";
 import { users } from "./drizzle/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import {
+    clearFailedLoginAttempts,
+    createLoginRateLimitKey,
+    isLoginBlocked,
+    recordFailedLoginAttempt,
+} from "./lib/auth/login-rate-limit";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     session: { strategy: "jwt" },
@@ -25,6 +31,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         return null;
                     }
 
+                    const rateLimitKey = createLoginRateLimitKey(email);
+                    if (isLoginBlocked(rateLimitKey)) {
+                        return null;
+                    }
+
                     const [user] = await db
                         .select()
                         .from(users)
@@ -32,6 +43,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         .limit(1);
 
                     if (!user || !user.password) {
+                        recordFailedLoginAttempt(rateLimitKey);
                         return null;
                     }
 
@@ -40,8 +52,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         user.password,
                     );
                     if (!isValid) {
+                        recordFailedLoginAttempt(rateLimitKey);
                         return null;
                     }
+
+                    clearFailedLoginAttempts(rateLimitKey);
 
                     return {
                         id: user.id,

@@ -18,7 +18,7 @@ export function AdminPanel({
           {title}
         </h2>
         {subtitle ? (
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
+          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.15em] text-(--muted)">
             {subtitle}
           </p>
         ) : null}

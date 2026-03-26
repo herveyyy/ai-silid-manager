@@ -16,7 +16,7 @@ export async function proxy(request: NextRequest) {
 
     if (!rawToken) {
         if (isDashboardPage) {
-            return NextResponse.redirect(new URL("/login", request.url));
+            return NextResponse.redirect(new URL("/", request.url));
         }
 
         return NextResponse.next();
@@ -54,7 +54,7 @@ export async function proxy(request: NextRequest) {
         console.error("Security Bypass Attempt or Decoding Error:", error);
 
         if (isDashboardPage) {
-            return NextResponse.redirect(new URL("/login", request.url));
+            return NextResponse.redirect(new URL("/", request.url));
         }
 
         return NextResponse.next();

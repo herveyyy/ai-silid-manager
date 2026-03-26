@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "../molecules/theme-toggle";
+import { signOut } from "next-auth/react";
 
 const nav = [
     { href: "/dashboard", label: "Dashboard" },
@@ -76,12 +77,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     <p className="font-mono text-[10px] text-(--success)">
                         • ADMIN_SESSION_ACTIVE
                     </p>
-                    <Link
-                        href="/login"
+                    <button
                         className="theme-link mt-3 inline-block font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)"
+                    onClick={() => {
+                        signOut();
+                    }}
                     >
                         Sign out
-                    </Link>
+                    </button>
                 </div>
             </aside>
 
