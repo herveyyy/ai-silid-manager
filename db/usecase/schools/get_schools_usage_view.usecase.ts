@@ -87,7 +87,6 @@ export class GetSchoolsUsageViewUsecase {
                     tokenUsageBySchool,
                     eq(schools.id, tokenUsageBySchool.schoolId),
                 );
-            console.log(rows);
             return rows;
         } catch (error) {
             console.error(error);
