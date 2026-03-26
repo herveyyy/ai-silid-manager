@@ -39,6 +39,20 @@ export type SchoolAdminMetrics = {
 
 export type SchoolProfile = School & SchoolAdminMetrics;
 
+export type SchoolUsageViewDTO = {
+    id: string;
+    name: string;
+    schoolCode: string;
+    site: string;
+    aiFeat: boolean;
+    unlimitedStorage: boolean;
+    unlimitedToken: boolean;
+    storageLimit: number;
+    tokenLimit: number;
+    storageUsedBytes: number;
+    tokensUsed: number;
+};
+
 /** `attachments` */
 export type Attachment = {
     id: string;

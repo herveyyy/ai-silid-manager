@@ -8,10 +8,9 @@ import {
   mockPromptLogs,
   totalAttachmentBytes,
 } from "@/lib/admin-mock-data";
-import { createSchoolsController } from "@/db/route";
-
+import { createSchoolsController } from "../actions";
 export default async function DashboardPage() {
-  const schoolsController = createSchoolsController();
+  const schoolsController = await createSchoolsController();
   const schools = await schoolsController.getAllSchools();
   const storageUsed = totalAttachmentBytes(
     mockAttachments.filter((a) => !a.isDeleted),
