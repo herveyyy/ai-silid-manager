@@ -122,7 +122,7 @@ export function SchoolsFleetTable({
         className="border-t px-4 py-3 font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)"
         style={{ borderColor: "var(--border)" }}
       >
-        schools · usage & quotas (mock) · local quota overrides apply in this
+        schools · usage report & quotas · local quota overrides apply in this
         browser
       </p>
     </div>
