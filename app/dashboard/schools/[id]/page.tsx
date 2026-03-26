@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminPanel } from "@/components/molecules/admin-panel";
 import { SchoolProfileSettings } from "@/components/organisms/school-profile-settings";
-import { createSchoolsController } from "@/app/actions";
+import { createAiPromptsController, createSchoolsController } from "@/app/actions";
 
 export default async function SchoolProfilePage({
   params,
@@ -11,9 +11,11 @@ export default async function SchoolProfilePage({
 }) {
   const { id } = await params;
   const schoolsController = await createSchoolsController();
-  const [schools, report] = await Promise.all([
+  const aiPromptsController = await createAiPromptsController();
+  const [schools, report, promptLogs] = await Promise.all([
     schoolsController.getAllSchools(),
     schoolsController.getSchoolsUsageView(),
+    aiPromptsController.getSchoolAIPrompts(id),
   ]);
 
   const school = schools.find((entry) => entry.id === id);
@@ -26,6 +28,14 @@ export default async function SchoolProfilePage({
     quotaStorageBytes: Number(school.storageLimit ?? 0),
     quotaTokens: Number(school.tokenLimit ?? 0),
   };
+  const totalPromptTokens = promptLogs.reduce(
+    (total, row) => total + (row.tokenAiValue ?? 0),
+    0,
+  );
+  const totalPromptCredits = promptLogs.reduce(
+    (total, row) => total + (row.creditsSpent ?? 0),
+    0,
+  );
 
   return (
     <div className="space-y-8">
@@ -47,6 +57,104 @@ export default async function SchoolProfilePage({
         subtitle={`school_code ${school.schoolCode} · ${school.id}`}
       >
         <SchoolProfileSettings school={school} metrics={metrics} />
+      </AdminPanel>
+
+      <AdminPanel
+        title="School AI activity"
+        subtitle="Recent prompt logs scoped to this school"
+      >
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="theme-panel-strong border px-4 py-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
+              Prompt runs
+            </p>
+            <p className="mt-1 font-mono text-2xl tabular-nums text-foreground">
+              {promptLogs.length}
+            </p>
+          </div>
+          <div className="theme-panel-strong border px-4 py-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
+              Tokens used
+            </p>
+            <p className="mt-1 font-mono text-2xl tabular-nums text-foreground">
+              {totalPromptTokens.toLocaleString()}
+            </p>
+          </div>
+          <div className="theme-panel-strong border px-4 py-3">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
+              Credits spent
+            </p>
+            <p className="mt-1 font-mono text-2xl tabular-nums text-foreground">
+              {totalPromptCredits.toLocaleString()}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full min-w-[920px] border-collapse font-mono text-[11px]">
+            <thead>
+              <tr
+                className="border-b text-left text-(--muted)"
+                style={{ borderColor: "var(--border-strong)" }}
+              >
+                <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
+                  feat_type
+                </th>
+                <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
+                  status
+                </th>
+                <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
+                  ai_model_name
+                </th>
+                <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
+                  token_ai_value
+                </th>
+                <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
+                  credits_spent
+                </th>
+                <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
+                  prompt_title
+                </th>
+                <th className="pb-2 font-normal uppercase tracking-[0.12em]">
+                  created_at
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {promptLogs.slice(0, 12).map((row) => (
+                <tr
+                  key={row.id}
+                  className="border-b align-top text-(--muted-strong)"
+                  style={{ borderColor: "var(--border)" }}
+                >
+                  <td className="py-2 pr-3 text-foreground">{row.featType}</td>
+                  <td className="py-2 pr-3 uppercase">{row.status}</td>
+                  <td className="py-2 pr-3">{row.aiModelName ?? "—"}</td>
+                  <td className="py-2 pr-3 tabular-nums">
+                    {(row.tokenAiValue ?? 0).toLocaleString()}
+                  </td>
+                  <td className="py-2 pr-3 tabular-nums">
+                    {(row.creditsSpent ?? 0).toLocaleString()}
+                  </td>
+                  <td
+                    className="max-w-[180px] truncate py-2 pr-3"
+                    title={row.promptTitle ?? ""}
+                  >
+                    {row.promptTitle ?? "—"}
+                  </td>
+                  <td className="py-2 text-(--muted)">
+                    {row.createdAt?.slice(0, 19).replace("T", " ") ?? "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {promptLogs.length === 0 ? (
+          <p className="mt-4 font-mono text-[12px] text-(--muted)">
+            No AI prompt activity found for this school yet.
+          </p>
+        ) : null}
       </AdminPanel>
 
       <div className="flex flex-wrap gap-6 font-mono text-[11px]">

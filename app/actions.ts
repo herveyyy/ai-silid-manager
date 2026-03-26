@@ -10,6 +10,11 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { UpdateSchoolConfigurationUsecase } from "@/db/usecase/schools/update_school_configuration.usecase";
 
+import { GetPromptLogsUsecase } from "@/db/usecase/prompts/get_ai_prompts.usecase";
+import { GetSchoolPromptLogsUsecase } from "@/db/usecase/prompts/get_school_ai_prompts.usecase";
+import { AiPromptsController } from "@/db/controller/ai-prompts/ai-prompts.controller";
+import { AiPromptsService } from "@/db/service/ai-prompts.service";
+
 export async function createSchoolsController(): Promise<SchoolsController> {
     try {
         const session = await auth();
@@ -40,5 +45,23 @@ export async function createUsersController(): Promise<UsersController> {
     } catch (error) {
         console.error(error);
         throw new Error("Failed to create users controller");
+    }
+}
+
+export async function createAiPromptsController(): Promise<AiPromptsController> {
+    try {
+        const session = await auth();
+        if (!session?.user) {
+            redirect("/login");
+        }
+        return new AiPromptsController(
+            new AiPromptsService(
+                new GetPromptLogsUsecase(),
+                new GetSchoolPromptLogsUsecase(),
+            ),
+        );
+    } catch (error) {
+        console.error(error);
+        throw new Error("Failed to create ai prompts controller");
     }
 }

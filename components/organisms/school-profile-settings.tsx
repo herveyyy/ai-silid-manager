@@ -1,16 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import type { SchoolAdminMetrics, SchoolDTO } from "@/lib/types/admin-types";
-import {
-  readSchoolConfigOverride,
-  writeSchoolConfigOverride,
-} from "@/lib/school-config-storage";
 import {
   readQuotaOverride,
   writeQuotaOverride,
 } from "@/lib/school-quota-storage";
 import { formatBytes } from "@/lib/admin-mock-data";
+import { updateSchoolConfigurationAction } from "@/app/dashboard/schools/actions";
 
 function bytesToGb(n: number): string {
   return (n / (1024 * 1024 * 1024)).toFixed(2);
@@ -31,6 +29,7 @@ export function SchoolProfileSettings({
   school: SchoolDTO;
   metrics: SchoolAdminMetrics;
 }) {
+  const router = useRouter();
   const [quotaStorageBytes, setQuotaStorageBytes] = useState(
     metrics.quotaStorageBytes,
   );
@@ -51,24 +50,23 @@ export function SchoolProfileSettings({
   const [storageLimitInput, setStorageLimitInput] = useState(
     String(school.storageLimit),
   );
+  const [configError, setConfigError] = useState<string | null>(null);
   const [configSavedFlash, setConfigSavedFlash] = useState(false);
-
+  const [isConfigPending, startConfigTransition] = useTransition();
   useEffect(() => {
     const o = readQuotaOverride(school.id);
     const base = o ? { ...metrics, ...o } : metrics;
-    const configOverride = readSchoolConfigOverride(school.id);
-    const effectiveSchool = configOverride ? { ...school, ...configOverride } : school;
 
     setTimeout(() => {
       setQuotaStorageBytes(base.quotaStorageBytes);
       setQuotaTokens(base.quotaTokens);
       setStorageGbInput(bytesToGb(base.quotaStorageBytes));
       setTokensInput(String(base.quotaTokens));
-      setAiFeat(effectiveSchool.aiFeat);
-      setUnlimitedStorage(effectiveSchool.unlimitedStorage);
-      setUnlimitedToken(effectiveSchool.unlimitedToken);
-      setTokenLimitInput(String(effectiveSchool.tokenLimit));
-      setStorageLimitInput(String(effectiveSchool.storageLimit));
+      setAiFeat(school.aiFeat);
+      setUnlimitedStorage(school.unlimitedStorage);
+      setUnlimitedToken(school.unlimitedToken);
+      setTokenLimitInput(String(school.tokenLimit));
+      setStorageLimitInput(String(school.storageLimit));
     }, 0);
   }, [school, metrics]);
 
@@ -107,20 +105,34 @@ export function SchoolProfileSettings({
       !Number.isFinite(storageLimit) ||
       storageLimit < 0
     ) {
+      setConfigError("Enter valid non-negative numeric limits.");
       return;
     }
+    setConfigError(null);
+    startConfigTransition(async () => {
+      const result = await updateSchoolConfigurationAction(school.id, {
+        aiFeat,
+        unlimitedStorage,
+        unlimitedToken,
+        tokenLimit: Math.floor(tokenLimit),
+        storageLimit: Math.floor(storageLimit),
+      });
 
-    writeSchoolConfigOverride(school.id, {
-      aiFeat,
-      unlimitedStorage,
-      unlimitedToken,
-      tokenLimit: Math.floor(tokenLimit),
-      storageLimit: Math.floor(storageLimit),
+      if (!result.success) {
+        setConfigSavedFlash(false);
+        setConfigError(result.message);
+        return;
+      }
+
+      setTokenLimitInput(String(Math.floor(tokenLimit)));
+      setStorageLimitInput(String(Math.floor(storageLimit)));
+      setConfigSavedFlash(true);
+      window.setTimeout(() => setConfigSavedFlash(false), 2200);
+      router.refresh();
     });
-    setConfigSavedFlash(true);
-    window.setTimeout(() => setConfigSavedFlash(false), 2200);
   }, [
     aiFeat,
+    router,
     school.id,
     storageLimitInput,
     tokenLimitInput,
@@ -204,6 +216,7 @@ export function SchoolProfileSettings({
                 />
                 {unlimitedStorage ? "Enabled" : "Disabled"}
               </label>
+           
             </div>
 
             <div className="theme-panel border p-4">
@@ -219,12 +232,18 @@ export function SchoolProfileSettings({
                 />
                 {unlimitedToken ? "Enabled" : "Disabled"}
               </label>
+            
             </div>
 
             <div className="theme-panel border p-4">
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
                 Token limit
               </p>
+              {unlimitedToken ? (
+                <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-(--accent)">
+                  &infin; Unlimited
+                </p>
+              ) : null}
               <input
                 type="text"
                 inputMode="numeric"
@@ -238,6 +257,11 @@ export function SchoolProfileSettings({
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
                 Storage limit
               </p>
+              {unlimitedStorage ? (
+                <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-(--accent)">
+                  &infin; Unlimited
+                </p>
+              ) : null}
               <input
                 type="text"
                 inputMode="numeric"
@@ -252,13 +276,19 @@ export function SchoolProfileSettings({
             <button
               type="button"
               onClick={applyConfigSave}
+              disabled={isConfigPending}
               className="theme-button-secondary border px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors"
             >
-              Save configuration
+              {isConfigPending ? "Saving..." : "Save configuration"}
             </button>
             {configSavedFlash ? (
               <span className="font-mono text-[11px] text-(--success)">
-                Configuration saved locally
+                Configuration saved
+              </span>
+            ) : null}
+            {configError ? (
+              <span className="font-mono text-[11px] text-(--danger)">
+                {configError}
               </span>
             ) : null}
           </div>
@@ -276,7 +306,11 @@ export function SchoolProfileSettings({
             </p>
             <p className="mt-1 font-mono text-sm text-foreground">
               {formatBytes(metrics.storageUsedBytes)} /{" "}
-              {formatBytes(quotaStorageBytes)}
+              {unlimitedStorage ? (
+                <span className="text-(--accent)">&infin;</span>
+              ) : (
+                formatBytes(quotaStorageBytes)
+              )}
             </p>
             <div className="mt-2 h-2 w-full bg-background">
               <div
@@ -291,7 +325,11 @@ export function SchoolProfileSettings({
             </p>
             <p className="mt-1 font-mono text-sm text-foreground">
               {metrics.tokensUsed.toLocaleString()} /{" "}
-              {quotaTokens.toLocaleString()}
+              {unlimitedToken ? (
+                <span className="text-(--accent)">&infin;</span>
+              ) : (
+                quotaTokens.toLocaleString()
+              )}
             </p>
             <div className="mt-2 h-2 w-full bg-background">
               <div
@@ -315,6 +353,9 @@ export function SchoolProfileSettings({
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
           <label className="block font-mono text-[11px] uppercase tracking-[0.15em] text-(--muted-strong)">
             Total storage (GB)
+            {unlimitedStorage ? (
+              <span className="mt-2 block text-(--accent)">&infin; Unlimited</span>
+            ) : null}
             <input
               type="text"
               inputMode="decimal"
@@ -325,6 +366,9 @@ export function SchoolProfileSettings({
           </label>
           <label className="block font-mono text-[11px] uppercase tracking-[0.15em] text-(--muted-strong)">
             Total tokens
+            {unlimitedToken ? (
+              <span className="mt-2 block text-(--accent)">&infin; Unlimited</span>
+            ) : null}
             <input
               type="text"
               inputMode="numeric"
