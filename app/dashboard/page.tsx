@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { SchoolsDirectory } from "@/components/organisms/schools-directory";
 import { AdminPanel } from "@/components/molecules/admin-panel";

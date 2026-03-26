@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import { AdminPanel } from "@/components/molecules/admin-panel";
 import { SchoolsFleetTable } from "@/components/organisms/schools-fleet-table";
@@ -23,8 +22,8 @@ export default async function SchoolsListPage() {
       aiFeat: school.aiFeat,
       unlimitedStorage: school.unlimitedStorage,
       unlimitedToken: school.unlimitedToken,
-      tokenLimit: school.tokenLimit,
-      storageLimit: school.storageLimit,
+      tokenLimit: Number(school.tokenLimit ?? 0),
+      storageLimit: Number(school.storageLimit ?? 0),
     },
     metrics: {
       storageUsedBytes: Number(school.storageUsedBytes ?? 0),

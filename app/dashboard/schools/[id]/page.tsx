@@ -2,10 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminPanel } from "@/components/molecules/admin-panel";
 import { SchoolProfileSettings } from "@/components/organisms/school-profile-settings";
-import {
-  getDefaultSchoolMetrics,
-  getSchoolById,
-} from "@/lib/admin-mock-data";
+import { createSchoolsController } from "@/app/actions";
 
 export default async function SchoolProfilePage({
   params,
@@ -13,10 +10,22 @@ export default async function SchoolProfilePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const school = getSchoolById(id);
+  const schoolsController = await createSchoolsController();
+  const [schools, report] = await Promise.all([
+    schoolsController.getAllSchools(),
+    schoolsController.getSchoolsUsageView(),
+  ]);
+
+  const school = schools.find((entry) => entry.id === id);
   if (!school) notFound();
 
-  const metrics = getDefaultSchoolMetrics(school.id);
+  const schoolReport = report.find((entry) => entry.id === school.id);
+  const metrics = {
+    storageUsedBytes: Number(schoolReport?.storageUsedBytes ?? 0),
+    tokensUsed: Number(schoolReport?.tokensUsed ?? 0),
+    quotaStorageBytes: Number(school.storageLimit ?? 0),
+    quotaTokens: Number(school.tokenLimit ?? 0),
+  };
 
   return (
     <div className="space-y-8">
@@ -29,7 +38,7 @@ export default async function SchoolProfilePage({
         </h1>
         <p className="mt-2 max-w-2xl font-mono text-[12px] leading-relaxed text-(--muted)">
           Registry fields from <span className="text-(--muted-strong)">schools</span>,
-          plus admin quotas for storage and AI tokens.
+          plus usage totals and admin quotas for storage and AI tokens.
         </p>
       </div>
 

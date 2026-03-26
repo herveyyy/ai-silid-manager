@@ -241,10 +241,11 @@ export function totalAttachmentBytes(rows: Attachment[]): number {
 }
 
 export function formatBytes(n: number): string {
-    if (n === 0) return "0 B";
+    const safeValue = Number(n);
+    if (!Number.isFinite(safeValue) || safeValue <= 0) return "0 B";
     const units = ["B", "KB", "MB", "GB", "TB"];
     let i = 0;
-    let v = n;
+    let v = safeValue;
     while (v >= 1024 && i < units.length - 1) {
         v /= 1024;
         i++;

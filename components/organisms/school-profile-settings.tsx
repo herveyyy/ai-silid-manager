@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import type { SchoolAdminMetrics, SchoolDTO } from "@/lib/types/admin-types";
 import {
+  readSchoolConfigOverride,
+  writeSchoolConfigOverride,
+} from "@/lib/school-config-storage";
+import {
   readQuotaOverride,
   writeQuotaOverride,
 } from "@/lib/school-quota-storage";
@@ -36,17 +40,37 @@ export function SchoolProfileSettings({
   );
   const [tokensInput, setTokensInput] = useState(String(metrics.quotaTokens));
   const [savedFlash, setSavedFlash] = useState(false);
+  const [aiFeat, setAiFeat] = useState(school.aiFeat);
+  const [unlimitedStorage, setUnlimitedStorage] = useState(
+    school.unlimitedStorage,
+  );
+  const [unlimitedToken, setUnlimitedToken] = useState(school.unlimitedToken);
+  const [tokenLimitInput, setTokenLimitInput] = useState(
+    String(school.tokenLimit),
+  );
+  const [storageLimitInput, setStorageLimitInput] = useState(
+    String(school.storageLimit),
+  );
+  const [configSavedFlash, setConfigSavedFlash] = useState(false);
 
   useEffect(() => {
     const o = readQuotaOverride(school.id);
     const base = o ? { ...metrics, ...o } : metrics;
+    const configOverride = readSchoolConfigOverride(school.id);
+    const effectiveSchool = configOverride ? { ...school, ...configOverride } : school;
+
     setTimeout(() => {
       setQuotaStorageBytes(base.quotaStorageBytes);
       setQuotaTokens(base.quotaTokens);
       setStorageGbInput(bytesToGb(base.quotaStorageBytes));
       setTokensInput(String(base.quotaTokens));
+      setAiFeat(effectiveSchool.aiFeat);
+      setUnlimitedStorage(effectiveSchool.unlimitedStorage);
+      setUnlimitedToken(effectiveSchool.unlimitedToken);
+      setTokenLimitInput(String(effectiveSchool.tokenLimit));
+      setStorageLimitInput(String(effectiveSchool.storageLimit));
     }, 0);
-  }, [school.id, metrics]);
+  }, [school, metrics]);
 
   const storagePct =
     quotaStorageBytes > 0
@@ -73,6 +97,36 @@ export function SchoolProfileSettings({
     setSavedFlash(true);
     window.setTimeout(() => setSavedFlash(false), 2200);
   }, [school.id, storageGbInput, tokensInput]);
+
+  const applyConfigSave = useCallback(() => {
+    const tokenLimit = Number(tokenLimitInput.replace(/,/g, ""));
+    const storageLimit = Number(storageLimitInput.replace(/,/g, ""));
+    if (
+      !Number.isFinite(tokenLimit) ||
+      tokenLimit < 0 ||
+      !Number.isFinite(storageLimit) ||
+      storageLimit < 0
+    ) {
+      return;
+    }
+
+    writeSchoolConfigOverride(school.id, {
+      aiFeat,
+      unlimitedStorage,
+      unlimitedToken,
+      tokenLimit: Math.floor(tokenLimit),
+      storageLimit: Math.floor(storageLimit),
+    });
+    setConfigSavedFlash(true);
+    window.setTimeout(() => setConfigSavedFlash(false), 2200);
+  }, [
+    aiFeat,
+    school.id,
+    storageLimitInput,
+    tokenLimitInput,
+    unlimitedStorage,
+    unlimitedToken,
+  ]);
 
   return (
     <div className="space-y-8">
@@ -113,6 +167,102 @@ export function SchoolProfileSettings({
             </dd>
           </div>
         </dl>
+
+        <div
+          className="mt-6 border-t pt-5"
+          style={{ borderColor: "var(--border)" }}
+        >
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted)">
+            School configuration
+          </p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="theme-panel border p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
+                AI feature
+              </p>
+              <label className="mt-3 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.12em] text-foreground">
+                <input
+                  type="checkbox"
+                  checked={aiFeat}
+                  onChange={(e) => setAiFeat(e.target.checked)}
+                  className="h-4 w-4 accent-(--accent)"
+                />
+                {aiFeat ? "Enabled" : "Disabled"}
+              </label>
+            </div>
+
+            <div className="theme-panel border p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
+                Unlimited storage
+              </p>
+              <label className="mt-3 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.12em] text-foreground">
+                <input
+                  type="checkbox"
+                  checked={unlimitedStorage}
+                  onChange={(e) => setUnlimitedStorage(e.target.checked)}
+                  className="h-4 w-4 accent-(--accent)"
+                />
+                {unlimitedStorage ? "Enabled" : "Disabled"}
+              </label>
+            </div>
+
+            <div className="theme-panel border p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
+                Unlimited token
+              </p>
+              <label className="mt-3 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.12em] text-foreground">
+                <input
+                  type="checkbox"
+                  checked={unlimitedToken}
+                  onChange={(e) => setUnlimitedToken(e.target.checked)}
+                  className="h-4 w-4 accent-(--accent)"
+                />
+                {unlimitedToken ? "Enabled" : "Disabled"}
+              </label>
+            </div>
+
+            <div className="theme-panel border p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
+                Token limit
+              </p>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={tokenLimitInput}
+                onChange={(e) => setTokenLimitInput(e.target.value)}
+                className="theme-input mt-3 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+              />
+            </div>
+
+            <div className="theme-panel border p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
+                Storage limit
+              </p>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={storageLimitInput}
+                onChange={(e) => setStorageLimitInput(e.target.value)}
+                className="theme-input mt-3 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              onClick={applyConfigSave}
+              className="theme-button-secondary border px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors"
+            >
+              Save configuration
+            </button>
+            {configSavedFlash ? (
+              <span className="font-mono text-[11px] text-(--success)">
+                Configuration saved locally
+              </span>
+            ) : null}
+          </div>
+        </div>
       </div>
 
       <div className="theme-panel-strong border p-5">

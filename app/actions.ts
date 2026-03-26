@@ -8,6 +8,7 @@ import { UserService } from "@/db/service/user.service";
 import { GetUserByCredsUsecase } from "@/db/usecase/user/get_user_by_creds.usecase";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { UpdateSchoolConfigurationUsecase } from "@/db/usecase/schools/update_school_configuration.usecase";
 
 export async function createSchoolsController(): Promise<SchoolsController> {
     try {
@@ -19,6 +20,7 @@ export async function createSchoolsController(): Promise<SchoolsController> {
             new SchoolsService(
                 new GetAllSchoolsUsecase(),
                 new GetSchoolsUsageViewUsecase(),
+                new UpdateSchoolConfigurationUsecase(),
             ),
         );
     } catch (error) {
