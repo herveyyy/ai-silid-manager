@@ -12,6 +12,9 @@ import { UpdateSchoolConfigurationUsecase } from "@/db/usecase/schools/update_sc
 import { AttachmentsController } from "@/db/controller/attachments/attachments.controller";
 import { AttachmentsService } from "@/db/service/attachments.service";
 import { GetAttachmentsUsecase } from "@/db/usecase/attachments/get_attachments.usecase";
+import { RoomsController } from "@/db/controller/rooms/rooms.controller";
+import { RoomsService } from "@/db/service/rooms.service";
+import { GetSchoolRoomsUsageUsecase } from "@/db/usecase/rooms/get_school_rooms_usage.usecase";
 
 import { GetPromptLogsUsecase } from "@/db/usecase/prompts/get_ai_prompts.usecase";
 import { GetSchoolPromptLogsUsecase } from "@/db/usecase/prompts/get_school_ai_prompts.usecase";
@@ -68,6 +71,21 @@ export async function createAttachmentsController(): Promise<AttachmentsControll
     } catch (error) {
         console.error(error);
         throw new Error("Failed to create attachments controller");
+    }
+}
+
+export async function createRoomsController(): Promise<RoomsController> {
+    try {
+        const session = await auth();
+        if (!session?.user) {
+            redirect("/login");
+        }
+        return new RoomsController(
+            new RoomsService(new GetSchoolRoomsUsageUsecase()),
+        );
+    } catch (error) {
+        console.error(error);
+        throw new Error("Failed to create rooms controller");
     }
 }
 

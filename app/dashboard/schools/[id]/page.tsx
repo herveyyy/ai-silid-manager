@@ -2,7 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminPanel } from "@/components/molecules/admin-panel";
 import { SchoolProfileSettings } from "@/components/organisms/school-profile-settings";
-import { createAiPromptsController, createSchoolsController } from "@/app/actions";
+import { SchoolRoomsTable } from "@/components/organisms/school-rooms-table";
+import {
+  createAiPromptsController,
+  createRoomsController,
+  createSchoolsController,
+} from "@/app/actions";
 
 export default async function SchoolProfilePage({
   params,
@@ -12,10 +17,12 @@ export default async function SchoolProfilePage({
   const { id } = await params;
   const schoolsController = await createSchoolsController();
   const aiPromptsController = await createAiPromptsController();
-  const [schools, report, promptLogs] = await Promise.all([
+  const roomsController = await createRoomsController();
+  const [schools, report, promptLogs, rooms] = await Promise.all([
     schoolsController.getAllSchools(),
     schoolsController.getSchoolsUsageView(),
     aiPromptsController.getSchoolAIPrompts(id),
+    roomsController.getSchoolRoomsUsage(id),
   ]);
 
   const school = schools.find((entry) => entry.id === id);
@@ -57,6 +64,13 @@ export default async function SchoolProfilePage({
         subtitle={`school_code ${school.schoolCode} · ${school.id}`}
       >
         <SchoolProfileSettings school={school} metrics={metrics} />
+      </AdminPanel>
+
+      <AdminPanel
+        title="School rooms"
+        subtitle="Classrooms with storage, token, and participant usage"
+      >
+        <SchoolRoomsTable schoolId={school.id} rooms={rooms} />
       </AdminPanel>
 
       <AdminPanel

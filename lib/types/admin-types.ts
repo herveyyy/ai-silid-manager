@@ -1,4 +1,10 @@
-import { aiModels, attachmentType, attachments, schools } from "@/drizzle/schema";
+import {
+    aiModels,
+    attachmentType,
+    attachments,
+    classrooms,
+    schools,
+} from "@/drizzle/schema";
 export type AttachmentParentType = (typeof attachmentType.enumValues)[number];
 
 export type InsertSchool = typeof schools.$inferInsert;
@@ -12,6 +18,20 @@ export type School = SelectSchool & {
     storageLimit: number;
 };
 export type SchoolDTO = Omit<School, "password" | "secret" | "apiKey">;
+
+export type SelectRoom = typeof classrooms.$inferSelect;
+export type RoomDTO = SelectRoom & {
+    sectionName: string | null;
+    sectionLevel: string | null;
+};
+
+export type RoomUsageDTO = RoomDTO & {
+    classCardCount: number;
+    participantCount: number;
+    storageUsedBytes: number;
+    tokensUsed: number;
+    promptRuns: number;
+};
 
 export type InsertAiModel = typeof aiModels.$inferInsert;
 export type SelectAiModel = typeof aiModels.$inferSelect;
