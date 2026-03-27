@@ -42,6 +42,7 @@ export default async function SchoolsListPage({
       site: school.site,
       createdAt: "",
       updatedAt: "",
+      defaultAiModelId: null,
       aiFeat: school.aiFeat,
       unlimitedStorage: school.unlimitedStorage,
       unlimitedToken: school.unlimitedToken,
