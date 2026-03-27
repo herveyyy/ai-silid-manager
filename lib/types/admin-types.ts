@@ -76,6 +76,13 @@ export type SchoolUsageViewDTO = {
 /** `attachments` */
 export type SelectAttachment = typeof attachments.$inferSelect;
 export type Attachment = SelectAttachment;
+export type PaginatedAttachmentsDTO = {
+    rows: Attachment[];
+    total: number;
+    page: number;
+    limit: number;
+    offset: number;
+};
 
 /** `prompt` — AI feature usage log */
 export type PromptLog = {

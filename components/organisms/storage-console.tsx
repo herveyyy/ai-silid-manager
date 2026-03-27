@@ -1,7 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { Attachment, AttachmentParentType } from "@/lib/types/admin-types";
+import type {
+  Attachment,
+  AttachmentParentType,
+  PaginatedAttachmentsDTO,
+} from "@/lib/types/admin-types";
 import { formatBytes, totalAttachmentBytes } from "@/lib/admin-mock-data";
 import { AdminPanel } from "@/components/molecules/admin-panel";
 
@@ -19,11 +24,14 @@ function bytesByParentType(rows: Attachment[]): Partial<
 
 export function StorageConsole({
   rows,
+  paginatedAttachments,
   parentTypes,
 }: {
   rows: Attachment[];
+  paginatedAttachments: PaginatedAttachmentsDTO;
   parentTypes: readonly AttachmentParentType[];
 }) {
+  const { rows: paginatedRows, total, page, limit, offset } = paginatedAttachments;
   const used = totalAttachmentBytes(rows.filter((r) => !r.isDeleted));
   const [ceilingGb, setCeilingGb] = useState(50);
   const ceilingBytes = ceilingGb * 1024 ** 3;
@@ -41,6 +49,18 @@ export function StorageConsole({
 
   const softDeleted = rows.filter((r) => r.isDeleted).length;
   const unusedMarked = rows.filter((r) => !r.isUsed && !r.isDeleted).length;
+  const hasPrevious = offset > 0;
+  const hasNext = offset + paginatedRows.length < total;
+
+  function createPageHref(nextPage: number, nextOffset: number): string {
+    const params = new URLSearchParams({
+      page: String(nextPage),
+      limit: String(limit),
+      offset: String(nextOffset),
+    });
+
+    return `/dashboard/storage?${params.toString()}`;
+  }
 
   return (
     <div className="space-y-8">
@@ -149,7 +169,7 @@ export function StorageConsole({
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {paginatedRows.map((r) => (
                 <tr
                   key={r.id}
                   className="border-b text-(--muted-strong)"
@@ -164,6 +184,40 @@ export function StorageConsole({
               ))}
             </tbody>
           </table>
+        </div>
+        <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
+          attachments · showing {paginatedRows.length} of {total} · page {page} ·
+          {" "}offset {offset} · limit {limit}
+        </p>
+        <div className="mt-4 flex flex-col gap-3 font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted) sm:flex-row sm:items-center sm:justify-between">
+          <span className="w-full sm:w-auto">
+            {hasPrevious ? (
+              <Link
+                href={createPageHref(page - 1, Math.max(offset - limit, 0))}
+                className="theme-button-secondary inline-block w-full border px-3 py-1.5 text-center font-semibold tracking-[0.2em] transition-colors sm:w-auto"
+              >
+                Previous
+              </Link>
+            ) : (
+              <span className="inline-block w-full border px-3 py-1.5 text-center opacity-50 sm:w-auto">
+                Previous
+              </span>
+            )}
+          </span>
+          <span className="w-full sm:w-auto">
+            {hasNext ? (
+              <Link
+                href={createPageHref(page + 1, offset + limit)}
+                className="theme-button-secondary inline-block w-full border px-3 py-1.5 text-center font-semibold tracking-[0.2em] transition-colors sm:w-auto"
+              >
+                Next
+              </Link>
+            ) : (
+              <span className="inline-block w-full border px-3 py-1.5 text-center opacity-50 sm:w-auto">
+                Next
+              </span>
+            )}
+          </span>
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
           <button type="button" className="theme-button-secondary border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors">

@@ -2,9 +2,31 @@ import { createAttachmentsController } from "@/app/actions";
 import { StorageConsole } from "@/components/organisms/storage-console";
 import { attachmentType } from "@/drizzle/schema";
 
-export default async function StoragePage() {
+export default async function StoragePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; limit?: string; offset?: string }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+
+  function parsePositiveInt(value: string | undefined, fallback: number): number {
+    const parsed = Number.parseInt(value ?? "", 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  }
+
+  function parseNonNegativeInt(value: string | undefined, fallback: number): number {
+    const parsed = Number.parseInt(value ?? "", 10);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+  }
+
+  const page = parsePositiveInt(resolvedSearchParams.page, 1);
+  const limit = parsePositiveInt(resolvedSearchParams.limit, 10);
+  const offset = parseNonNegativeInt(resolvedSearchParams.offset, 0);
   const attachmentsController = await createAttachmentsController();
-  const rows = await attachmentsController.getAttachments();
+  const [rows, paginatedAttachments] = await Promise.all([
+    attachmentsController.getAttachments(),
+    attachmentsController.getPaginatedAttachments(page, offset, limit),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -21,7 +43,11 @@ export default async function StoragePage() {
           control stays UI-only until a quota field or settings row exists.
         </p>
       </header>
-      <StorageConsole rows={rows} parentTypes={attachmentType.enumValues} />
+      <StorageConsole
+        rows={rows}
+        paginatedAttachments={paginatedAttachments}
+        parentTypes={attachmentType.enumValues}
+      />
     </div>
   );
 }
