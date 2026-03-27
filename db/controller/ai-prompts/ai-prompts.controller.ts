@@ -1,4 +1,4 @@
-import { PromptLog } from "@/lib/types/admin-types";
+import { PaginatedPromptLogDTO, PromptLog } from "@/lib/types/admin-types";
 import { IAIPrompts } from "./ai-prompts.interface";
 import { AiPromptsService } from "@/db/service/ai-prompts.service";
 
@@ -7,6 +7,18 @@ export class AiPromptsController implements IAIPrompts {
 
     async getAIPrompts(): Promise<PromptLog[]> {
         return await this.aiPromptsService.getPromptLogs();
+    }
+
+    async getPaginatedAIPrompts(
+        page: number,
+        offset: number,
+        limit: number,
+    ): Promise<PaginatedPromptLogDTO> {
+        return await this.aiPromptsService.getPaginatedPromptLogs(
+            page,
+            offset,
+            limit,
+        );
     }
 
     async getSchoolAIPrompts(schoolId: string): Promise<PromptLog[]> {

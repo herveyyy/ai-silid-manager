@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AdminPanel } from "@/components/molecules/admin-panel";
@@ -7,6 +8,7 @@ import { createAiModelAction, updateAiModelAction } from "@/app/dashboard/ai/act
 import type {
   AiModelDTO,
   AiModelMutationInput,
+  PaginatedPromptLogDTO,
   PromptLog,
 } from "@/lib/types/admin-types";
 
@@ -22,11 +24,13 @@ function buildDraft(model: AiModelDTO): AiModelMutationInput {
 
 export type AiConsoleProps = {
   promptLogs: PromptLog[];
+  paginatedPromptLogs: PaginatedPromptLogDTO;
   aiModels: AiModelDTO[];
 };
 
 export function AiConsole({
   promptLogs,
+  paginatedPromptLogs,
   aiModels,
 }: AiConsoleProps) {
   const router = useRouter();
@@ -49,6 +53,13 @@ export function AiConsole({
   const [isUpdatePending, startUpdateTransition] = useTransition();
 
   const rows = promptLogs;
+  const {
+    rows: paginatedRows,
+    total,
+    page,
+    limit,
+    offset,
+  } = paginatedPromptLogs;
 
   const featTypes = useMemo(
     () => Array.from(new Set(rows.map((r) => r.featType))).sort(),
@@ -59,7 +70,7 @@ export function AiConsole({
     [rows],
   );
 
-  const filtered = rows.filter((r) => {
+  const filteredPaginatedRows = paginatedRows.filter((r) => {
     if (statusFilter !== "all" && r.status !== statusFilter) return false;
     if (featFilter !== "all" && r.featType !== featFilter) return false;
     return true;
@@ -78,6 +89,8 @@ export function AiConsole({
 
   const totalModels = aiModels.length;
   const activeModels = aiModels.filter((model) => model.status === "active").length;
+  const hasPrevious = offset > 0;
+  const hasNext = offset + paginatedRows.length < total;
 
   function updateDraft(
     modelId: string,
@@ -148,6 +161,16 @@ export function AiConsole({
       delete next[model.id];
       return next;
     });
+  }
+
+  function createPageHref(nextPage: number, nextOffset: number): string {
+    const params = new URLSearchParams({
+      page: String(nextPage),
+      limit: String(limit),
+      offset: String(nextOffset),
+    });
+
+    return `/dashboard/ai?${params.toString()}`;
   }
 
   return (
@@ -514,7 +537,7 @@ export function AiConsole({
               </tr>
             </thead>
             <tbody>
-              {filtered.map((r) => (
+              {filteredPaginatedRows.map((r) => (
                 <tr
                   key={r.id}
                   className="border-b align-top text-(--muted-strong)"
@@ -543,9 +566,43 @@ export function AiConsole({
             </tbody>
           </table>
         </div>
-        {filtered.length === 0 ? (
+        <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
+          prompt logs · showing {paginatedRows.length} of {total} · page {page} ·
+          {" "}offset {offset} · limit {limit}
+        </p>
+        <div className="mt-4 flex flex-col gap-3 font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted) sm:flex-row sm:items-center sm:justify-between">
+          <span className="w-full sm:w-auto">
+            {hasPrevious ? (
+              <Link
+                href={createPageHref(page - 1, Math.max(offset - limit, 0))}
+                className="theme-button-secondary inline-block w-full border px-3 py-1.5 text-center font-semibold tracking-[0.2em] transition-colors sm:w-auto"
+              >
+                Previous
+              </Link>
+            ) : (
+              <span className="inline-block w-full border px-3 py-1.5 text-center opacity-50 sm:w-auto">
+                Previous
+              </span>
+            )}
+          </span>
+          <span className="w-full sm:w-auto">
+            {hasNext ? (
+              <Link
+                href={createPageHref(page + 1, offset + limit)}
+                className="theme-button-secondary inline-block w-full border px-3 py-1.5 text-center font-semibold tracking-[0.2em] transition-colors sm:w-auto"
+              >
+                Next
+              </Link>
+            ) : (
+              <span className="inline-block w-full border px-3 py-1.5 text-center opacity-50 sm:w-auto">
+                Next
+              </span>
+            )}
+          </span>
+        </div>
+        {filteredPaginatedRows.length === 0 ? (
           <p className="mt-4 font-mono text-[12px] text-(--muted)">
-            No rows match filters.
+            No rows match filters on this page.
           </p>
         ) : null}
       </AdminPanel>

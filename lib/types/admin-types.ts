@@ -108,3 +108,11 @@ export type PromptLog = {
     status: string;
     createdBy: string;
 };
+
+export type PaginatedPromptLogDTO = {
+    rows: PromptLog[];
+    total: number;
+    page: number;
+    limit: number;
+    offset: number;
+};
