@@ -21,6 +21,7 @@ export class GetAllSchoolsUsecase {
                     unlimitedToken: schools.unlimitedToken,
                     tokenLimit: schools.tokenLimit,
                     storageLimit: schools.storageLimit,
+                    defaultAiModelId: schools.defaultAiModelId,
                 })
                 .from(schools);
 
