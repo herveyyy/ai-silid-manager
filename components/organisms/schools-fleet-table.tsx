@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import type { SchoolAdminMetrics, SchoolDTO } from "@/lib/types/admin-types";
+import type {
+  PaginatedSchoolUsageViewDTO,
+  SchoolAdminMetrics,
+  SchoolDTO,
+} from "@/lib/types/admin-types";
 import { formatBytes } from "@/lib/admin-mock-data";
 import {
   readQuotaOverride,
@@ -24,10 +28,15 @@ function mergeMetrics(
 
 export function SchoolsFleetTable({
   rows,
+  paginatedSchools,
 }: {
   rows: { school: SchoolDTO ; metrics: SchoolAdminMetrics }[];
+  paginatedSchools: PaginatedSchoolUsageViewDTO;
 }) {
   const [tick, setTick] = useState(0);
+  const { total, page, limit, offset } = paginatedSchools;
+  const hasPrevious = offset > 0;
+  const hasNext = offset + rows.length < total;
 
   useEffect(() => {
     const bump = () => setTick((t) => t + 1);
@@ -42,6 +51,16 @@ export function SchoolsFleetTable({
       window.removeEventListener("storage", onStorage);
     };
   }, []);
+
+  function createPageHref(nextPage: number, nextOffset: number): string {
+    const params = new URLSearchParams({
+      page: String(nextPage),
+      limit: String(limit),
+      offset: String(nextOffset),
+    });
+
+    return `/dashboard/schools?${params.toString()}`;
+  }
 
   return (
     <div className="theme-panel overflow-x-auto border">
@@ -122,9 +141,42 @@ export function SchoolsFleetTable({
         className="border-t px-4 py-3 font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)"
         style={{ borderColor: "var(--border)" }}
       >
-        schools · usage report & quotas · local quota overrides apply in this
-        browser
+        schools · showing {rows.length} of {total} · page {page} · offset {offset}
+        {" "}· limit {limit} · local quota overrides apply in this browser
       </p>
+      <div
+        className="flex flex-col gap-3 border-t px-4 py-3 font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted) sm:flex-row sm:items-center sm:justify-between"
+        style={{ borderColor: "var(--border)" }}
+      >
+        <span className="w-full sm:w-auto">
+          {hasPrevious ? (
+            <Link
+              href={createPageHref(page - 1, Math.max(offset - limit, 0))}
+              className="theme-button-secondary inline-block w-full border px-3 py-1.5 text-center font-semibold tracking-[0.2em] transition-colors sm:w-auto"
+            >
+              Previous
+            </Link>
+          ) : (
+            <span className="inline-block w-full border px-3 py-1.5 text-center opacity-50 sm:w-auto">
+              Previous
+            </span>
+          )}
+        </span>
+        <span className="w-full sm:w-auto">
+          {hasNext ? (
+            <Link
+              href={createPageHref(page + 1, offset + limit)}
+              className="theme-button-secondary inline-block w-full border px-3 py-1.5 text-center font-semibold tracking-[0.2em] transition-colors sm:w-auto"
+            >
+              Next
+            </Link>
+          ) : (
+            <span className="inline-block w-full border px-3 py-1.5 text-center opacity-50 sm:w-auto">
+              Next
+            </span>
+          )}
+        </span>
+      </div>
     </div>
   );
 }

@@ -3,14 +3,37 @@ import { AdminPanel } from "@/components/molecules/admin-panel";
 import { SchoolsFleetTable } from "@/components/organisms/schools-fleet-table";
 import { createSchoolsController } from "@/app/actions";
 
-export default async function SchoolsListPage() {
+export default async function SchoolsListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; limit?: string; offset?: string }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+
+  function parsePositiveInt(value: string | undefined, fallback: number): number {
+    const parsed = Number.parseInt(value ?? "", 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  }
+
+  function parseNonNegativeInt(value: string | undefined, fallback: number): number {
+    const parsed = Number.parseInt(value ?? "", 10);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+  }
+
+  const page = parsePositiveInt(resolvedSearchParams.page, 1);
+  const limit = parsePositiveInt(resolvedSearchParams.limit, 10);
+  const offset = parseNonNegativeInt(resolvedSearchParams.offset, 0);
   const schoolsController = await createSchoolsController();
-  const report = await schoolsController.getSchoolsUsageView();
-  const uniqueReport = Array.from(
-    new Map(report.map((school) => [school.id, school])).values(),
+  const paginatedReport = await schoolsController.getPaginatedSchoolsUsageView(
+    page,
+    offset,
+    limit,
+  );
+  const uniqueRows = Array.from(
+    new Map(paginatedReport.rows.map((school) => [school.id, school])).values(),
   );
 
-  const rows = uniqueReport.map((school) => ({
+  const rows = uniqueRows.map((school) => ({
     school: {
       id: school.id,
       name: school.name,
@@ -54,7 +77,7 @@ export default async function SchoolsListPage() {
         title="All schools"
         subtitle="Usage report by school · limits from schools table"
       >
-        <SchoolsFleetTable rows={rows} />
+        <SchoolsFleetTable rows={rows} paginatedSchools={paginatedReport} />
       </AdminPanel>
 
       <p className="font-mono text-[11px] text-(--muted)">

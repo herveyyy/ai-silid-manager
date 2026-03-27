@@ -1,4 +1,8 @@
-import { SchoolDTO, SchoolUsageViewDTO } from "@/lib/types/admin-types";
+import {
+    PaginatedSchoolUsageViewDTO,
+    SchoolDTO,
+    SchoolUsageViewDTO,
+} from "@/lib/types/admin-types";
 import { GetAllSchoolsUsecase } from "../usecase/schools/get_all_schools.usecase";
 import { GetSchoolsUsageViewUsecase } from "../usecase/schools/get_schools_usage_view.usecase";
 import { StoredSchoolConfig } from "@/lib/school-config-storage";
@@ -18,6 +22,19 @@ export class SchoolsService {
     async getSchoolsUsageView(): Promise<SchoolUsageViewDTO[]> {
         return await this.getSchoolsUsageViewUsecase.execute();
     }
+
+    async getPaginatedSchoolsUsageView(
+        page: number,
+        offset: number,
+        limit: number,
+    ): Promise<PaginatedSchoolUsageViewDTO> {
+        return await this.getSchoolsUsageViewUsecase.executePaginated(
+            page,
+            offset,
+            limit,
+        );
+    }
+
     async updateSchoolConfiguration(
         schoolId: string,
         data: StoredSchoolConfig,

@@ -73,6 +73,14 @@ export type SchoolUsageViewDTO = {
     tokensUsed: number;
 };
 
+export type PaginatedSchoolUsageViewDTO = {
+    rows: SchoolUsageViewDTO[];
+    total: number;
+    page: number;
+    limit: number;
+    offset: number;
+};
+
 /** `attachments` */
 export type SelectAttachment = typeof attachments.$inferSelect;
 export type Attachment = SelectAttachment;
