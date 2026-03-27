@@ -4,6 +4,7 @@ import { AdminPanel } from "@/components/molecules/admin-panel";
 import { SchoolProfileSettings } from "@/components/organisms/school-profile-settings";
 import { SchoolRoomsTable } from "@/components/organisms/school-rooms-table";
 import {
+  createAiModelsController,
   createAiPromptsController,
   createRoomsController,
   createSchoolsController,
@@ -11,18 +12,32 @@ import {
 
 export default async function SchoolProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string; offset?: string; limit?: string }>;
 }) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
+
+  function parsePositiveInt(value: string | undefined, fallback: number): number {
+    const parsed = Number.parseInt(value ?? "", 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  }
+
+  const page = parsePositiveInt(resolvedSearchParams.page, 1);
+  const limit = parsePositiveInt(resolvedSearchParams.limit, 10);
+  const offset = parsePositiveInt(resolvedSearchParams.offset, 0);
   const schoolsController = await createSchoolsController();
+  const aiModelsController = await createAiModelsController();
   const aiPromptsController = await createAiPromptsController();
   const roomsController = await createRoomsController();
-  const [schools, report, promptLogs, rooms] = await Promise.all([
+  const [schools, report, aiModels, promptLogs, paginatedRooms] = await Promise.all([
     schoolsController.getAllSchools(),
     schoolsController.getSchoolsUsageView(),
+    aiModelsController.getAiModels(),
     aiPromptsController.getSchoolAIPrompts(id),
-    roomsController.getSchoolRoomsUsage(id),
+    roomsController.getSchoolRoomsUsage(id, page, offset, limit),
   ]);
 
   const school = schools.find((entry) => entry.id === id);
@@ -63,14 +78,14 @@ export default async function SchoolProfilePage({
         title="School detail"
         subtitle={`school_code ${school.schoolCode} · ${school.id}`}
       >
-        <SchoolProfileSettings school={school} metrics={metrics} />
+        <SchoolProfileSettings school={school} metrics={metrics} aiModels={aiModels} />
       </AdminPanel>
 
       <AdminPanel
         title="School rooms"
         subtitle="Classrooms with storage, token, and participant usage"
       >
-        <SchoolRoomsTable schoolId={school.id} rooms={rooms} />
+        <SchoolRoomsTable schoolId={school.id} paginatedRooms={paginatedRooms} />
       </AdminPanel>
 
       <AdminPanel

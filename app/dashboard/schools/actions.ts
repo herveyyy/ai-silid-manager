@@ -7,9 +7,13 @@ export async function updateSchoolConfigurationAction(
     schoolId: string,
     data: StoredSchoolConfig,
 ): Promise<{ success: boolean; message: string }> {
-    
     const tokenLimit = Number(data.tokenLimit);
     const storageLimit = Number(data.storageLimit);
+    const defaultAiModelId =
+        typeof data.defaultAiModelId === "string" &&
+        data.defaultAiModelId.trim() !== ""
+            ? data.defaultAiModelId
+            : null;
 
     if (
         !schoolId ||
@@ -28,6 +32,7 @@ export async function updateSchoolConfigurationAction(
         const schoolsController = await createSchoolsController();
         await schoolsController.updateSchoolConfiguration(schoolId, {
             aiFeat: Boolean(data.aiFeat),
+            defaultAiModelId,
             unlimitedStorage: Boolean(data.unlimitedStorage),
             unlimitedToken: Boolean(data.unlimitedToken),
             tokenLimit: Math.floor(tokenLimit),

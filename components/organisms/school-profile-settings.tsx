@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { SchoolAdminMetrics, SchoolDTO } from "@/lib/types/admin-types";
+import type {
+  AiModelDTO,
+  SchoolAdminMetrics,
+  SchoolDTO,
+} from "@/lib/types/admin-types";
 import {
   readQuotaOverride,
   writeQuotaOverride,
@@ -25,9 +29,11 @@ function parseGbInput(s: string): number | null {
 export function SchoolProfileSettings({
   school,
   metrics,
+  aiModels,
 }: {
   school: SchoolDTO;
   metrics: SchoolAdminMetrics;
+  aiModels: AiModelDTO[];
 }) {
   const router = useRouter();
   const [quotaStorageBytes, setQuotaStorageBytes] = useState(
@@ -44,6 +50,9 @@ export function SchoolProfileSettings({
     school.unlimitedStorage,
   );
   const [unlimitedToken, setUnlimitedToken] = useState(school.unlimitedToken);
+  const [defaultAiModelId, setDefaultAiModelId] = useState(
+    school.defaultAiModelId ?? "",
+  );
   const [tokenLimitInput, setTokenLimitInput] = useState(
     String(school.tokenLimit),
   );
@@ -63,6 +72,7 @@ export function SchoolProfileSettings({
       setStorageGbInput(bytesToGb(base.quotaStorageBytes));
       setTokensInput(String(base.quotaTokens));
       setAiFeat(school.aiFeat);
+      setDefaultAiModelId(school.defaultAiModelId ?? "");
       setUnlimitedStorage(school.unlimitedStorage);
       setUnlimitedToken(school.unlimitedToken);
       setTokenLimitInput(String(school.tokenLimit));
@@ -112,6 +122,7 @@ export function SchoolProfileSettings({
     startConfigTransition(async () => {
       const result = await updateSchoolConfigurationAction(school.id, {
         aiFeat,
+        defaultAiModelId: defaultAiModelId || null,
         unlimitedStorage,
         unlimitedToken,
         tokenLimit: Math.floor(tokenLimit),
@@ -132,6 +143,7 @@ export function SchoolProfileSettings({
     });
   }, [
     aiFeat,
+    defaultAiModelId,
     router,
     school.id,
     storageLimitInput,
@@ -201,6 +213,30 @@ export function SchoolProfileSettings({
                 />
                 {aiFeat ? "Enabled" : "Disabled"}
               </label>
+            </div>
+
+            <div className="theme-panel border p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
+                Default AI model
+              </p>
+              <select
+                value={defaultAiModelId}
+                onChange={(e) => setDefaultAiModelId(e.target.value)}
+                className="theme-input mt-3 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+              >
+                <option value="">No default model</option>
+                {aiModels.map((model) => (
+                  <option key={model.id} value={model.id}>
+                    {model.name} · {model.status}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-3 font-mono text-[11px] text-(--muted)">
+                {defaultAiModelId
+                  ? aiModels.find((model) => model.id === defaultAiModelId)
+                      ?.description ?? "Selected model"
+                  : "Use this school's preferred default AI model."}
+              </p>
             </div>
 
             <div className="theme-panel border p-4">

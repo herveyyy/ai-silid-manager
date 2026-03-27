@@ -1,4 +1,4 @@
-import type { RoomUsageDTO } from "@/lib/types/admin-types";
+import type { PaginatedRoomUsageDTO } from "@/lib/types/admin-types";
 import { GetSchoolRoomsUsageUsecase } from "../usecase/rooms/get_school_rooms_usage.usecase";
 
 export class RoomsService {
@@ -6,7 +6,17 @@ export class RoomsService {
         private readonly getSchoolRoomsUsageUsecase: GetSchoolRoomsUsageUsecase,
     ) {}
 
-    async getSchoolRoomsUsage(schoolId: string): Promise<RoomUsageDTO[]> {
-        return await this.getSchoolRoomsUsageUsecase.execute(schoolId);
+    async getSchoolRoomsUsage(
+        schoolId: string,
+        page: number,
+        offset: number,
+        limit: number,
+    ): Promise<PaginatedRoomUsageDTO> {
+        return await this.getSchoolRoomsUsageUsecase.execute(
+            schoolId,
+            page,
+            offset,
+            limit,
+        );
     }
 }

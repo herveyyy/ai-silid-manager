@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AdminPanel } from "@/components/molecules/admin-panel";
 import { createAiModelAction, updateAiModelAction } from "@/app/dashboard/ai/actions";
@@ -40,6 +40,7 @@ export function AiConsole({
   const [updateMessages, setUpdateMessages] = useState<Record<string, string>>(
     {},
   );
+  const [editingModelId, setEditingModelId] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, AiModelMutationInput>>(
     () =>
       Object.fromEntries(aiModels.map((model) => [model.id, buildDraft(model)])),
@@ -48,12 +49,6 @@ export function AiConsole({
   const [isUpdatePending, startUpdateTransition] = useTransition();
 
   const rows = promptLogs;
-
-  useEffect(() => {
-    setDrafts(
-      Object.fromEntries(aiModels.map((model) => [model.id, buildDraft(model)])),
-    );
-  }, [aiModels]);
 
   const featTypes = useMemo(
     () => Array.from(new Set(rows.map((r) => r.featType))).sort(),
@@ -130,8 +125,28 @@ export function AiConsole({
       }));
 
       if (result.success) {
+        setEditingModelId(null);
         router.refresh();
       }
+    });
+  }
+
+  function handleEditModel(model: AiModelDTO) {
+    setEditingModelId(model.id);
+    setUpdateMessages((current) => ({ ...current, [model.id]: "" }));
+    setDrafts((current) => ({
+      ...current,
+      [model.id]: buildDraft(model),
+    }));
+  }
+
+  function handleCancelEdit(model: AiModelDTO) {
+    setEditingModelId(null);
+    setUpdateMessages((current) => ({ ...current, [model.id]: "" }));
+    setDrafts((current) => {
+      const next = { ...current };
+      delete next[model.id];
+      return next;
     });
   }
 
@@ -304,6 +319,7 @@ export function AiConsole({
                 {aiModels.map((model) => {
                   const draft = drafts[model.id] ?? buildDraft(model);
                   const message = updateMessages[model.id];
+                  const isEditing = editingModelId === model.id;
 
                   return (
                     <tr
@@ -312,51 +328,93 @@ export function AiConsole({
                       style={{ borderColor: "var(--border)" }}
                     >
                       <td className="py-3 pr-3">
-                        <input
-                          type="text"
-                          value={draft.name}
-                          onChange={(e) =>
-                            updateDraft(model.id, "name", e.target.value)
-                          }
-                          className="theme-input w-full border px-3 py-2 font-mono text-[12px] outline-none"
-                        />
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={draft.name}
+                            onChange={(e) =>
+                              updateDraft(model.id, "name", e.target.value)
+                            }
+                            className="theme-input w-full border px-3 py-2 font-mono text-[12px] outline-none"
+                          />
+                        ) : (
+                          <p className="text-foreground">{model.name}</p>
+                        )}
                       </td>
                       <td className="py-3 pr-3">
-                        <textarea
-                          value={draft.description ?? ""}
-                          onChange={(e) =>
-                            updateDraft(model.id, "description", e.target.value)
-                          }
-                          className="theme-input min-h-24 w-full border px-3 py-2 font-mono text-[12px] outline-none"
-                        />
+                        {isEditing ? (
+                          <textarea
+                            value={draft.description ?? ""}
+                            onChange={(e) =>
+                              updateDraft(model.id, "description", e.target.value)
+                            }
+                            className="theme-input min-h-24 w-full border px-3 py-2 font-mono text-[12px] outline-none"
+                          />
+                        ) : (
+                          <p className="max-w-[260px] whitespace-pre-wrap text-(--muted-strong)">
+                            {model.description ?? "—"}
+                          </p>
+                        )}
                       </td>
                       <td className="py-3 pr-3">
-                        <select
-                          value={draft.status}
-                          onChange={(e) =>
-                            updateDraft(model.id, "status", e.target.value)
-                          }
-                          className="theme-input w-full border px-3 py-2 font-mono text-[12px] outline-none"
-                        >
-                          {STATUS_OPTIONS.map((status) => (
-                            <option key={status} value={status}>
-                              {status}
-                            </option>
-                          ))}
-                        </select>
+                        {isEditing ? (
+                          <select
+                            value={draft.status}
+                            onChange={(e) =>
+                              updateDraft(model.id, "status", e.target.value)
+                            }
+                            className="theme-input w-full border px-3 py-2 font-mono text-[12px] outline-none"
+                          >
+                            {STATUS_OPTIONS.map((status) => (
+                              <option key={status} value={status}>
+                                {status}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <p className="uppercase">{model.status}</p>
+                        )}
                       </td>
                       <td className="py-3 pr-3 text-(--muted)">
                         {model.updatedAt.slice(0, 19).replace("T", " ")}
                       </td>
                       <td className="py-3">
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateModel(model.id)}
-                          disabled={isUpdatePending}
-                          className="theme-button-secondary border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors"
-                        >
-                          {isUpdatePending ? "Saving..." : "Save"}
-                        </button>
+                        <div className="flex flex-wrap gap-2">
+                          {isEditing ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateModel(model.id)}
+                                disabled={isUpdatePending}
+                                className="theme-button-secondary border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors"
+                              >
+                                {isUpdatePending ? "Saving..." : "Save"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleCancelEdit(model)}
+                                disabled={isUpdatePending}
+                                className="border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-(--muted) transition-colors"
+                                style={{ borderColor: "var(--border)" }}
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleEditModel(model)}
+                              disabled={
+                                isUpdatePending ||
+                                (editingModelId !== null &&
+                                  editingModelId !== model.id)
+                              }
+                              className="theme-button-secondary border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors"
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </div>
                         {message ? (
                           <p
                             className={`mt-2 max-w-32 font-mono text-[10px] ${

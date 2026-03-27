@@ -7,13 +7,18 @@ import {
     prompt,
     sections,
 } from "@/drizzle/schema";
-import type { RoomUsageDTO } from "@/lib/types/admin-types";
-import { countDistinct, eq, sql } from "drizzle-orm";
+import type { PaginatedRoomUsageDTO } from "@/lib/types/admin-types";
+import { asc, countDistinct, eq, sql } from "drizzle-orm";
 
 export class GetSchoolRoomsUsageUsecase {
     private db = db;
 
-    async execute(schoolId: string): Promise<RoomUsageDTO[]> {
+    async execute(
+        schoolId: string,
+        page: number,
+        offset: number,
+        limit: number,
+    ): Promise<PaginatedRoomUsageDTO> {
         try {
             const roomUsers = this.db
                 .selectDistinct({
@@ -95,43 +100,62 @@ export class GetSchoolRoomsUsageUsecase {
                 .groupBy(classCard.classroomId)
                 .as("class_card_count_by_room");
 
-            return await this.db
-                .select({
-                    id: classrooms.id,
-                    name: classrooms.name,
-                    schoolId: classrooms.schoolId,
-                    sectionId: classrooms.sectionId,
-                    adviserId: classrooms.adviserId,
-                    assistantAdviserId: classrooms.assistantAdviserId,
-                    createdAt: classrooms.createdAt,
-                    updatedAt: classrooms.updatedAt,
-                    sectionName: sections.name,
-                    sectionLevel: sections.level,
-                    classCardCount: sql<number>`coalesce(${classCardCountByRoom.classCardCount}, 0)`,
-                    participantCount: sql<number>`coalesce(${participantCountByRoom.participantCount}, 0)`,
-                    storageUsedBytes: sql<number>`coalesce(${storageUsageByRoom.storageUsedBytes}, 0)`,
-                    tokensUsed: sql<number>`coalesce(${tokenUsageByRoom.tokensUsed}, 0)`,
-                    promptRuns: sql<number>`coalesce(${tokenUsageByRoom.promptRuns}, 0)`,
-                })
-                .from(classrooms)
-                .leftJoin(sections, eq(classrooms.sectionId, sections.id))
-                .leftJoin(
-                    classCardCountByRoom,
-                    eq(classrooms.id, classCardCountByRoom.roomId),
-                )
-                .leftJoin(
-                    participantCountByRoom,
-                    eq(classrooms.id, participantCountByRoom.roomId),
-                )
-                .leftJoin(
-                    storageUsageByRoom,
-                    eq(classrooms.id, storageUsageByRoom.roomId),
-                )
-                .leftJoin(
-                    tokenUsageByRoom,
-                    eq(classrooms.id, tokenUsageByRoom.roomId),
-                )
-                .where(eq(classrooms.schoolId, schoolId));
+            const [rows, totalRows] = await Promise.all([
+                this.db
+                    .select({
+                        id: classrooms.id,
+                        name: classrooms.name,
+                        schoolId: classrooms.schoolId,
+                        sectionId: classrooms.sectionId,
+                        adviserId: classrooms.adviserId,
+                        assistantAdviserId: classrooms.assistantAdviserId,
+                        createdAt: classrooms.createdAt,
+                        updatedAt: classrooms.updatedAt,
+                        sectionName: sections.name,
+                        sectionLevel: sections.level,
+                        classCardCount: sql<number>`coalesce(${classCardCountByRoom.classCardCount}, 0)`,
+                        participantCount: sql<number>`coalesce(${participantCountByRoom.participantCount}, 0)`,
+                        storageUsedBytes: sql<number>`coalesce(${storageUsageByRoom.storageUsedBytes}, 0)`,
+                        tokensUsed: sql<number>`coalesce(${tokenUsageByRoom.tokensUsed}, 0)`,
+                        promptRuns: sql<number>`coalesce(${tokenUsageByRoom.promptRuns}, 0)`,
+                    })
+                    .from(classrooms)
+                    .leftJoin(sections, eq(classrooms.sectionId, sections.id))
+                    .leftJoin(
+                        classCardCountByRoom,
+                        eq(classrooms.id, classCardCountByRoom.roomId),
+                    )
+                    .leftJoin(
+                        participantCountByRoom,
+                        eq(classrooms.id, participantCountByRoom.roomId),
+                    )
+                    .leftJoin(
+                        storageUsageByRoom,
+                        eq(classrooms.id, storageUsageByRoom.roomId),
+                    )
+                    .leftJoin(
+                        tokenUsageByRoom,
+                        eq(classrooms.id, tokenUsageByRoom.roomId),
+                    )
+                    .where(eq(classrooms.schoolId, schoolId))
+                    .orderBy(asc(classrooms.name))
+                    .limit(limit)
+                    .offset(offset),
+                this.db
+                    .select({
+                        total: countDistinct(classrooms.id).as("total"),
+                    })
+                    .from(classrooms)
+                    .where(eq(classrooms.schoolId, schoolId)),
+            ]);
+
+            return {
+                rows,
+                total: Number(totalRows[0]?.total ?? 0),
+                page,
+                limit,
+                offset,
+            };
         } catch (error) {
             console.error(error);
             throw new Error("Failed to get school rooms usage");

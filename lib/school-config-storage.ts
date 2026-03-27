@@ -5,6 +5,7 @@ export const SCHOOL_CONFIG_STORAGE_KEY = "silid-admin-school-config";
 export type StoredSchoolConfig = Pick<
     SchoolDTO,
     | "aiFeat"
+    | "defaultAiModelId"
     | "unlimitedStorage"
     | "unlimitedToken"
     | "tokenLimit"

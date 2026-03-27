@@ -33,6 +33,14 @@ export type RoomUsageDTO = RoomDTO & {
     promptRuns: number;
 };
 
+export type PaginatedRoomUsageDTO = {
+    rows: RoomUsageDTO[];
+    total: number;
+    page: number;
+    limit: number;
+    offset: number;
+};
+
 export type InsertAiModel = typeof aiModels.$inferInsert;
 export type SelectAiModel = typeof aiModels.$inferSelect;
 export type AiModelDTO = SelectAiModel;

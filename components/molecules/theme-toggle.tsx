@@ -1,19 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useSyncExternalStore } from "react";
 import { FaRegMoon } from "react-icons/fa";
 import { MdOutlineWbSunny } from "react-icons/md";
 
 type Theme = "dark" | "light";
 
 const STORAGE_KEY = "silid-theme";
+const THEME_EVENT = "silid-theme-updated";
 
 function applyTheme(theme: Theme) {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem(STORAGE_KEY, theme);
+    window.dispatchEvent(new Event(THEME_EVENT));
 }
 
-function getInitialTheme(): Theme {
+function getThemeSnapshot(): Theme {
     if (typeof document !== "undefined") {
         const domTheme = document.documentElement.dataset.theme;
         if (domTheme === "light" || domTheme === "dark") {
@@ -29,8 +31,37 @@ function getInitialTheme(): Theme {
     return "dark";
 }
 
+function getServerThemeSnapshot(): Theme {
+    return "dark";
+}
+
+function subscribeToTheme(onStoreChange: () => void): () => void {
+    if (typeof window === "undefined") {
+        return () => {};
+    }
+
+    const handleThemeChange = () => onStoreChange();
+    const handleStorageChange = (event: StorageEvent) => {
+        if (event.key === null || event.key === STORAGE_KEY) {
+            onStoreChange();
+        }
+    };
+
+    window.addEventListener(THEME_EVENT, handleThemeChange);
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+        window.removeEventListener(THEME_EVENT, handleThemeChange);
+        window.removeEventListener("storage", handleStorageChange);
+    };
+}
+
 export function ThemeToggle() {
-    const [theme, setTheme] = useState<Theme>(getInitialTheme);
+    const theme = useSyncExternalStore(
+        subscribeToTheme,
+        getThemeSnapshot,
+        getServerThemeSnapshot,
+    );
 
     const isDark = theme === "dark";
 
@@ -39,7 +70,6 @@ export function ThemeToggle() {
             type="button"
             onClick={() => {
                 const nextTheme: Theme = isDark ? "light" : "dark";
-                setTheme(nextTheme);
                 applyTheme(nextTheme);
             }}
             className=" border px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.25em] transition-colors theme-panel theme-link"
