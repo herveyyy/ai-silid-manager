@@ -1,21 +1,5 @@
-import { schools } from "@/drizzle/schema";
-export type AttachmentParentType =
-    | "question"
-    | "section-question"
-    | "student-answer"
-    | "class-card"
-    | "post-comment"
-    | "profile"
-    | "post"
-    | "quiz-evidence"
-    | "assignment"
-    | "materials"
-    | "attendance"
-    | "school-badge"
-    | "chatbox"
-    | "chatbox-message"
-    | "content"
-    | "content-question";
+import { aiModels, attachmentType, attachments, schools } from "@/drizzle/schema";
+export type AttachmentParentType = (typeof attachmentType.enumValues)[number];
 
 export type InsertSchool = typeof schools.$inferInsert;
 export type SelectSchool = typeof schools.$inferSelect;
@@ -28,6 +12,14 @@ export type School = SelectSchool & {
     storageLimit: number;
 };
 export type SchoolDTO = Omit<School, "password" | "secret" | "apiKey">;
+
+export type InsertAiModel = typeof aiModels.$inferInsert;
+export type SelectAiModel = typeof aiModels.$inferSelect;
+export type AiModelDTO = SelectAiModel;
+export type AiModelMutationInput = Pick<
+    AiModelDTO,
+    "name" | "description" | "status"
+>;
 
 /** Admin quotas and usage (mock / future API — not in `schools` table yet). */
 export type SchoolAdminMetrics = {
@@ -54,20 +46,8 @@ export type SchoolUsageViewDTO = {
 };
 
 /** `attachments` */
-export type Attachment = {
-    id: string;
-    parentId: string;
-    filePath: string;
-    fileType: string;
-    parentType: AttachmentParentType | null;
-    isDeleted: boolean | null;
-    isUsed: boolean | null;
-    createdAt: string;
-    updatedAt: string;
-    createdBy: string | null;
-    fileSize: string;
-    fileName: string;
-};
+export type SelectAttachment = typeof attachments.$inferSelect;
+export type Attachment = SelectAttachment;
 
 /** `prompt` — AI feature usage log */
 export type PromptLog = {

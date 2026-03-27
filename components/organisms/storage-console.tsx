@@ -2,11 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Attachment, AttachmentParentType } from "@/lib/types/admin-types";
-import {
-  formatBytes,
-  mockAttachments,
-  totalAttachmentBytes,
-} from "@/lib/admin-mock-data";
+import { formatBytes, totalAttachmentBytes } from "@/lib/admin-mock-data";
 import { AdminPanel } from "@/components/molecules/admin-panel";
 
 function bytesByParentType(rows: Attachment[]): Partial<
@@ -21,13 +17,27 @@ function bytesByParentType(rows: Attachment[]): Partial<
   return m;
 }
 
-export function StorageConsole() {
-  const rows = mockAttachments;
+export function StorageConsole({
+  rows,
+  parentTypes,
+}: {
+  rows: Attachment[];
+  parentTypes: readonly AttachmentParentType[];
+}) {
   const used = totalAttachmentBytes(rows.filter((r) => !r.isDeleted));
   const [ceilingGb, setCeilingGb] = useState(50);
   const ceilingBytes = ceilingGb * 1024 ** 3;
   const pct = Math.min(100, (used / ceilingBytes) * 100);
   const byType = useMemo(() => bytesByParentType(rows), [rows]);
+  const byTypeRows = [
+    ...parentTypes.map((type) => ({
+      key: type,
+      value: byType[type] ?? 0,
+    })),
+    ...(byType.unknown !== undefined
+      ? [{ key: "unknown" as const, value: byType.unknown ?? 0 }]
+      : []),
+  ];
 
   const softDeleted = rows.filter((r) => r.isDeleted).length;
   const unusedMarked = rows.filter((r) => !r.isUsed && !r.isDeleted).length;
@@ -36,7 +46,7 @@ export function StorageConsole() {
     <div className="space-y-8">
       <AdminPanel
         title="Storage ceiling"
-        subtitle="Plan limit (UI only — wire to API / schools settings later)"
+        subtitle="Plan limit (UI only) against live attachments usage"
       >
         <div className="space-y-4">
           <div className="flex flex-wrap items-end justify-between gap-4">
@@ -87,19 +97,19 @@ export function StorageConsole() {
 
       <AdminPanel
         title="Usage by parent_type"
-        subtitle="attachment_type enum · excludes is_deleted rows from chart"
+        subtitle="attachment_type enum from schema · excludes is_deleted rows"
       >
         <ul className="space-y-2 font-mono text-[12px]">
-          {Object.entries(byType)
-            .sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0))
-            .map(([k, v]) => (
+          {byTypeRows
+            .sort((a, b) => b.value - a.value)
+            .map(({ key, value }) => (
               <li
-                key={k}
+                key={key}
                 className="flex justify-between border-b py-2 text-(--muted-strong)"
                 style={{ borderColor: "var(--border)" }}
               >
-                <span className="uppercase text-(--muted)">{k}</span>
-                <span className="tabular-nums text-foreground">{formatBytes(v ?? 0)}</span>
+                <span className="uppercase text-(--muted)">{key}</span>
+                <span className="tabular-nums text-foreground">{formatBytes(value)}</span>
               </li>
             ))}
         </ul>
@@ -107,7 +117,7 @@ export function StorageConsole() {
 
       <AdminPanel
         title="Attachment registry"
-        subtitle="attachments · manage flags (frontend-only)"
+        subtitle="attachments table · live rows from controller"
       >
         <div className="mb-4 flex flex-wrap gap-3 font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
           <span>Soft-deleted rows: {softDeleted}</span>
@@ -157,7 +167,7 @@ export function StorageConsole() {
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
           <button type="button" className="theme-button-secondary border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors">
-            Export manifest (mock)
+            Export manifest
           </button>
           <button
             type="button"
@@ -167,7 +177,7 @@ export function StorageConsole() {
               color: "var(--danger)",
             }}
           >
-            Purge soft-deleted (mock)
+            Purge soft-deleted
           </button>
         </div>
       </AdminPanel>

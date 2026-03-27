@@ -580,6 +580,57 @@ export const subjects = pgTable(
     ],
 );
 
+export const schools = pgTable(
+    "schools",
+    {
+        id: uuid().defaultRandom().primaryKey().notNull(),
+        name: text().notNull(),
+        schoolCode: varchar("school_code", { length: 50 }).notNull(),
+        username: varchar({ length: 100 }),
+        password: varchar({ length: 100 }),
+        site: text().notNull(),
+        createdAt: timestamp("created_at", {
+            withTimezone: true,
+            mode: "string",
+        })
+            .defaultNow()
+            .notNull(),
+        updatedAt: timestamp("updated_at", {
+            withTimezone: true,
+            mode: "string",
+        })
+            .defaultNow()
+            .notNull(),
+        secret: varchar({ length: 100 }),
+        apiKey: varchar("api_key", { length: 100 }),
+        aiFeat: boolean("ai_feat").default(false).notNull(),
+        unlimitedStorage: boolean("unlimited_storage").default(false).notNull(),
+        unlimitedToken: boolean("unlimited_token").default(false).notNull(),
+        tokenLimit: integer("token_limit").default(10000).notNull(),
+        storageLimit: integer("storage_limit").default(10000).notNull(),
+        defaultAiModelId: uuid("default_ai_model_id"),
+    },
+    (table) => [
+        index("schools_created_at_idx").using(
+            "btree",
+            table.createdAt.asc().nullsLast().op("timestamptz_ops"),
+        ),
+        index("schools_school_code_idx").using(
+            "btree",
+            table.schoolCode.asc().nullsLast().op("text_ops"),
+        ),
+        index("schools_username_idx").using(
+            "btree",
+            table.username.asc().nullsLast().op("text_ops"),
+        ),
+        foreignKey({
+            columns: [table.defaultAiModelId],
+            foreignColumns: [aiModels.id],
+            name: "schools_default_ai_model_id_ai_models_id_fk",
+        }),
+    ],
+);
+
 export const chatboxMessages = pgTable(
     "chatbox_messages",
     {
@@ -745,51 +796,6 @@ export const term = pgTable(
             foreignColumns: [users.id],
             name: "term_created_by_users_id_fk",
         }),
-    ],
-);
-
-export const schools = pgTable(
-    "schools",
-    {
-        id: uuid().defaultRandom().primaryKey().notNull(),
-        name: text().notNull(),
-        schoolCode: varchar("school_code", { length: 50 }).notNull(),
-        username: varchar({ length: 100 }),
-        password: varchar({ length: 100 }),
-        site: text().notNull(),
-        createdAt: timestamp("created_at", {
-            withTimezone: true,
-            mode: "string",
-        })
-            .defaultNow()
-            .notNull(),
-        updatedAt: timestamp("updated_at", {
-            withTimezone: true,
-            mode: "string",
-        })
-            .defaultNow()
-            .notNull(),
-        secret: varchar({ length: 100 }),
-        apiKey: varchar("api_key", { length: 100 }),
-        aiFeat: boolean("ai_feat").default(false).notNull(),
-        unlimitedStorage: boolean("unlimited_storage").default(false).notNull(),
-        unlimitedToken: boolean("unlimited_token").default(false).notNull(),
-        tokenLimit: integer("token_limit").default(10000).notNull(),
-        storageLimit: integer("storage_limit").default(10000).notNull(),
-    },
-    (table) => [
-        index("schools_created_at_idx").using(
-            "btree",
-            table.createdAt.asc().nullsLast().op("timestamptz_ops"),
-        ),
-        index("schools_school_code_idx").using(
-            "btree",
-            table.schoolCode.asc().nullsLast().op("text_ops"),
-        ),
-        index("schools_username_idx").using(
-            "btree",
-            table.username.asc().nullsLast().op("text_ops"),
-        ),
     ],
 );
 
@@ -1761,6 +1767,7 @@ export const prompt = pgTable(
         creditsSpent: integer("credits_spent"),
         status: text().notNull(),
         createdBy: uuid().notNull(),
+        bypassedProcess: boolean("bypassed_process").default(false).notNull(),
     },
     (table) => [
         index("prompt_completed_at_idx").using(
@@ -1790,3 +1797,16 @@ export const prompt = pgTable(
         }),
     ],
 );
+
+export const aiModels = pgTable("ai_models", {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    name: text().notNull(),
+    description: text(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+        .defaultNow()
+        .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+        .defaultNow()
+        .notNull(),
+    status: text().default("active").notNull(),
+});

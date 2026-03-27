@@ -12,7 +12,15 @@ const nav = [
     { href: "/dashboard/ai", label: "AI" },
 ] as const;
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({
+    children,
+    environmentLabel,
+    isDatabaseConnected,
+}: {
+    children: React.ReactNode;
+    environmentLabel: "LOCAL" | "STAGING" | "PROD";
+    isDatabaseConnected: boolean;
+}) {
     const pathname = usePathname();
 
     return (
@@ -103,10 +111,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     </div>
                     <div className="text-right">
                         <p className="font-mono text-[10px] text-(--muted)">
-                            Local preview
+                            {environmentLabel}
                         </p>
-                        <p className="font-mono text-[11px] text-(--success)">
-                            DATA_DISCONNECTED
+                        <p
+                            className={`font-mono text-[11px] ${
+                                isDatabaseConnected
+                                    ? "text-(--success)"
+                                    : "text-(--danger)"
+                            }`}
+                        >
+                            {isDatabaseConnected
+                                ? "DATA_CONNECTED"
+                                : "DATA_DISCONNECTED"}
                         </p>
                     </div>
                 </header>

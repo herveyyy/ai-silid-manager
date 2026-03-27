@@ -1,6 +1,11 @@
+import { createAttachmentsController } from "@/app/actions";
 import { StorageConsole } from "@/components/organisms/storage-console";
+import { attachmentType } from "@/drizzle/schema";
 
-export default function StoragePage() {
+export default async function StoragePage() {
+  const attachmentsController = await createAttachmentsController();
+  const rows = await attachmentsController.getAttachments();
+
   return (
     <div className="space-y-6">
       <header>
@@ -12,11 +17,11 @@ export default function StoragePage() {
         </h1>
         <p className="mt-2 max-w-2xl font-mono text-[12px] leading-relaxed text-(--muted)">
           Mirrors `attachments`: file_path, file_size, file_type, parent_type
-          (attachment_type enum), is_used, is_deleted. Ceiling control is UI
-          only until a quota field or settings row exists in the schema.
+          (`attachment_type` enum), is_used, is_deleted. Usage is live; ceiling
+          control stays UI-only until a quota field or settings row exists.
         </p>
       </header>
-      <StorageConsole />
+      <StorageConsole rows={rows} parentTypes={attachmentType.enumValues} />
     </div>
   );
 }

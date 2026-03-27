@@ -1,6 +1,17 @@
+import { createAiModelsController, createAiPromptsController } from "@/app/actions";
 import { AiConsole } from "@/components/organisms/ai-console";
+import type { AiConsoleProps } from "@/components/organisms/ai-console";
 
-export default function AiPage() {
+const AiConsoleClient = AiConsole as (props: AiConsoleProps) => React.JSX.Element;
+
+export default async function AiPage() {
+  const aiPromptsController = await createAiPromptsController();
+  const aiModelsController = await createAiModelsController();
+  const [promptLogs, aiModels] = await Promise.all([
+    aiPromptsController.getAIPrompts(),
+    aiModelsController.getAiModels(),
+  ]);
+
   return (
     <div className="space-y-6">
       <header>
@@ -12,10 +23,11 @@ export default function AiPage() {
         </h1>
         <p className="mt-2 max-w-2xl font-mono text-[12px] leading-relaxed text-(--muted)">
           Mirrors `prompt`: feat_type, status, ai_model_name, token_ai_value,
-          credits_spent, user_prompt, prompt_title, result, timestamps.
+          credits_spent, user_prompt, prompt_title, result, timestamps, plus
+          `ai_models` management.
         </p>
       </header>
-      <AiConsole />
+      <AiConsoleClient promptLogs={promptLogs} aiModels={aiModels} />
     </div>
   );
 }

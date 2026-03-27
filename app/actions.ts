@@ -9,11 +9,19 @@ import { GetUserByCredsUsecase } from "@/db/usecase/user/get_user_by_creds.useca
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { UpdateSchoolConfigurationUsecase } from "@/db/usecase/schools/update_school_configuration.usecase";
+import { AttachmentsController } from "@/db/controller/attachments/attachments.controller";
+import { AttachmentsService } from "@/db/service/attachments.service";
+import { GetAttachmentsUsecase } from "@/db/usecase/attachments/get_attachments.usecase";
 
 import { GetPromptLogsUsecase } from "@/db/usecase/prompts/get_ai_prompts.usecase";
 import { GetSchoolPromptLogsUsecase } from "@/db/usecase/prompts/get_school_ai_prompts.usecase";
 import { AiPromptsController } from "@/db/controller/ai-prompts/ai-prompts.controller";
 import { AiPromptsService } from "@/db/service/ai-prompts.service";
+import { AiModelsController } from "@/db/controller/ai-models/ai-models.controller";
+import { AiModelsService } from "@/db/service/ai-models.service";
+import { GetAiModelsUsecase } from "@/db/usecase/ai-models/get_ai_models.usecase";
+import { CreateAiModelUsecase } from "@/db/usecase/ai-models/create_ai_model.usecase";
+import { UpdateAiModelUsecase } from "@/db/usecase/ai-models/update_ai_model.usecase";
 
 export async function createSchoolsController(): Promise<SchoolsController> {
     try {
@@ -48,6 +56,21 @@ export async function createUsersController(): Promise<UsersController> {
     }
 }
 
+export async function createAttachmentsController(): Promise<AttachmentsController> {
+    try {
+        const session = await auth();
+        if (!session?.user) {
+            redirect("/login");
+        }
+        return new AttachmentsController(
+            new AttachmentsService(new GetAttachmentsUsecase()),
+        );
+    } catch (error) {
+        console.error(error);
+        throw new Error("Failed to create attachments controller");
+    }
+}
+
 export async function createAiPromptsController(): Promise<AiPromptsController> {
     try {
         const session = await auth();
@@ -63,5 +86,24 @@ export async function createAiPromptsController(): Promise<AiPromptsController> 
     } catch (error) {
         console.error(error);
         throw new Error("Failed to create ai prompts controller");
+    }
+}
+
+export async function createAiModelsController(): Promise<AiModelsController> {
+    try {
+        const session = await auth();
+        if (!session?.user) {
+            redirect("/login");
+        }
+        return new AiModelsController(
+            new AiModelsService(
+                new GetAiModelsUsecase(),
+                new CreateAiModelUsecase(),
+                new UpdateAiModelUsecase(),
+            ),
+        );
+    } catch (error) {
+        console.error(error);
+        throw new Error("Failed to create ai models controller");
     }
 }
