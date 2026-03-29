@@ -1,5 +1,5 @@
 import { RoomsService } from "@/db/service/rooms.service";
-import type { PaginatedRoomUsageDTO } from "@/lib/types/admin-types";
+import type { PaginatedRoomUsageDTO, RoomUsageDTO } from "@/lib/types/admin-types";
 import { IRooms } from "./rooms.interface";
 
 export class RoomsController implements IRooms {
@@ -17,5 +17,12 @@ export class RoomsController implements IRooms {
             offset,
             limit,
         );
+    }
+
+    async getRoomUsageById(
+        schoolId: string,
+        roomId: string,
+    ): Promise<RoomUsageDTO | null> {
+        return await this.roomsService.getRoomUsageById(schoolId, roomId);
     }
 }

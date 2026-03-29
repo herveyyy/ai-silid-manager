@@ -144,7 +144,54 @@ export function StorageConsole({
           <span>·</span>
           <span>Unused & active: {unusedMarked}</span>
         </div>
-        <div className="overflow-x-auto">
+        <div className="divide-y md:hidden" style={{ borderColor: "var(--border)" }}>
+          {paginatedRows.map((r) => (
+            <article key={r.id} className="space-y-4 py-4">
+              <div className="min-w-0">
+                <p className="truncate font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
+                  attachment
+                </p>
+                <h3 className="wrap-break-word text-sm font-semibold text-foreground">
+                  {r.fileName}
+                </h3>
+              </div>
+
+              <dl className="grid grid-cols-2 gap-3 font-mono text-[11px]">
+                <div className="theme-panel-strong border px-3 py-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    file_size
+                  </dt>
+                  <dd className="mt-1 tabular-nums text-foreground">
+                    {formatBytes(Number(r.fileSize))}
+                  </dd>
+                </div>
+                <div className="theme-panel-strong border px-3 py-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    parent_type
+                  </dt>
+                  <dd className="mt-1 uppercase text-foreground">
+                    {r.parentType ?? "—"}
+                  </dd>
+                </div>
+                <div className="theme-panel-strong border px-3 py-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    is_used
+                  </dt>
+                  <dd className="mt-1 text-foreground">{r.isUsed ? "true" : "false"}</dd>
+                </div>
+                <div className="theme-panel-strong border px-3 py-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    is_deleted
+                  </dt>
+                  <dd className="mt-1 text-foreground">
+                    {r.isDeleted ? "true" : "false"}
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[720px] border-collapse font-mono text-[11px]">
             <thead>
               <tr

@@ -1,9 +1,11 @@
-import type { PaginatedRoomUsageDTO } from "@/lib/types/admin-types";
+import type { PaginatedRoomUsageDTO, RoomUsageDTO } from "@/lib/types/admin-types";
 import { GetSchoolRoomsUsageUsecase } from "../usecase/rooms/get_school_rooms_usage.usecase";
+import { GetRoomUsageByIdUsecase } from "../usecase/rooms/get_room_usage_by_id.usecase";
 
 export class RoomsService {
     constructor(
         private readonly getSchoolRoomsUsageUsecase: GetSchoolRoomsUsageUsecase,
+        private readonly getRoomUsageByIdUsecase: GetRoomUsageByIdUsecase,
     ) {}
 
     async getSchoolRoomsUsage(
@@ -18,5 +20,12 @@ export class RoomsService {
             offset,
             limit,
         );
+    }
+
+    async getRoomUsageById(
+        schoolId: string,
+        roomId: string,
+    ): Promise<RoomUsageDTO | null> {
+        return await this.getRoomUsageByIdUsecase.execute(schoolId, roomId);
     }
 }

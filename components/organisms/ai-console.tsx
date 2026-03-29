@@ -314,7 +314,138 @@ export function AiConsole({
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="divide-y md:hidden" style={{ borderColor: "var(--border)" }}>
+            {aiModels.map((model) => {
+              const draft = drafts[model.id] ?? buildDraft(model);
+              const message = updateMessages[model.id];
+              const isEditing = editingModelId === model.id;
+
+              return (
+                <article key={model.id} className="space-y-4 py-4">
+                  <div className="min-w-0">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
+                      model
+                    </p>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={draft.name}
+                        onChange={(e) => updateDraft(model.id, "name", e.target.value)}
+                        className="theme-input mt-2 w-full border px-3 py-2 font-mono text-[12px] outline-none"
+                      />
+                    ) : (
+                      <h3 className="mt-1 wrap-break-word text-sm font-semibold text-foreground">
+                        {model.name}
+                      </h3>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="theme-panel-strong border px-3 py-2">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
+                        description
+                      </p>
+                      {isEditing ? (
+                        <textarea
+                          value={draft.description ?? ""}
+                          onChange={(e) =>
+                            updateDraft(model.id, "description", e.target.value)
+                          }
+                          className="theme-input mt-2 min-h-24 w-full border px-3 py-2 font-mono text-[12px] outline-none"
+                        />
+                      ) : (
+                        <p className="mt-1 whitespace-pre-wrap text-(--muted-strong)">
+                          {model.description ?? "—"}
+                        </p>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="theme-panel-strong border px-3 py-2">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
+                          status
+                        </p>
+                        {isEditing ? (
+                          <select
+                            value={draft.status}
+                            onChange={(e) =>
+                              updateDraft(model.id, "status", e.target.value)
+                            }
+                            className="theme-input mt-2 w-full border px-3 py-2 font-mono text-[12px] outline-none"
+                          >
+                            {STATUS_OPTIONS.map((status) => (
+                              <option key={status} value={status}>
+                                {status}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <p className="mt-1 uppercase text-foreground">{model.status}</p>
+                        )}
+                      </div>
+                      <div className="theme-panel-strong border px-3 py-2">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
+                          updated_at
+                        </p>
+                        <p className="mt-1 text-(--muted)">
+                          {model.updatedAt.slice(0, 19).replace("T", " ")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {isEditing ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateModel(model.id)}
+                          disabled={isUpdatePending}
+                          className="theme-button-secondary border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors"
+                        >
+                          {isUpdatePending ? "Saving..." : "Save"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleCancelEdit(model)}
+                          disabled={isUpdatePending}
+                          className="border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-(--muted) transition-colors"
+                          style={{ borderColor: "var(--border)" }}
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleEditModel(model)}
+                        disabled={
+                          isUpdatePending ||
+                          (editingModelId !== null && editingModelId !== model.id)
+                        }
+                        className="theme-button-secondary border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors"
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </div>
+                  {message ? (
+                    <p
+                      className={`font-mono text-[10px] ${
+                        message.includes("Failed") ||
+                        message.includes("Invalid") ||
+                        message.includes("not found")
+                          ? "text-(--danger)"
+                          : "text-(--success)"
+                      }`}
+                    >
+                      {message}
+                    </p>
+                  ) : null}
+                </article>
+              );
+            })}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[860px] border-collapse font-mono text-[11px]">
               <thead>
                 <tr
@@ -457,12 +588,12 @@ export function AiConsole({
                 })}
               </tbody>
             </table>
-            {aiModels.length === 0 ? (
-              <p className="mt-4 font-mono text-[12px] text-(--muted)">
-                No AI models found yet.
-              </p>
-            ) : null}
           </div>
+          {aiModels.length === 0 ? (
+            <p className="mt-4 font-mono text-[12px] text-(--muted)">
+              No AI models found yet.
+            </p>
+          ) : null}
         </div>
       </AdminPanel>
 
@@ -506,7 +637,62 @@ export function AiConsole({
       </AdminPanel>
 
       <AdminPanel title="Prompt log" subtitle="prompt table columns">
-        <div className="overflow-x-auto">
+        <div className="divide-y md:hidden" style={{ borderColor: "var(--border)" }}>
+          {filteredPaginatedRows.map((r) => (
+            <article key={r.id} className="space-y-4 py-4">
+              <div className="min-w-0">
+                <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
+                  prompt
+                </p>
+                <h3 className="mt-1 text-sm font-semibold uppercase tracking-[0.08em] text-foreground">
+                  {r.featType}
+                </h3>
+                <p className="mt-1 uppercase text-(--muted-strong)">{r.status}</p>
+              </div>
+              <dl className="grid grid-cols-2 gap-3 font-mono text-[11px]">
+                <div className="theme-panel-strong border px-3 py-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    ai_model_name
+                  </dt>
+                  <dd className="mt-1 text-foreground">{r.aiModelName ?? "—"}</dd>
+                </div>
+                <div className="theme-panel-strong border px-3 py-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    created_at
+                  </dt>
+                  <dd className="mt-1 text-(--muted)">
+                    {r.createdAt?.slice(0, 19).replace("T", " ") ?? "—"}
+                  </dd>
+                </div>
+                <div className="theme-panel-strong border px-3 py-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    token_ai_value
+                  </dt>
+                  <dd className="mt-1 tabular-nums text-foreground">
+                    {(r.tokenAiValue ?? 0).toLocaleString()}
+                  </dd>
+                </div>
+                <div className="theme-panel-strong border px-3 py-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    credits_spent
+                  </dt>
+                  <dd className="mt-1 tabular-nums text-foreground">
+                    {(r.creditsSpent ?? 0).toLocaleString()}
+                  </dd>
+                </div>
+                <div className="theme-panel-strong border px-3 py-2 col-span-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    prompt_title
+                  </dt>
+                  <dd className="mt-1 wrap-break-word text-foreground">
+                    {r.promptTitle ?? "—"}
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[960px] border-collapse font-mono text-[11px]">
             <thead>
               <tr

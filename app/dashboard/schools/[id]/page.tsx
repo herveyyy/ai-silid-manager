@@ -119,7 +119,63 @@ export default async function SchoolProfilePage({
           </div>
         </div>
 
-        <div className="mt-6 overflow-x-auto">
+        <div className="mt-6 divide-y md:hidden" style={{ borderColor: "var(--border)" }}>
+          {promptLogs.slice(0, 12).map((row) => (
+            <article key={row.id} className="space-y-4 py-4">
+              <div className="min-w-0">
+                <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
+                  prompt
+                </p>
+                <h3 className="mt-1 text-sm font-semibold uppercase tracking-[0.08em] text-foreground">
+                  {row.featType}
+                </h3>
+                <p className="mt-1 uppercase text-(--muted-strong)">{row.status}</p>
+              </div>
+              <dl className="grid grid-cols-2 gap-3 font-mono text-[11px]">
+                <div className="theme-panel-strong border px-3 py-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    ai_model_name
+                  </dt>
+                  <dd className="mt-1 text-foreground">{row.aiModelName ?? "—"}</dd>
+                </div>
+                <div className="theme-panel-strong border px-3 py-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    created_at
+                  </dt>
+                  <dd className="mt-1 text-(--muted)">
+                    {row.createdAt?.slice(0, 19).replace("T", " ") ?? "—"}
+                  </dd>
+                </div>
+                <div className="theme-panel-strong border px-3 py-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    token_ai_value
+                  </dt>
+                  <dd className="mt-1 tabular-nums text-foreground">
+                    {(row.tokenAiValue ?? 0).toLocaleString()}
+                  </dd>
+                </div>
+                <div className="theme-panel-strong border px-3 py-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    credits_spent
+                  </dt>
+                  <dd className="mt-1 tabular-nums text-foreground">
+                    {(row.creditsSpent ?? 0).toLocaleString()}
+                  </dd>
+                </div>
+                <div className="theme-panel-strong border px-3 py-2 col-span-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    prompt_title
+                  </dt>
+                  <dd className="mt-1 wrap-break-word text-foreground">
+                    {row.promptTitle ?? "—"}
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+
+        <div className="mt-6 hidden overflow-x-auto md:block">
           <table className="w-full min-w-[920px] border-collapse font-mono text-[11px]">
             <thead>
               <tr

@@ -1,4 +1,4 @@
-import type { PaginatedRoomUsageDTO } from "@/lib/types/admin-types";
+import type { PaginatedRoomUsageDTO, RoomUsageDTO } from "@/lib/types/admin-types";
 
 export interface IRooms {
     getSchoolRoomsUsage(
@@ -7,4 +7,8 @@ export interface IRooms {
         offset: number,
         limit: number,
     ): Promise<PaginatedRoomUsageDTO>;
+    getRoomUsageById(
+        schoolId: string,
+        roomId: string,
+    ): Promise<RoomUsageDTO | null>;
 }

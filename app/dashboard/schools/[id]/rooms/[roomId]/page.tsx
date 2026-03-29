@@ -12,15 +12,14 @@ export default async function RoomProfilePage({
   const { id, roomId } = await params;
   const schoolsController = await createSchoolsController();
   const roomsController = await createRoomsController();
-  const [schools, paginatedRooms] = await Promise.all([
+  const [schools, room] = await Promise.all([
     schoolsController.getAllSchools(),
-    roomsController.getSchoolRoomsUsage(id, 1, 0, 100),
+    roomsController.getRoomUsageById(id, roomId),
   ]);
 
   const school = schools.find((entry) => entry.id === id);
   if (!school) notFound();
 
-  const room = paginatedRooms.rows.find((entry) => entry.id === roomId);
   if (!room) notFound();
 
   return (

@@ -15,6 +15,7 @@ import { GetAttachmentsUsecase } from "@/db/usecase/attachments/get_attachments.
 import { RoomsController } from "@/db/controller/rooms/rooms.controller";
 import { RoomsService } from "@/db/service/rooms.service";
 import { GetSchoolRoomsUsageUsecase } from "@/db/usecase/rooms/get_school_rooms_usage.usecase";
+import { GetRoomUsageByIdUsecase } from "@/db/usecase/rooms/get_room_usage_by_id.usecase";
 
 import { GetPromptLogsUsecase } from "@/db/usecase/prompts/get_ai_prompts.usecase";
 import { GetSchoolPromptLogsUsecase } from "@/db/usecase/prompts/get_school_ai_prompts.usecase";
@@ -81,7 +82,10 @@ export async function createRoomsController(): Promise<RoomsController> {
             redirect("/login");
         }
         return new RoomsController(
-            new RoomsService(new GetSchoolRoomsUsageUsecase()),
+            new RoomsService(
+                new GetSchoolRoomsUsageUsecase(),
+                new GetRoomUsageByIdUsecase(),
+            ),
         );
     } catch (error) {
         console.error(error);
