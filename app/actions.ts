@@ -6,8 +6,6 @@ import { GetSchoolsUsageViewUsecase } from "@/db/usecase/schools/get_schools_usa
 import { UsersController } from "@/db/controller/users/users.controller";
 import { UserService } from "@/db/service/user.service";
 import { GetUserByCredsUsecase } from "@/db/usecase/user/get_user_by_creds.usecase";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import { UpdateSchoolConfigurationUsecase } from "@/db/usecase/schools/update_school_configuration.usecase";
 import { CreateSchoolUsecase } from "@/db/usecase/schools/create_school.usecase";
 import { AttachmentsController } from "@/db/controller/attachments/attachments.controller";
@@ -27,107 +25,61 @@ import { AiModelsService } from "@/db/service/ai-models.service";
 import { GetAiModelsUsecase } from "@/db/usecase/ai-models/get_ai_models.usecase";
 import { CreateAiModelUsecase } from "@/db/usecase/ai-models/create_ai_model.usecase";
 import { UpdateAiModelUsecase } from "@/db/usecase/ai-models/update_ai_model.usecase";
+import { requireDashboardAccess } from "@/lib/auth/require-dashboard-access";
 
 export async function createSchoolsController(): Promise<SchoolsController> {
-    try {
-        const session = await auth();
-        if (!session?.user) {
-            redirect("/login");
-        }
-        return new SchoolsController(
-            new SchoolsService(
-                new GetAllSchoolsUsecase(),
-                new GetSchoolsUsageViewUsecase(),
-                new UpdateSchoolConfigurationUsecase(),
-                new CreateSchoolUsecase(),
-            ),
-        );
-    } catch (error) {
-        console.error(error);
-        throw new Error("Failed to create schools controller");
-    }
+    await requireDashboardAccess();
+    return new SchoolsController(
+        new SchoolsService(
+            new GetAllSchoolsUsecase(),
+            new GetSchoolsUsageViewUsecase(),
+            new UpdateSchoolConfigurationUsecase(),
+            new CreateSchoolUsecase(),
+        ),
+    );
 }
+
 export async function createUsersController(): Promise<UsersController> {
-    try {
-        const session = await auth();
-        if (!session?.user) {
-            redirect("/login");
-        }
-        return new UsersController(
-            new UserService(new GetUserByCredsUsecase()),
-        );
-    } catch (error) {
-        console.error(error);
-        throw new Error("Failed to create users controller");
-    }
+    await requireDashboardAccess();
+    return new UsersController(
+        new UserService(new GetUserByCredsUsecase()),
+    );
 }
 
 export async function createAttachmentsController(): Promise<AttachmentsController> {
-    try {
-        const session = await auth();
-        if (!session?.user) {
-            redirect("/login");
-        }
-        return new AttachmentsController(
-            new AttachmentsService(new GetAttachmentsUsecase()),
-        );
-    } catch (error) {
-        console.error(error);
-        throw new Error("Failed to create attachments controller");
-    }
+    await requireDashboardAccess();
+    return new AttachmentsController(
+        new AttachmentsService(new GetAttachmentsUsecase()),
+    );
 }
 
 export async function createRoomsController(): Promise<RoomsController> {
-    try {
-        const session = await auth();
-        if (!session?.user) {
-            redirect("/login");
-        }
-        return new RoomsController(
-            new RoomsService(
-                new GetSchoolRoomsUsageUsecase(),
-                new GetRoomUsageByIdUsecase(),
-            ),
-        );
-    } catch (error) {
-        console.error(error);
-        throw new Error("Failed to create rooms controller");
-    }
+    await requireDashboardAccess();
+    return new RoomsController(
+        new RoomsService(
+            new GetSchoolRoomsUsageUsecase(),
+            new GetRoomUsageByIdUsecase(),
+        ),
+    );
 }
 
 export async function createAiPromptsController(): Promise<AiPromptsController> {
-    try {
-        const session = await auth();
-        if (!session?.user) {
-            redirect("/login");
-        }
-        return new AiPromptsController(
-            new AiPromptsService(
-                new GetPromptLogsUsecase(),
-                new GetSchoolPromptLogsUsecase(),
-            ),
-        );
-    } catch (error) {
-        console.error(error);
-        throw new Error("Failed to create ai prompts controller");
-    }
+    await requireDashboardAccess();
+    return new AiPromptsController(
+        new AiPromptsService(
+            new GetPromptLogsUsecase(),
+            new GetSchoolPromptLogsUsecase(),
+        ),
+    );
 }
 
 export async function createAiModelsController(): Promise<AiModelsController> {
-    try {
-        const session = await auth();
-        if (!session?.user) {
-            redirect("/login");
-        }
-        return new AiModelsController(
-            new AiModelsService(
-                new GetAiModelsUsecase(),
-                new CreateAiModelUsecase(),
-                new UpdateAiModelUsecase(),
-            ),
-        );
-    } catch (error) {
-        console.error(error);
-        throw new Error("Failed to create ai models controller");
-    }
+    await requireDashboardAccess();
+    return new AiModelsController(
+        new AiModelsService(
+            new GetAiModelsUsecase(),
+            new CreateAiModelUsecase(),
+            new UpdateAiModelUsecase(),
+        ),
+    );
 }
