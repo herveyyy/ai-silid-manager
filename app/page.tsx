@@ -5,7 +5,7 @@ export default function Home() {
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <div className="theme-grid pointer-events-none absolute inset-0 opacity-[0.85]" />
       <div className="pointer-events-none absolute left-6 top-6 font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted)">
-        SILID LMS // ADMIN NETWORK
+        SILID LMS // SCHOOLS
       </div>
       <div className="pointer-events-none absolute right-6 top-6 font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted)">
         STATUS // ACTIVE
@@ -21,28 +21,21 @@ export default function Home() {
               <h1 className="max-w-4xl text-4xl font-bold uppercase leading-tight tracking-[0.14em] sm:text-5xl lg:text-6xl">
                 Silid LMS
                 <br />
-                <span className="text-(--accent)">Admin Control Surface</span>
+                <span className="text-(--accent)">Teaching &amp; learning</span>
               </h1>
               <p className="max-w-2xl font-mono text-[13px] leading-7 text-(--muted)">
-                Centralized oversight for the SILID LMS platform across schools,
-                storage consumption, AI token usage, and tenant limits. Built for
-                fast operations with a dark-first interface and a soft brown light
-                mode when needed.
+                A platform for Philippine schools: classroom workflows, Silid-AI
+                tools aligned with DepEd needs, and a calm interface that works
+                in dark or soft light mode.
               </p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
-                href="/login"
+                href="/school-plans"
                 className="theme-button inline-flex items-center justify-center border px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.28em] transition-colors"
               >
-                Open Admin Access
-              </Link>
-              <Link
-                href="/dashboard"
-                className="theme-button-secondary inline-flex items-center justify-center border px-6 py-3 text-[11px] font-semibold uppercase tracking-[0.28em] transition-colors"
-              >
-                View Dashboard
+                School plans · Silid-AI
               </Link>
             </div>
 
@@ -55,7 +48,7 @@ export default function Home() {
                   Schools
                 </p>
                 <p className="mt-2 font-mono text-[11px] leading-6 text-(--muted)">
-                  Registry and tenant overview across the full fleet.
+                  Organize campuses, sections, and classes in one place.
                 </p>
               </div>
               <div className="theme-panel-strong border p-5">
@@ -66,7 +59,7 @@ export default function Home() {
                   Storage
                 </p>
                 <p className="mt-2 font-mono text-[11px] leading-6 text-(--muted)">
-                  Track attachment load, soft deletes, and quota pressure.
+                  Keep learning materials and uploads easy to find and manage.
                 </p>
               </div>
               <div className="theme-panel-strong border p-5">
@@ -77,7 +70,7 @@ export default function Home() {
                   AI
                 </p>
                 <p className="mt-2 font-mono text-[11px] leading-6 text-(--muted)">
-                  Inspect prompt activity, token spend, and model usage.
+                  Silid-AI assists teachers and students with everyday tasks.
                 </p>
               </div>
             </div>
@@ -86,10 +79,10 @@ export default function Home() {
           <section className="theme-panel theme-inset-shadow border p-6 sm:p-8">
             <div className="border-b pb-5" style={{ borderColor: "var(--border)" }}>
               <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-(--muted)">
-                OPS SNAPSHOT
+                AT A GLANCE
               </p>
               <p className="mt-3 text-xl font-bold uppercase tracking-[0.14em]">
-                Command Summary
+                Platform snapshot
               </p>
             </div>
 
@@ -104,7 +97,7 @@ export default function Home() {
                 <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
                   Access model
                 </p>
-                <p className="mt-2 font-mono text-3xl text-(--success)">AUTH READY</p>
+                <p className="mt-2 font-mono text-3xl text-(--success)">SECURE</p>
               </div>
               <div className="theme-panel-strong border p-4">
                 <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
@@ -116,9 +109,9 @@ export default function Home() {
 
             <div className="mt-6 border-t pt-5" style={{ borderColor: "var(--border)" }}>
               <p className="font-mono text-[11px] leading-6 text-(--muted)">
-                Use the theme toggle to switch between the default dark console
-                and the soft brown light mode. Continue to login for secured
-                access, or open the dashboard directly while developing.
+                Staff sign in through the URL your school provides—there is no
+                public sign-in link here. Use the theme toggle where available for
+                dark or soft brown light mode.
               </p>
             </div>
           </section>

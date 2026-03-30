@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AdminShell } from "@/components/organisms/admin-shell";
 import { db } from "@/db";
+import { requireDashboardAccess } from "@/lib/auth/require-dashboard-access";
 import { sql } from "drizzle-orm";
 
 export const metadata: Metadata = {
@@ -37,6 +38,8 @@ async function getDatabaseConnectionStatus(): Promise<boolean> {
 export default async function DashboardLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  await requireDashboardAccess();
+
   const [environmentLabel, isDatabaseConnected] = await Promise.all([
     Promise.resolve(getEnvironmentLabel()),
     getDatabaseConnectionStatus(),

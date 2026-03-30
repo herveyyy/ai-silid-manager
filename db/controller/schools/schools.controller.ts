@@ -1,6 +1,7 @@
 import { SchoolsService } from "@/db/service/schools.service";
 import { ISchools } from "./schools.interface";
 import type {
+    CreateSchoolPayload,
     PaginatedSchoolUsageViewDTO,
     SchoolDTO,
     SchoolUsageViewDTO,
@@ -38,5 +39,9 @@ export class SchoolsController implements ISchools {
             schoolId,
             data,
         );
+    }
+
+    async createSchool(data: CreateSchoolPayload): Promise<SchoolDTO> {
+        return await this.schoolsService.createSchool(data);
     }
 }
