@@ -19,6 +19,15 @@ export type School = SelectSchool & {
 };
 export type SchoolDTO = Omit<School, "password" | "secret" | "apiKey">;
 
+/** Values ready for DB insert (password is stored hashed when set). */
+export type CreateSchoolPayload = {
+    name: string;
+    schoolCode: string;
+    site: string;
+    username: string | null;
+    password: string | null;
+};
+
 export type SelectRoom = typeof classrooms.$inferSelect;
 export type RoomDTO = SelectRoom & {
     sectionName: string | null;

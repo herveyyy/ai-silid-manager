@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AdminPanel } from "@/components/molecules/admin-panel";
+import { AddSchoolModal } from "@/components/organisms/add-school-modal";
 import { SchoolsFleetTable } from "@/components/organisms/schools-fleet-table";
 import { createSchoolsController } from "@/app/actions";
 
@@ -78,6 +79,7 @@ export default async function SchoolsListPage({
         title="All schools"
         subtitle="Usage report by school · limits from schools table"
       >
+        <AddSchoolModal />
         <SchoolsFleetTable rows={rows} paginatedSchools={paginatedReport} />
       </AdminPanel>
 

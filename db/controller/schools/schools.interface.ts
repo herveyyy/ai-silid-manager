@@ -1,5 +1,6 @@
 import { StoredSchoolConfig } from "@/lib/school-config-storage";
 import {
+    CreateSchoolPayload,
     PaginatedSchoolUsageViewDTO,
     SchoolDTO,
     SchoolUsageViewDTO,
@@ -17,4 +18,5 @@ export interface ISchools {
         schoolId: string,
         data: StoredSchoolConfig,
     ): Promise<void>;
+    createSchool(data: CreateSchoolPayload): Promise<SchoolDTO>;
 }
