@@ -43,16 +43,10 @@ export default function NotFound() {
               Home
             </Link>
             <Link
-              href="/dashboard"
+              href="/school-plans"
               className="theme-button-secondary inline-flex items-center justify-center border px-5 py-2.5 text-center font-mono text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors"
             >
-              Dashboard
-            </Link>
-            <Link
-              href="/login"
-              className="theme-link inline-flex items-center justify-center px-2 py-2.5 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted-strong) underline underline-offset-2"
-            >
-              Sign in
+              School plans
             </Link>
           </div>
         </div>
