@@ -3,6 +3,7 @@ import {
     PaginatedSchoolUsageViewDTO,
     SchoolDTO,
     SchoolUsageViewDTO,
+    UpdateSchoolProfilePayload,
 } from "@/lib/types/admin-types";
 import { GetAllSchoolsUsecase } from "../usecase/schools/get_all_schools.usecase";
 import { GetSchoolsUsageViewUsecase } from "../usecase/schools/get_schools_usage_view.usecase";
@@ -10,6 +11,7 @@ import { StoredSchoolConfig } from "@/lib/school-config-storage";
 import { UpdateSchoolConfigurationUsecase } from "../usecase/schools/update_school_configuration.usecase";
 import { CreateSchoolUsecase } from "../usecase/schools/create_school.usecase";
 import { UpdateSchoolPasswordUsecase } from "../usecase/schools/update_school_password.usecase";
+import { UpdateSchoolProfileUsecase } from "../usecase/schools/update_school_profile.usecase";
 
 export class SchoolsService {
     constructor(
@@ -18,6 +20,7 @@ export class SchoolsService {
         private readonly updateSchoolConfigurationUsecase: UpdateSchoolConfigurationUsecase,
         private readonly createSchoolUsecase: CreateSchoolUsecase,
         private readonly updateSchoolPasswordUsecase: UpdateSchoolPasswordUsecase,
+        private readonly updateSchoolProfileUsecase: UpdateSchoolProfileUsecase,
     ) {}
 
     async getAllSchools(): Promise<SchoolDTO[]> {
@@ -62,5 +65,12 @@ export class SchoolsService {
             schoolId,
             password,
         );
+    }
+
+    async updateSchoolProfile(
+        schoolId: string,
+        data: UpdateSchoolProfilePayload,
+    ): Promise<void> {
+        return await this.updateSchoolProfileUsecase.execute(schoolId, data);
     }
 }

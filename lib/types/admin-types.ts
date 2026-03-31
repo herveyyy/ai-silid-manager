@@ -33,6 +33,14 @@ export type CreateSchoolPayload = {
     apiKey: string | null;
 };
 
+/** Updatable registry fields on `schools` (excludes password — use password action). */
+export type UpdateSchoolProfilePayload = {
+    name: string;
+    schoolCode: string;
+    site: string;
+    username: string | null;
+};
+
 export type SelectRoom = typeof classrooms.$inferSelect;
 export type RoomDTO = SelectRoom & {
     sectionName: string | null;

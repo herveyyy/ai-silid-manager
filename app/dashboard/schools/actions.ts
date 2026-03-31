@@ -6,6 +6,10 @@ import { revalidatePath } from "next/cache";
 const SCHOOL_SECRET_MAX = 100;
 const SCHOOL_API_KEY_MAX = 100;
 const SCHOOL_PASSWORD_MAX = 100;
+const SCHOOL_CODE_MAX = 50;
+const USERNAME_MAX = 100;
+const NAME_MAX = 500;
+const SITE_MAX = 2000;
 
 export async function updateSchoolConfigurationAction(
     schoolId: string,
@@ -86,6 +90,71 @@ export async function updateSchoolConfigurationAction(
     }
 }
 
+export async function updateSchoolProfileAction(
+    schoolId: string,
+    form: {
+        name: string;
+        schoolCode: string;
+        site: string;
+        username?: string;
+    },
+): Promise<{ success: boolean; message: string }> {
+    const name = form.name.trim();
+    const schoolCode = form.schoolCode.trim();
+    const site = form.site.trim();
+    const usernameRaw = form.username?.trim() ?? "";
+
+    if (!schoolId) {
+        return { success: false, message: "Missing school." };
+    }
+    if (!name || name.length > NAME_MAX) {
+        return {
+            success: false,
+            message: "Name is required (max 500 characters).",
+        };
+    }
+    if (!schoolCode || schoolCode.length > SCHOOL_CODE_MAX) {
+        return {
+            success: false,
+            message: `School code is required (max ${SCHOOL_CODE_MAX} characters).`,
+        };
+    }
+    if (!site || site.length > SITE_MAX) {
+        return {
+            success: false,
+            message: `Site URL or label is required (max ${SITE_MAX} characters).`,
+        };
+    }
+    if (usernameRaw.length > USERNAME_MAX) {
+        return {
+            success: false,
+            message: `Username must be at most ${USERNAME_MAX} characters.`,
+        };
+    }
+
+    const username = usernameRaw === "" ? null : usernameRaw;
+
+    try {
+        const schoolsController = await createSchoolsController();
+        await schoolsController.updateSchoolProfile(schoolId, {
+            name,
+            schoolCode,
+            site,
+            username,
+        });
+        revalidatePath("/dashboard");
+        revalidatePath("/dashboard/schools");
+        revalidatePath(`/dashboard/schools/${schoolId}`);
+        return { success: true, message: "School info saved." };
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            message: "Failed to save school info.",
+        };
+    }
+}
+
 export async function updateSchoolPasswordAction(
     schoolId: string,
     form:
@@ -138,11 +207,6 @@ export async function updateSchoolPasswordAction(
         };
     }
 }
-
-const SCHOOL_CODE_MAX = 50;
-const USERNAME_MAX = 100;
-const NAME_MAX = 500;
-const SITE_MAX = 2000;
 
 export async function createSchoolAction(form: {
     name: string;

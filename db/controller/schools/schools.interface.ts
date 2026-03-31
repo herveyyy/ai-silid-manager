@@ -4,6 +4,7 @@ import {
     PaginatedSchoolUsageViewDTO,
     SchoolDTO,
     SchoolUsageViewDTO,
+    UpdateSchoolProfilePayload,
 } from "@/lib/types/admin-types";
 
 export interface ISchools {
@@ -22,5 +23,9 @@ export interface ISchools {
     updateSchoolPassword(
         schoolId: string,
         password: string | null,
+    ): Promise<void>;
+    updateSchoolProfile(
+        schoolId: string,
+        data: UpdateSchoolProfilePayload,
     ): Promise<void>;
 }

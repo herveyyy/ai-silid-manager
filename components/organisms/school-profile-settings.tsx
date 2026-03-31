@@ -15,6 +15,7 @@ import { formatBytes } from "@/lib/admin-mock-data";
 import {
   updateSchoolConfigurationAction,
   updateSchoolPasswordAction,
+  updateSchoolProfileAction,
 } from "@/app/dashboard/schools/actions";
 
 function bytesToGb(n: number): string {
@@ -72,6 +73,13 @@ export function SchoolProfileSettings({
   const [pwdError, setPwdError] = useState<string | null>(null);
   const [pwdSavedFlash, setPwdSavedFlash] = useState(false);
   const [isPwdPending, startPwdTransition] = useTransition();
+  const [nameInput, setNameInput] = useState(school.name);
+  const [schoolCodeInput, setSchoolCodeInput] = useState(school.schoolCode);
+  const [siteInput, setSiteInput] = useState(school.site);
+  const [usernameInput, setUsernameInput] = useState(school.username ?? "");
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileSavedFlash, setProfileSavedFlash] = useState(false);
+  const [isProfilePending, startProfileTransition] = useTransition();
   useEffect(() => {
     const o = readQuotaOverride(school.id);
     const base = o ? { ...metrics, ...o } : metrics;
@@ -89,6 +97,10 @@ export function SchoolProfileSettings({
       setStorageLimitInput(String(school.storageLimit));
       setApiKeyInput(school.apiKey ?? "");
       setSecretInput(school.secret ?? "");
+      setNameInput(school.name);
+      setSchoolCodeInput(school.schoolCode);
+      setSiteInput(school.site);
+      setUsernameInput(school.username ?? "");
     }, 0);
   }, [school, metrics]);
 
@@ -232,6 +244,33 @@ export function SchoolProfileSettings({
     });
   }, [router, school.id]);
 
+  const applyProfileSave = useCallback(() => {
+    setProfileError(null);
+    startProfileTransition(async () => {
+      const result = await updateSchoolProfileAction(school.id, {
+        name: nameInput,
+        schoolCode: schoolCodeInput,
+        site: siteInput,
+        username: usernameInput,
+      });
+      if (!result.success) {
+        setProfileSavedFlash(false);
+        setProfileError(result.message);
+        return;
+      }
+      setProfileSavedFlash(true);
+      window.setTimeout(() => setProfileSavedFlash(false), 2200);
+      router.refresh();
+    });
+  }, [
+    nameInput,
+    router,
+    school.id,
+    schoolCodeInput,
+    siteInput,
+    usernameInput,
+  ]);
+
   return (
     <div className="space-y-8">
       <div className="theme-panel-strong border p-5">
@@ -241,25 +280,87 @@ export function SchoolProfileSettings({
         <h2 className="mt-2 text-lg font-bold uppercase tracking-[0.12em] text-foreground">
           {school.name}
         </h2>
-        <dl className="mt-4 grid gap-3 font-mono text-[12px] sm:grid-cols-2">
-          <div className="flex justify-between gap-4 border-b py-2" style={{ borderColor: "var(--border)" }}>
-            <dt className="text-(--muted)">school_code</dt>
-            <dd className="text-(--muted-strong)">{school.schoolCode}</dd>
+
+        <div
+          className="mt-6 border-t pt-5"
+          style={{ borderColor: "var(--border)" }}
+        >
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted)">
+            Edit school info
+          </p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <label className="block font-mono text-[11px] uppercase tracking-[0.12em] text-(--muted-strong)">
+              Name
+              <input
+                type="text"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                maxLength={500}
+                className="theme-input mt-2 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+              />
+            </label>
+            <label className="block font-mono text-[11px] uppercase tracking-[0.12em] text-(--muted-strong)">
+              School code
+              <input
+                type="text"
+                value={schoolCodeInput}
+                onChange={(e) => setSchoolCodeInput(e.target.value)}
+                maxLength={50}
+                className="theme-input mt-2 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+              />
+            </label>
+            <label className="block font-mono text-[11px] uppercase tracking-[0.12em] text-(--muted-strong) sm:col-span-2">
+              Site
+              <input
+                type="text"
+                value={siteInput}
+                onChange={(e) => setSiteInput(e.target.value)}
+                maxLength={2000}
+                className="theme-input mt-2 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+              />
+            </label>
+            <label className="block font-mono text-[11px] uppercase tracking-[0.12em] text-(--muted-strong) sm:col-span-2">
+              Username{" "}
+              <span className="normal-case tracking-normal text-(--muted)">
+                (optional)
+              </span>
+              <input
+                type="text"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                maxLength={100}
+                autoComplete="off"
+                className="theme-input mt-2 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+              />
+            </label>
           </div>
-          <div className="flex justify-between gap-4 border-b py-2" style={{ borderColor: "var(--border)" }}>
-            <dt className="text-(--muted)">username</dt>
-            <dd className="text-(--muted-strong)">{school.username ?? "—"}</dd>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              onClick={applyProfileSave}
+              disabled={isProfilePending}
+              className="theme-button border px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors disabled:opacity-50"
+            >
+              {isProfilePending ? "Saving…" : "Save school info"}
+            </button>
+            {profileSavedFlash ? (
+              <span className="font-mono text-[11px] text-(--success)">
+                Saved
+              </span>
+            ) : null}
+            {profileError ? (
+              <span className="font-mono text-[11px] text-(--danger)">
+                {profileError}
+              </span>
+            ) : null}
           </div>
+        </div>
+
+        <dl className="mt-6 grid gap-3 font-mono text-[12px] sm:grid-cols-2">
           <div className="flex justify-between gap-4 border-b py-2" style={{ borderColor: "var(--border)" }}>
             <dt className="text-(--muted)">password</dt>
             <dd className="text-(--muted-strong)">
               {school.passwordCredentialSet ? "Set (plain text)" : "Not set"}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-4 border-b py-2 sm:col-span-2" style={{ borderColor: "var(--border)" }}>
-            <dt className="text-(--muted)">site</dt>
-            <dd className="truncate text-right text-(--success)" title={school.site}>
-              {school.site}
             </dd>
           </div>
           <div className="flex justify-between gap-4 border-b py-2 sm:col-span-2" style={{ borderColor: "var(--border)" }}>

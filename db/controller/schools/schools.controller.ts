@@ -5,6 +5,7 @@ import type {
     PaginatedSchoolUsageViewDTO,
     SchoolDTO,
     SchoolUsageViewDTO,
+    UpdateSchoolProfilePayload,
 } from "@/lib/types/admin-types";
 import { StoredSchoolConfig } from "@/lib/school-config-storage";
 
@@ -53,5 +54,12 @@ export class SchoolsController implements ISchools {
             schoolId,
             password,
         );
+    }
+
+    async updateSchoolProfile(
+        schoolId: string,
+        data: UpdateSchoolProfilePayload,
+    ): Promise<void> {
+        return await this.schoolsService.updateSchoolProfile(schoolId, data);
     }
 }
