@@ -1,9 +1,12 @@
 "use server";
 
 import { createSchoolsController } from "@/app/actions";
-import { hashPassword } from "@/lib/auth/password";
 import { StoredSchoolConfig } from "@/lib/school-config-storage";
 import { revalidatePath } from "next/cache";
+const SCHOOL_SECRET_MAX = 100;
+const SCHOOL_API_KEY_MAX = 100;
+const SCHOOL_PASSWORD_MAX = 100;
+
 export async function updateSchoolConfigurationAction(
     schoolId: string,
     data: StoredSchoolConfig,
@@ -15,6 +18,30 @@ export async function updateSchoolConfigurationAction(
         data.defaultAiModelId.trim() !== ""
             ? data.defaultAiModelId
             : null;
+
+    const secretRaw =
+        data.secret != null && typeof data.secret === "string"
+            ? data.secret.trim()
+            : "";
+    const apiKeyRaw =
+        data.apiKey != null && typeof data.apiKey === "string"
+            ? data.apiKey.trim()
+            : "";
+    const secret = secretRaw === "" ? null : secretRaw;
+    const apiKey = apiKeyRaw === "" ? null : apiKeyRaw;
+
+    if (secret !== null && secret.length > SCHOOL_SECRET_MAX) {
+        return {
+            success: false,
+            message: `Secret must be at most ${SCHOOL_SECRET_MAX} characters.`,
+        };
+    }
+    if (apiKey !== null && apiKey.length > SCHOOL_API_KEY_MAX) {
+        return {
+            success: false,
+            message: `API key must be at most ${SCHOOL_API_KEY_MAX} characters.`,
+        };
+    }
 
     if (
         !schoolId ||
@@ -38,6 +65,8 @@ export async function updateSchoolConfigurationAction(
             unlimitedToken: Boolean(data.unlimitedToken),
             tokenLimit: Math.floor(tokenLimit),
             storageLimit: Math.floor(storageLimit),
+            secret,
+            apiKey,
         });
 
         revalidatePath("/dashboard");
@@ -57,6 +86,59 @@ export async function updateSchoolConfigurationAction(
     }
 }
 
+export async function updateSchoolPasswordAction(
+    schoolId: string,
+    form:
+        | { removeCredential: true }
+        | { newPassword: string; confirmPassword: string },
+): Promise<{ success: boolean; message: string }> {
+    if (!schoolId) {
+        return { success: false, message: "Missing school." };
+    }
+
+    try {
+        const schoolsController = await createSchoolsController();
+
+        if ("removeCredential" in form) {
+            await schoolsController.updateSchoolPassword(schoolId, null);
+            revalidatePath("/dashboard");
+            revalidatePath("/dashboard/schools");
+            revalidatePath(`/dashboard/schools/${schoolId}`);
+            return { success: true, message: "Stored password removed." };
+        }
+
+        const { newPassword, confirmPassword } = form;
+        if (newPassword.length < 8) {
+            return {
+                success: false,
+                message: "New password must be at least 8 characters.",
+            };
+        }
+        if (newPassword !== confirmPassword) {
+            return { success: false, message: "Passwords do not match." };
+        }
+
+        if (newPassword.length > SCHOOL_PASSWORD_MAX) {
+            return {
+                success: false,
+                message: `Password must be at most ${SCHOOL_PASSWORD_MAX} characters.`,
+            };
+        }
+
+        await schoolsController.updateSchoolPassword(schoolId, newPassword);
+        revalidatePath("/dashboard");
+        revalidatePath("/dashboard/schools");
+        revalidatePath(`/dashboard/schools/${schoolId}`);
+        return { success: true, message: "Password updated." };
+    } catch (error) {
+        console.error(error);
+        return {
+            success: false,
+            message: "Failed to update school password.",
+        };
+    }
+}
+
 const SCHOOL_CODE_MAX = 50;
 const USERNAME_MAX = 100;
 const NAME_MAX = 500;
@@ -68,12 +150,18 @@ export async function createSchoolAction(form: {
     site: string;
     username?: string;
     password?: string;
+    secret?: string;
+    apiKey?: string;
 }): Promise<{ success: boolean; message: string; schoolId?: string }> {
     const name = form.name.trim();
     const schoolCode = form.schoolCode.trim();
     const site = form.site.trim();
     const usernameRaw = form.username?.trim() ?? "";
     const passwordRaw = form.password ?? "";
+    const secretRaw = (form.secret ?? "").trim();
+    const apiKeyRaw = (form.apiKey ?? "").trim();
+    const secret = secretRaw === "" ? null : secretRaw;
+    const apiKey = apiKeyRaw === "" ? null : apiKeyRaw;
 
     if (!name || name.length > NAME_MAX) {
         return {
@@ -105,12 +193,28 @@ export async function createSchoolAction(form: {
             message: "Password must be at least 8 characters when set.",
         };
     }
+    if (passwordRaw.length > SCHOOL_PASSWORD_MAX) {
+        return {
+            success: false,
+            message: `Password must be at most ${SCHOOL_PASSWORD_MAX} characters.`,
+        };
+    }
+    if (secret !== null && secret.length > SCHOOL_SECRET_MAX) {
+        return {
+            success: false,
+            message: `Secret must be at most ${SCHOOL_SECRET_MAX} characters.`,
+        };
+    }
+    if (apiKey !== null && apiKey.length > SCHOOL_API_KEY_MAX) {
+        return {
+            success: false,
+            message: `API key must be at most ${SCHOOL_API_KEY_MAX} characters.`,
+        };
+    }
 
     const username = usernameRaw === "" ? null : usernameRaw;
-    let password: string | null = null;
-    if (passwordRaw !== "") {
-        password = await hashPassword(passwordRaw);
-    }
+    const password =
+        passwordRaw === "" ? null : passwordRaw;
 
     try {
         const schoolsController = await createSchoolsController();
@@ -120,6 +224,8 @@ export async function createSchoolAction(form: {
             site,
             username,
             password,
+            secret,
+            apiKey,
         });
 
         revalidatePath("/dashboard");

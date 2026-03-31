@@ -9,6 +9,7 @@ import { GetSchoolsUsageViewUsecase } from "../usecase/schools/get_schools_usage
 import { StoredSchoolConfig } from "@/lib/school-config-storage";
 import { UpdateSchoolConfigurationUsecase } from "../usecase/schools/update_school_configuration.usecase";
 import { CreateSchoolUsecase } from "../usecase/schools/create_school.usecase";
+import { UpdateSchoolPasswordUsecase } from "../usecase/schools/update_school_password.usecase";
 
 export class SchoolsService {
     constructor(
@@ -16,6 +17,7 @@ export class SchoolsService {
         private readonly getSchoolsUsageViewUsecase: GetSchoolsUsageViewUsecase,
         private readonly updateSchoolConfigurationUsecase: UpdateSchoolConfigurationUsecase,
         private readonly createSchoolUsecase: CreateSchoolUsecase,
+        private readonly updateSchoolPasswordUsecase: UpdateSchoolPasswordUsecase,
     ) {}
 
     async getAllSchools(): Promise<SchoolDTO[]> {
@@ -50,5 +52,15 @@ export class SchoolsService {
 
     async createSchool(data: CreateSchoolPayload): Promise<SchoolDTO> {
         return await this.createSchoolUsecase.execute(data);
+    }
+
+    async updateSchoolPassword(
+        schoolId: string,
+        password: string | null,
+    ): Promise<void> {
+        return await this.updateSchoolPasswordUsecase.execute(
+            schoolId,
+            password,
+        );
     }
 }

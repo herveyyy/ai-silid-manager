@@ -17,15 +17,20 @@ export type School = SelectSchool & {
     tokenLimit: number;
     storageLimit: number;
 };
-export type SchoolDTO = Omit<School, "password" | "secret" | "apiKey">;
+export type SchoolDTO = Omit<School, "password"> & {
+    /** True when a password value is stored; the value is never sent to the client. */
+    passwordCredentialSet: boolean;
+};
 
-/** Values ready for DB insert (password is stored hashed when set). */
+/** Values ready for DB insert (school password stored as plain text when set). */
 export type CreateSchoolPayload = {
     name: string;
     schoolCode: string;
     site: string;
     username: string | null;
     password: string | null;
+    secret: string | null;
+    apiKey: string | null;
 };
 
 export type SelectRoom = typeof classrooms.$inferSelect;

@@ -8,6 +8,7 @@ import { UserService } from "@/db/service/user.service";
 import { GetUserByCredsUsecase } from "@/db/usecase/user/get_user_by_creds.usecase";
 import { UpdateSchoolConfigurationUsecase } from "@/db/usecase/schools/update_school_configuration.usecase";
 import { CreateSchoolUsecase } from "@/db/usecase/schools/create_school.usecase";
+import { UpdateSchoolPasswordUsecase } from "@/db/usecase/schools/update_school_password.usecase";
 import { AttachmentsController } from "@/db/controller/attachments/attachments.controller";
 import { AttachmentsService } from "@/db/service/attachments.service";
 import { GetAttachmentsUsecase } from "@/db/usecase/attachments/get_attachments.usecase";
@@ -35,6 +36,7 @@ export async function createSchoolsController(): Promise<SchoolsController> {
             new GetSchoolsUsageViewUsecase(),
             new UpdateSchoolConfigurationUsecase(),
             new CreateSchoolUsecase(),
+            new UpdateSchoolPasswordUsecase(),
         ),
     );
 }

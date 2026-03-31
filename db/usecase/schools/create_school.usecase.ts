@@ -15,6 +15,8 @@ export class CreateSchoolUsecase {
                     site: data.site,
                     username: data.username,
                     password: data.password,
+                    secret: data.secret,
+                    apiKey: data.apiKey,
                 })
                 .returning({
                     id: schools.id,
@@ -24,6 +26,8 @@ export class CreateSchoolUsecase {
                     site: schools.site,
                     createdAt: schools.createdAt,
                     updatedAt: schools.updatedAt,
+                    secret: schools.secret,
+                    apiKey: schools.apiKey,
                     aiFeat: schools.aiFeat,
                     unlimitedStorage: schools.unlimitedStorage,
                     unlimitedToken: schools.unlimitedToken,
@@ -36,7 +40,10 @@ export class CreateSchoolUsecase {
                 throw new Error("Insert returned no row");
             }
 
-            return row;
+            return {
+                ...row,
+                passwordCredentialSet: Boolean(data.password),
+            };
         } catch (error) {
             console.error(error);
             throw new Error("Failed to create school");

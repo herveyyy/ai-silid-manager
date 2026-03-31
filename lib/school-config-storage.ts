@@ -10,6 +10,8 @@ export type StoredSchoolConfig = Pick<
     | "unlimitedToken"
     | "tokenLimit"
     | "storageLimit"
+    | "secret"
+    | "apiKey"
 >;
 
 export function readSchoolConfigOverride(

@@ -12,6 +12,8 @@ export function AddSchoolModal() {
   const [site, setSite] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [apiKey, setApiKey] = useState("");
+  const [secret, setSecret] = useState("");
   const [feedback, setFeedback] = useState<{
     text: string;
     kind: "error" | "ok";
@@ -24,6 +26,8 @@ export function AddSchoolModal() {
     setSite("");
     setUsername("");
     setPassword("");
+    setApiKey("");
+    setSecret("");
     setFeedback(null);
   }, []);
 
@@ -65,6 +69,8 @@ export function AddSchoolModal() {
         site,
         username,
         password,
+        apiKey,
+        secret,
       });
       if (!result.success) {
         setFeedback({ text: result.message, kind: "error" });
@@ -191,14 +197,45 @@ export function AddSchoolModal() {
               <label className="block font-mono text-[11px] uppercase tracking-[0.12em] text-(--muted-strong)">
                 Password{" "}
                 <span className="normal-case tracking-normal text-(--muted)">
-                  (optional, min 8 if set — stored hashed)
+                  (optional, min 8 if set — stored as plain text)
                 </span>
                 <input
                   type="password"
                   name="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  maxLength={100}
                   autoComplete="new-password"
+                  className="theme-input mt-2 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+                />
+              </label>
+              <label className="block font-mono text-[11px] uppercase tracking-[0.12em] text-(--muted-strong)">
+                API key{" "}
+                <span className="normal-case tracking-normal text-(--muted)">
+                  (optional, max 100)
+                </span>
+                <input
+                  type="text"
+                  name="apiKey"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  maxLength={100}
+                  autoComplete="off"
+                  className="theme-input mt-2 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+                />
+              </label>
+              <label className="block font-mono text-[11px] uppercase tracking-[0.12em] text-(--muted-strong)">
+                Secret{" "}
+                <span className="normal-case tracking-normal text-(--muted)">
+                  (optional, max 100)
+                </span>
+                <input
+                  type="text"
+                  name="secret"
+                  value={secret}
+                  onChange={(e) => setSecret(e.target.value)}
+                  maxLength={100}
+                  autoComplete="off"
                   className="theme-input mt-2 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
                 />
               </label>

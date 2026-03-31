@@ -12,7 +12,10 @@ import {
   writeQuotaOverride,
 } from "@/lib/school-quota-storage";
 import { formatBytes } from "@/lib/admin-mock-data";
-import { updateSchoolConfigurationAction } from "@/app/dashboard/schools/actions";
+import {
+  updateSchoolConfigurationAction,
+  updateSchoolPasswordAction,
+} from "@/app/dashboard/schools/actions";
 
 function bytesToGb(n: number): string {
   return (n / (1024 * 1024 * 1024)).toFixed(2);
@@ -59,9 +62,16 @@ export function SchoolProfileSettings({
   const [storageLimitInput, setStorageLimitInput] = useState(
     String(school.storageLimit),
   );
+  const [apiKeyInput, setApiKeyInput] = useState(school.apiKey ?? "");
+  const [secretInput, setSecretInput] = useState(school.secret ?? "");
   const [configError, setConfigError] = useState<string | null>(null);
   const [configSavedFlash, setConfigSavedFlash] = useState(false);
   const [isConfigPending, startConfigTransition] = useTransition();
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [pwdError, setPwdError] = useState<string | null>(null);
+  const [pwdSavedFlash, setPwdSavedFlash] = useState(false);
+  const [isPwdPending, startPwdTransition] = useTransition();
   useEffect(() => {
     const o = readQuotaOverride(school.id);
     const base = o ? { ...metrics, ...o } : metrics;
@@ -77,6 +87,8 @@ export function SchoolProfileSettings({
       setUnlimitedToken(school.unlimitedToken);
       setTokenLimitInput(String(school.tokenLimit));
       setStorageLimitInput(String(school.storageLimit));
+      setApiKeyInput(school.apiKey ?? "");
+      setSecretInput(school.secret ?? "");
     }, 0);
   }, [school, metrics]);
 
@@ -118,6 +130,22 @@ export function SchoolProfileSettings({
       setConfigError("Enter valid non-negative numeric limits.");
       return;
     }
+    const apiKeyNorm = apiKeyInput.trim() === "" ? null : apiKeyInput.trim();
+    const secretNorm = secretInput.trim() === "" ? null : secretInput.trim();
+    if (
+      apiKeyNorm !== null &&
+      apiKeyNorm.length > 100
+    ) {
+      setConfigError("API key must be at most 100 characters.");
+      return;
+    }
+    if (
+      secretNorm !== null &&
+      secretNorm.length > 100
+    ) {
+      setConfigError("Secret must be at most 100 characters.");
+      return;
+    }
     setConfigError(null);
     startConfigTransition(async () => {
       const result = await updateSchoolConfigurationAction(school.id, {
@@ -127,6 +155,8 @@ export function SchoolProfileSettings({
         unlimitedToken,
         tokenLimit: Math.floor(tokenLimit),
         storageLimit: Math.floor(storageLimit),
+        apiKey: apiKeyNorm,
+        secret: secretNorm,
       });
 
       if (!result.success) {
@@ -137,20 +167,70 @@ export function SchoolProfileSettings({
 
       setTokenLimitInput(String(Math.floor(tokenLimit)));
       setStorageLimitInput(String(Math.floor(storageLimit)));
+      setApiKeyInput(apiKeyNorm ?? "");
+      setSecretInput(secretNorm ?? "");
       setConfigSavedFlash(true);
       window.setTimeout(() => setConfigSavedFlash(false), 2200);
       router.refresh();
     });
   }, [
     aiFeat,
+    apiKeyInput,
     defaultAiModelId,
     router,
     school.id,
+    secretInput,
     storageLimitInput,
     tokenLimitInput,
     unlimitedStorage,
     unlimitedToken,
   ]);
+
+  const applyPasswordUpdate = useCallback(() => {
+    setPwdError(null);
+    startPwdTransition(async () => {
+      const result = await updateSchoolPasswordAction(school.id, {
+        newPassword,
+        confirmPassword,
+      });
+      if (!result.success) {
+        setPwdSavedFlash(false);
+        setPwdError(result.message);
+        return;
+      }
+      setNewPassword("");
+      setConfirmPassword("");
+      setPwdSavedFlash(true);
+      window.setTimeout(() => setPwdSavedFlash(false), 2200);
+      router.refresh();
+    });
+  }, [confirmPassword, newPassword, router, school.id]);
+
+  const applyRemovePassword = useCallback(() => {
+    if (
+      !window.confirm(
+        "Remove the stored password for this school? Tenant login using this password will no longer work.",
+      )
+    ) {
+      return;
+    }
+    setPwdError(null);
+    startPwdTransition(async () => {
+      const result = await updateSchoolPasswordAction(school.id, {
+        removeCredential: true,
+      });
+      if (!result.success) {
+        setPwdSavedFlash(false);
+        setPwdError(result.message);
+        return;
+      }
+      setNewPassword("");
+      setConfirmPassword("");
+      setPwdSavedFlash(true);
+      window.setTimeout(() => setPwdSavedFlash(false), 2200);
+      router.refresh();
+    });
+  }, [router, school.id]);
 
   return (
     <div className="space-y-8">
@@ -170,10 +250,28 @@ export function SchoolProfileSettings({
             <dt className="text-(--muted)">username</dt>
             <dd className="text-(--muted-strong)">{school.username ?? "—"}</dd>
           </div>
+          <div className="flex justify-between gap-4 border-b py-2" style={{ borderColor: "var(--border)" }}>
+            <dt className="text-(--muted)">password</dt>
+            <dd className="text-(--muted-strong)">
+              {school.passwordCredentialSet ? "Set (plain text)" : "Not set"}
+            </dd>
+          </div>
           <div className="flex justify-between gap-4 border-b py-2 sm:col-span-2" style={{ borderColor: "var(--border)" }}>
             <dt className="text-(--muted)">site</dt>
             <dd className="truncate text-right text-(--success)" title={school.site}>
               {school.site}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-4 border-b py-2 sm:col-span-2" style={{ borderColor: "var(--border)" }}>
+            <dt className="text-(--muted)">api_key</dt>
+            <dd className="max-w-[min(100%,28rem)] break-all text-right text-(--muted-strong)">
+              {school.apiKey ?? "—"}
+            </dd>
+          </div>
+          <div className="flex justify-between gap-4 border-b py-2 sm:col-span-2" style={{ borderColor: "var(--border)" }}>
+            <dt className="text-(--muted)">secret</dt>
+            <dd className="max-w-[min(100%,28rem)] break-all text-right text-(--muted-strong)">
+              {school.secret ?? "—"}
             </dd>
           </div>
           <div className="flex justify-between gap-4 border-b py-2" style={{ borderColor: "var(--border)" }}>
@@ -191,6 +289,74 @@ export function SchoolProfileSettings({
             </dd>
           </div>
         </dl>
+
+        <div
+          className="mt-6 border-t pt-5"
+          style={{ borderColor: "var(--border)" }}
+        >
+          <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted)">
+            Login password (tenant)
+          </p>
+          <p className="mt-2 max-w-xl font-mono text-[11px] leading-relaxed text-(--muted)">
+            Stored as plain text in the database (max 100 characters). Not shown
+            again in this UI after save.
+          </p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <label className="block font-mono text-[11px] uppercase tracking-[0.12em] text-(--muted-strong)">
+              New password
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                maxLength={100}
+                autoComplete="new-password"
+                className="theme-input mt-2 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+                placeholder="Min 8 characters"
+              />
+            </label>
+            <label className="block font-mono text-[11px] uppercase tracking-[0.12em] text-(--muted-strong)">
+              Confirm new password
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                maxLength={100}
+                autoComplete="new-password"
+                className="theme-input mt-2 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+              />
+            </label>
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              onClick={applyPasswordUpdate}
+              disabled={isPwdPending}
+              className="theme-button-secondary border px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors disabled:opacity-50"
+            >
+              {isPwdPending ? "Saving…" : "Update password"}
+            </button>
+            {school.passwordCredentialSet ? (
+              <button
+                type="button"
+                onClick={applyRemovePassword}
+                disabled={isPwdPending}
+                className="border border-(--danger)/40 px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-(--danger) transition-colors hover:bg-(--danger)/10 disabled:opacity-50"
+              >
+                Remove stored password
+              </button>
+            ) : null}
+            {pwdSavedFlash ? (
+              <span className="font-mono text-[11px] text-(--success)">
+                Saved
+              </span>
+            ) : null}
+            {pwdError ? (
+              <span className="font-mono text-[11px] text-(--danger)">
+                {pwdError}
+              </span>
+            ) : null}
+          </div>
+        </div>
 
         <div
           className="mt-6 border-t pt-5"
@@ -304,6 +470,42 @@ export function SchoolProfileSettings({
                 value={storageLimitInput}
                 onChange={(e) => setStorageLimitInput(e.target.value)}
                 className="theme-input mt-3 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+              />
+            </div>
+
+            <div className="theme-panel border p-4 sm:col-span-2 xl:col-span-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
+                API key
+              </p>
+              <p className="mt-2 font-mono text-[11px] text-(--muted)">
+                Optional. Clear the field and save to remove. Max 100 characters.
+              </p>
+              <input
+                type="text"
+                value={apiKeyInput}
+                onChange={(e) => setApiKeyInput(e.target.value)}
+                maxLength={100}
+                autoComplete="off"
+                className="theme-input mt-3 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+                placeholder="—"
+              />
+            </div>
+
+            <div className="theme-panel border p-4 sm:col-span-2 xl:col-span-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
+                Secret
+              </p>
+              <p className="mt-2 font-mono text-[11px] text-(--muted)">
+                Optional. Clear the field and save to remove. Max 100 characters.
+              </p>
+              <input
+                type="text"
+                value={secretInput}
+                onChange={(e) => setSecretInput(e.target.value)}
+                maxLength={100}
+                autoComplete="off"
+                className="theme-input mt-3 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+                placeholder="—"
               />
             </div>
           </div>

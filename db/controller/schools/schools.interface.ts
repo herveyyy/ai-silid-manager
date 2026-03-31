@@ -19,4 +19,8 @@ export interface ISchools {
         data: StoredSchoolConfig,
     ): Promise<void>;
     createSchool(data: CreateSchoolPayload): Promise<SchoolDTO>;
+    updateSchoolPassword(
+        schoolId: string,
+        password: string | null,
+    ): Promise<void>;
 }

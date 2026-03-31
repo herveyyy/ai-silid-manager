@@ -44,4 +44,14 @@ export class SchoolsController implements ISchools {
     async createSchool(data: CreateSchoolPayload): Promise<SchoolDTO> {
         return await this.schoolsService.createSchool(data);
     }
+
+    async updateSchoolPassword(
+        schoolId: string,
+        password: string | null,
+    ): Promise<void> {
+        return await this.schoolsService.updateSchoolPassword(
+            schoolId,
+            password,
+        );
+    }
 }
