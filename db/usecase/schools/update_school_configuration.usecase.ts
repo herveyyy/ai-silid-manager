@@ -10,7 +10,16 @@ export class UpdateSchoolConfigurationUsecase {
         try {
             await this.db
                 .update(schools)
-                .set(data)
+                .set({
+                    aiFeat: data.aiFeat ? 1 : 0,
+                    unlimitedStorage: data.unlimitedStorage ? 1 : 0,
+                    unlimitedToken: data.unlimitedToken ? 1 : 0,
+                    tokenLimit: data.tokenLimit,
+                    storageLimit: data.storageLimit,
+                    secret: data.secret,
+                    apiKey: data.apiKey,
+                    defaultAiModelId: data.defaultAiModelId,
+                })
                 .where(eq(schools.id, schoolId));
         } catch (error) {
             console.error(error);

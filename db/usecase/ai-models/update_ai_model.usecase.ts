@@ -11,7 +11,7 @@ export class UpdateAiModelUsecase {
         data: AiModelMutationInput,
     ): Promise<AiModelDTO | null> {
         try {
-            const [row] = await this.db
+            await this.db
                 .update(aiModels)
                 .set({
                     name: data.name,
@@ -19,8 +19,11 @@ export class UpdateAiModelUsecase {
                     status: data.status,
                     updatedAt: sql`now()`,
                 })
-                .where(eq(aiModels.id, modelId))
-                .returning();
+                .where(eq(aiModels.id, modelId));
+            const [row] = await this.db
+                .select()
+                .from(aiModels)
+                .where(eq(aiModels.id, modelId));
 
             return row ?? null;
         } catch (error) {

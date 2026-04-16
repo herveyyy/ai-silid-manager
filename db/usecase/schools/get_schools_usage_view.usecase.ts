@@ -41,7 +41,7 @@ export class GetSchoolsUsageViewUsecase {
                     coalesce(
                         sum(
                             case
-                                when ${attachments.isDeleted} = false
+                                when ${attachments.isDeleted} = 0
                                 then ${attachments.fileSize}
                                 else 0
                             end
@@ -116,10 +116,16 @@ export class GetSchoolsUsageViewUsecase {
             const tokenUsageBySchool =
                 this.buildTokenUsageBySchoolQuery(schoolUsers);
 
-            return await this.buildUsageViewSelect(
+            const raw = await this.buildUsageViewSelect(
                 storageUsageBySchool,
                 tokenUsageBySchool,
             ).orderBy(asc(schools.name));
+            return raw.map((row) => ({
+                ...row,
+                aiFeat: Boolean(row.aiFeat),
+                unlimitedStorage: Boolean(row.unlimitedStorage),
+                unlimitedToken: Boolean(row.unlimitedToken),
+            }));
         } catch (error) {
             console.error(error);
             throw new Error("Failed to get schools usage view");
@@ -138,7 +144,7 @@ export class GetSchoolsUsageViewUsecase {
             const tokenUsageBySchool =
                 this.buildTokenUsageBySchoolQuery(schoolUsers);
 
-            const [rows, totalRows] = await Promise.all([
+            const [rawRows, totalRows] = await Promise.all([
                 this.buildUsageViewSelect(
                     storageUsageBySchool,
                     tokenUsageBySchool,
@@ -148,6 +154,13 @@ export class GetSchoolsUsageViewUsecase {
                     .offset(offset),
                 this.db.select({ total: count() }).from(schools),
             ]);
+
+            const rows = rawRows.map((row) => ({
+                ...row,
+                aiFeat: Boolean(row.aiFeat),
+                unlimitedStorage: Boolean(row.unlimitedStorage),
+                unlimitedToken: Boolean(row.unlimitedToken),
+            }));
 
             return {
                 rows,

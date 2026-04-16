@@ -27,12 +27,17 @@ export class GetAllSchoolsUsecase {
                     defaultAiModelId: schools.defaultAiModelId,
                     passwordCredentialSet: sql<boolean>`(
                         ${schools.password} is not null
-                        and btrim(coalesce(${schools.password}, '')) <> ''
+                        and trim(coalesce(${schools.password}, '')) <> ''
                     )`,
                 })
                 .from(schools);
 
-            return rows;
+            return rows.map((row) => ({
+                ...row,
+                aiFeat: Boolean(row.aiFeat),
+                unlimitedStorage: Boolean(row.unlimitedStorage),
+                unlimitedToken: Boolean(row.unlimitedToken),
+            }));
         } catch (error) {
             console.error(error);
             throw new Error("Failed to get all schools");

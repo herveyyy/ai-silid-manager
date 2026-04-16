@@ -9,13 +9,14 @@ export type AttachmentParentType = (typeof attachmentType.enumValues)[number];
 
 export type InsertSchool = typeof schools.$inferInsert;
 export type SelectSchool = typeof schools.$inferSelect;
-/** `schools` */
-export type School = SelectSchool & {
+/** `schools` — tinyint flags are typed as booleans for the app layer */
+export type School = Omit<
+    SelectSchool,
+    "aiFeat" | "unlimitedStorage" | "unlimitedToken"
+> & {
     aiFeat: boolean;
     unlimitedStorage: boolean;
     unlimitedToken: boolean;
-    tokenLimit: number;
-    storageLimit: number;
 };
 export type SchoolDTO = Omit<School, "password"> & {
     /** True when a password value is stored; the value is never sent to the client. */
