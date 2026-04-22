@@ -9,6 +9,8 @@ import {
   createRoomsController,
   createSchoolsController,
 } from "@/app/actions";
+import { buildPromptDailyStats } from "@/lib/prompt-daily-stats";
+import { SchoolPromptMetricsChart } from "@/components/organisms/school-prompt-metrics-chart";
 
 export default async function SchoolProfilePage({
   params,
@@ -50,14 +52,7 @@ export default async function SchoolProfilePage({
     quotaStorageBytes: Number(school.storageLimit ?? 0),
     quotaTokens: Number(school.tokenLimit ?? 0),
   };
-  const totalPromptTokens = promptLogs.reduce(
-    (total, row) => total + (row.tokenAiValue ?? 0),
-    0,
-  );
-  const totalPromptCredits = promptLogs.reduce(
-    (total, row) => total + (row.creditsSpent ?? 0),
-    0,
-  );
+  const promptDailyStats = buildPromptDailyStats(promptLogs);
 
   return (
     <div className="space-y-8">
@@ -92,32 +87,18 @@ export default async function SchoolProfilePage({
         title="School AI activity"
         subtitle="Recent prompt logs scoped to this school"
       >
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="theme-panel-strong border px-4 py-3">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
-              Prompt runs
-            </p>
-            <p className="mt-1 font-mono text-2xl tabular-nums text-foreground">
-              {promptLogs.length}
-            </p>
-          </div>
-          <div className="theme-panel-strong border px-4 py-3">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
-              Tokens used
-            </p>
-            <p className="mt-1 font-mono text-2xl tabular-nums text-foreground">
-              {totalPromptTokens.toLocaleString()}
-            </p>
-          </div>
-          <div className="theme-panel-strong border px-4 py-3">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
-              Credits spent
-            </p>
-            <p className="mt-1 font-mono text-2xl tabular-nums text-foreground">
-              {totalPromptCredits.toLocaleString()}
-            </p>
-          </div>
-        </div>
+        <SchoolPromptMetricsChart
+          avgPromptsPerDay={promptDailyStats.avgPromptsPerDay}
+          avgTokensPerDay={promptDailyStats.avgTokensPerDay}
+          avgTokensPerPrompt={promptDailyStats.avgTokensPerPrompt}
+          totalEstCost={promptDailyStats.totalEstCost}
+          avgEstCostPerDay={promptDailyStats.avgEstCostPerDay}
+          avgEstCostPerPrompt={promptDailyStats.avgEstCostPerPrompt}
+          spanDays={promptDailyStats.spanDays}
+          activeDays={promptDailyStats.activeDays}
+          periodLabel={promptDailyStats.periodLabel}
+          series={promptDailyStats.series}
+        />
 
         <div className="mt-6 divide-y md:hidden" style={{ borderColor: "var(--border)" }}>
           {promptLogs.slice(0, 12).map((row) => (
@@ -164,6 +145,14 @@ export default async function SchoolProfilePage({
                 </div>
                 <div className="theme-panel-strong border px-3 py-2 col-span-2">
                   <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    cost_value
+                  </dt>
+                  <dd className="mt-1 wrap-break-word text-foreground">
+                    {row.costValue ?? "—"}
+                  </dd>
+                </div>
+                <div className="theme-panel-strong border px-3 py-2 col-span-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
                     prompt_title
                   </dt>
                   <dd className="mt-1 wrap-break-word text-foreground">
@@ -176,7 +165,7 @@ export default async function SchoolProfilePage({
         </div>
 
         <div className="mt-6 hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[920px] border-collapse font-mono text-[11px]">
+          <table className="w-full min-w-[1060px] border-collapse font-mono text-[11px]">
             <thead>
               <tr
                 className="border-b text-left text-(--muted)"
@@ -196,6 +185,9 @@ export default async function SchoolProfilePage({
                 </th>
                 <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
                   credits_spent
+                </th>
+                <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
+                  cost_value
                 </th>
                 <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
                   prompt_title
@@ -220,6 +212,12 @@ export default async function SchoolProfilePage({
                   </td>
                   <td className="py-2 pr-3 tabular-nums">
                     {(row.creditsSpent ?? 0).toLocaleString()}
+                  </td>
+                  <td
+                    className="max-w-[160px] truncate py-2 pr-3"
+                    title={row.costValue ?? ""}
+                  >
+                    {row.costValue ?? "—"}
                   </td>
                   <td
                     className="max-w-[180px] truncate py-2 pr-3"

@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm/relations";
-import { classCard, activities, classWorkCategory, users, term, activityBadge, schoolBadge, activityWithTags, tags, attachments, attendance, course, certificateFormat, certificates, chatbox, chatboxMembers, chatboxMessages, classrooms, sections, subjects, schools, contents, contentQuestions, lessons, courseLevelTag, levelTags, courseTopic, topics, grading, notification, notificationDevice, participants, post, postComment, prompt, questions, sectionQuestions, studentActivity, quizEvidence, schoolMariadDb, aiModels, departments, studentAnswers, studentBadge, studentHubNote, studentHubFlashCard, takersAnswers, takersFeedback, takersProgress, takersTopics } from "./schema";
+import { classCard, activities, classWorkCategory, users, term, activityBadge, schoolBadge, activityWithTags, tags, attachments, attendance, course, certificateFormat, certificates, chatbox, chatboxMembers, chatboxMessages, classrooms, sections, subjects, schools, contents, contentQuestions, lessons, courseLevelTag, levelTags, coursePermission, courseSchool, courseTopic, topics, grading, notification, notificationDevice, participants, post, postComment, prompt, questions, sectionQuestions, studentActivity, quizEvidence, schoolMariadDb, aiModels, departments, studentAnswers, studentBadge, studentHubNote, studentHubFlashCard, takersAnswers, takersFeedback, takersProgress, takersTopics } from "./schema";
 
-export const activitiesRelations = relations(activities, ({one, many}) => ({
+export const activitiesRelations = relations(activities, ({ one, many }) => ({
 	classCard: one(classCard, {
 		fields: [activities.classCardId],
 		references: [classCard.id]
@@ -26,7 +26,7 @@ export const activitiesRelations = relations(activities, ({one, many}) => ({
 	studentBadges: many(studentBadge),
 }));
 
-export const classCardRelations = relations(classCard, ({one, many}) => ({
+export const classCardRelations = relations(classCard, ({ one, many }) => ({
 	activities: many(activities),
 	attendances: many(attendance),
 	chatboxes: many(chatbox),
@@ -51,7 +51,7 @@ export const classCardRelations = relations(classCard, ({one, many}) => ({
 	terms: many(term),
 }));
 
-export const classWorkCategoryRelations = relations(classWorkCategory, ({one, many}) => ({
+export const classWorkCategoryRelations = relations(classWorkCategory, ({ one, many }) => ({
 	activities: many(activities),
 	classCard: one(classCard, {
 		fields: [classWorkCategory.classCardId],
@@ -59,7 +59,7 @@ export const classWorkCategoryRelations = relations(classWorkCategory, ({one, ma
 	}),
 }));
 
-export const usersRelations = relations(users, ({many}) => ({
+export const usersRelations = relations(users, ({ many }) => ({
 	activities: many(activities),
 	activityBadges: many(activityBadge),
 	attachments: many(attachments),
@@ -76,6 +76,7 @@ export const usersRelations = relations(users, ({many}) => ({
 	contentQuestions: many(contentQuestions),
 	contents: many(contents),
 	courses: many(course),
+	coursePermissions: many(coursePermission),
 	gradings: many(grading),
 	lessons: many(lessons),
 	notifications: many(notification),
@@ -105,7 +106,7 @@ export const usersRelations = relations(users, ({many}) => ({
 	terms: many(term),
 }));
 
-export const termRelations = relations(term, ({one, many}) => ({
+export const termRelations = relations(term, ({ one, many }) => ({
 	activities: many(activities),
 	classCard: one(classCard, {
 		fields: [term.classCardId],
@@ -117,7 +118,7 @@ export const termRelations = relations(term, ({one, many}) => ({
 	}),
 }));
 
-export const activityBadgeRelations = relations(activityBadge, ({one}) => ({
+export const activityBadgeRelations = relations(activityBadge, ({ one }) => ({
 	activity: one(activities, {
 		fields: [activityBadge.activityId],
 		references: [activities.id]
@@ -132,7 +133,7 @@ export const activityBadgeRelations = relations(activityBadge, ({one}) => ({
 	}),
 }));
 
-export const schoolBadgeRelations = relations(schoolBadge, ({one, many}) => ({
+export const schoolBadgeRelations = relations(schoolBadge, ({ one, many }) => ({
 	activityBadges: many(activityBadge),
 	classCard: one(classCard, {
 		fields: [schoolBadge.classCardId],
@@ -149,7 +150,7 @@ export const schoolBadgeRelations = relations(schoolBadge, ({one, many}) => ({
 	studentBadges: many(studentBadge),
 }));
 
-export const activityWithTagsRelations = relations(activityWithTags, ({one}) => ({
+export const activityWithTagsRelations = relations(activityWithTags, ({ one }) => ({
 	activity: one(activities, {
 		fields: [activityWithTags.activityId],
 		references: [activities.id]
@@ -160,18 +161,18 @@ export const activityWithTagsRelations = relations(activityWithTags, ({one}) => 
 	}),
 }));
 
-export const tagsRelations = relations(tags, ({many}) => ({
+export const tagsRelations = relations(tags, ({ many }) => ({
 	activityWithTags: many(activityWithTags),
 }));
 
-export const attachmentsRelations = relations(attachments, ({one}) => ({
+export const attachmentsRelations = relations(attachments, ({ one }) => ({
 	user: one(users, {
 		fields: [attachments.createdBy],
 		references: [users.id]
 	}),
 }));
 
-export const attendanceRelations = relations(attendance, ({one}) => ({
+export const attendanceRelations = relations(attendance, ({ one }) => ({
 	classCard: one(classCard, {
 		fields: [attendance.classCardId],
 		references: [classCard.id]
@@ -182,33 +183,35 @@ export const attendanceRelations = relations(attendance, ({one}) => ({
 	}),
 }));
 
-export const certificateFormatRelations = relations(certificateFormat, ({one}) => ({
+export const certificateFormatRelations = relations(certificateFormat, ({ one }) => ({
 	course: one(course, {
 		fields: [certificateFormat.courseId],
 		references: [course.id]
 	}),
 }));
 
-export const courseRelations = relations(course, ({one, many}) => ({
+export const courseRelations = relations(course, ({ one, many }) => ({
 	certificateFormats: many(certificateFormat),
 	user: one(users, {
 		fields: [course.createdBy],
 		references: [users.id]
 	}),
 	courseLevelTags: many(courseLevelTag),
+	coursePermissions: many(coursePermission),
+	courseSchools: many(courseSchool),
 	courseTopics: many(courseTopic),
 	lessons: many(lessons),
 	takersFeedbacks: many(takersFeedback),
 }));
 
-export const certificatesRelations = relations(certificates, ({one}) => ({
+export const certificatesRelations = relations(certificates, ({ one }) => ({
 	user: one(users, {
 		fields: [certificates.userId],
 		references: [users.id]
 	}),
 }));
 
-export const chatboxRelations = relations(chatbox, ({one, many}) => ({
+export const chatboxRelations = relations(chatbox, ({ one, many }) => ({
 	classCard: one(classCard, {
 		fields: [chatbox.classCardId],
 		references: [classCard.id]
@@ -217,7 +220,7 @@ export const chatboxRelations = relations(chatbox, ({one, many}) => ({
 	chatboxMessages: many(chatboxMessages),
 }));
 
-export const chatboxMembersRelations = relations(chatboxMembers, ({one}) => ({
+export const chatboxMembersRelations = relations(chatboxMembers, ({ one }) => ({
 	chatbox: one(chatbox, {
 		fields: [chatboxMembers.chatboxId],
 		references: [chatbox.id]
@@ -232,7 +235,7 @@ export const chatboxMembersRelations = relations(chatboxMembers, ({one}) => ({
 	}),
 }));
 
-export const chatboxMessagesRelations = relations(chatboxMessages, ({one, many}) => ({
+export const chatboxMessagesRelations = relations(chatboxMessages, ({ one, many }) => ({
 	chatboxMembers: many(chatboxMembers),
 	chatbox: one(chatbox, {
 		fields: [chatboxMessages.chatBoxId],
@@ -244,7 +247,7 @@ export const chatboxMessagesRelations = relations(chatboxMessages, ({one, many})
 	}),
 }));
 
-export const classroomsRelations = relations(classrooms, ({one, many}) => ({
+export const classroomsRelations = relations(classrooms, ({ one, many }) => ({
 	classCards: many(classCard),
 	user_adviserId: one(users, {
 		fields: [classrooms.adviserId],
@@ -266,7 +269,7 @@ export const classroomsRelations = relations(classrooms, ({one, many}) => ({
 	}),
 }));
 
-export const sectionsRelations = relations(sections, ({one, many}) => ({
+export const sectionsRelations = relations(sections, ({ one, many }) => ({
 	classCards: many(classCard),
 	classrooms: many(classrooms),
 	department: one(departments, {
@@ -275,12 +278,13 @@ export const sectionsRelations = relations(sections, ({one, many}) => ({
 	}),
 }));
 
-export const subjectsRelations = relations(subjects, ({many}) => ({
+export const subjectsRelations = relations(subjects, ({ many }) => ({
 	classCards: many(classCard),
 }));
 
-export const schoolsRelations = relations(schools, ({one, many}) => ({
+export const schoolsRelations = relations(schools, ({ one, many }) => ({
 	classrooms: many(classrooms),
+	courseSchools: many(courseSchool),
 	schoolBadges: many(schoolBadge),
 	schoolMariadDbs: many(schoolMariadDb),
 	aiModel: one(aiModels, {
@@ -289,7 +293,7 @@ export const schoolsRelations = relations(schools, ({one, many}) => ({
 	}),
 }));
 
-export const contentQuestionsRelations = relations(contentQuestions, ({one, many}) => ({
+export const contentQuestionsRelations = relations(contentQuestions, ({ one, many }) => ({
 	content: one(contents, {
 		fields: [contentQuestions.contentId],
 		references: [contents.id]
@@ -301,7 +305,7 @@ export const contentQuestionsRelations = relations(contentQuestions, ({one, many
 	takersAnswers: many(takersAnswers),
 }));
 
-export const contentsRelations = relations(contents, ({one, many}) => ({
+export const contentsRelations = relations(contents, ({ one, many }) => ({
 	contentQuestions: many(contentQuestions),
 	user: one(users, {
 		fields: [contents.createdBy],
@@ -314,7 +318,7 @@ export const contentsRelations = relations(contents, ({one, many}) => ({
 	takersProgresses: many(takersProgress),
 }));
 
-export const lessonsRelations = relations(lessons, ({one, many}) => ({
+export const lessonsRelations = relations(lessons, ({ one, many }) => ({
 	contents: many(contents),
 	course: one(course, {
 		fields: [lessons.courseId],
@@ -334,7 +338,7 @@ export const lessonsRelations = relations(lessons, ({one, many}) => ({
 	}),
 }));
 
-export const courseLevelTagRelations = relations(courseLevelTag, ({one}) => ({
+export const courseLevelTagRelations = relations(courseLevelTag, ({ one }) => ({
 	course: one(course, {
 		fields: [courseLevelTag.courseId],
 		references: [course.id]
@@ -345,11 +349,33 @@ export const courseLevelTagRelations = relations(courseLevelTag, ({one}) => ({
 	}),
 }));
 
-export const levelTagsRelations = relations(levelTags, ({many}) => ({
+export const levelTagsRelations = relations(levelTags, ({ many }) => ({
 	courseLevelTags: many(courseLevelTag),
 }));
 
-export const courseTopicRelations = relations(courseTopic, ({one}) => ({
+export const coursePermissionRelations = relations(coursePermission, ({ one }) => ({
+	course: one(course, {
+		fields: [coursePermission.courseId],
+		references: [course.id]
+	}),
+	user: one(users, {
+		fields: [coursePermission.userId],
+		references: [users.id]
+	}),
+}));
+
+export const courseSchoolRelations = relations(courseSchool, ({ one }) => ({
+	course: one(course, {
+		fields: [courseSchool.courseId],
+		references: [course.id]
+	}),
+	school: one(schools, {
+		fields: [courseSchool.schoolId],
+		references: [schools.id]
+	}),
+}));
+
+export const courseTopicRelations = relations(courseTopic, ({ one }) => ({
 	course: one(course, {
 		fields: [courseTopic.courseId],
 		references: [course.id]
@@ -360,12 +386,12 @@ export const courseTopicRelations = relations(courseTopic, ({one}) => ({
 	}),
 }));
 
-export const topicsRelations = relations(topics, ({many}) => ({
+export const topicsRelations = relations(topics, ({ many }) => ({
 	courseTopics: many(courseTopic),
 	takersTopics: many(takersTopics),
 }));
 
-export const gradingRelations = relations(grading, ({one}) => ({
+export const gradingRelations = relations(grading, ({ one }) => ({
 	classCard: one(classCard, {
 		fields: [grading.classCardId],
 		references: [classCard.id]
@@ -376,21 +402,21 @@ export const gradingRelations = relations(grading, ({one}) => ({
 	}),
 }));
 
-export const notificationRelations = relations(notification, ({one}) => ({
+export const notificationRelations = relations(notification, ({ one }) => ({
 	user: one(users, {
 		fields: [notification.userId],
 		references: [users.id]
 	}),
 }));
 
-export const notificationDeviceRelations = relations(notificationDevice, ({one}) => ({
+export const notificationDeviceRelations = relations(notificationDevice, ({ one }) => ({
 	user: one(users, {
 		fields: [notificationDevice.userId],
 		references: [users.id]
 	}),
 }));
 
-export const participantsRelations = relations(participants, ({one}) => ({
+export const participantsRelations = relations(participants, ({ one }) => ({
 	classCard: one(classCard, {
 		fields: [participants.classCardId],
 		references: [classCard.id]
@@ -401,7 +427,7 @@ export const participantsRelations = relations(participants, ({one}) => ({
 	}),
 }));
 
-export const postRelations = relations(post, ({one, many}) => ({
+export const postRelations = relations(post, ({ one, many }) => ({
 	classCard: one(classCard, {
 		fields: [post.classCardId],
 		references: [classCard.id]
@@ -413,7 +439,7 @@ export const postRelations = relations(post, ({one, many}) => ({
 	postComments: many(postComment),
 }));
 
-export const postCommentRelations = relations(postComment, ({one}) => ({
+export const postCommentRelations = relations(postComment, ({ one }) => ({
 	user: one(users, {
 		fields: [postComment.createdBy],
 		references: [users.id]
@@ -424,14 +450,14 @@ export const postCommentRelations = relations(postComment, ({one}) => ({
 	}),
 }));
 
-export const promptRelations = relations(prompt, ({one}) => ({
+export const promptRelations = relations(prompt, ({ one }) => ({
 	user: one(users, {
 		fields: [prompt.createdBy],
 		references: [users.id]
 	}),
 }));
 
-export const questionsRelations = relations(questions, ({one, many}) => ({
+export const questionsRelations = relations(questions, ({ one, many }) => ({
 	activity: one(activities, {
 		fields: [questions.activitiesId],
 		references: [activities.id]
@@ -443,7 +469,7 @@ export const questionsRelations = relations(questions, ({one, many}) => ({
 	studentAnswers: many(studentAnswers),
 }));
 
-export const sectionQuestionsRelations = relations(sectionQuestions, ({one, many}) => ({
+export const sectionQuestionsRelations = relations(sectionQuestions, ({ one, many }) => ({
 	questions: many(questions),
 	activity: one(activities, {
 		fields: [sectionQuestions.activitiesId],
@@ -451,14 +477,14 @@ export const sectionQuestionsRelations = relations(sectionQuestions, ({one, many
 	}),
 }));
 
-export const quizEvidenceRelations = relations(quizEvidence, ({one}) => ({
+export const quizEvidenceRelations = relations(quizEvidence, ({ one }) => ({
 	studentActivity: one(studentActivity, {
 		fields: [quizEvidence.studentActivityId],
 		references: [studentActivity.id]
 	}),
 }));
 
-export const studentActivityRelations = relations(studentActivity, ({one, many}) => ({
+export const studentActivityRelations = relations(studentActivity, ({ one, many }) => ({
 	quizEvidences: many(quizEvidence),
 	activity: one(activities, {
 		fields: [studentActivity.activityId],
@@ -477,22 +503,22 @@ export const studentActivityRelations = relations(studentActivity, ({one, many})
 	studentAnswers: many(studentAnswers),
 }));
 
-export const schoolMariadDbRelations = relations(schoolMariadDb, ({one}) => ({
+export const schoolMariadDbRelations = relations(schoolMariadDb, ({ one }) => ({
 	school: one(schools, {
 		fields: [schoolMariadDb.schoolId],
 		references: [schools.id]
 	}),
 }));
 
-export const aiModelsRelations = relations(aiModels, ({many}) => ({
+export const aiModelsRelations = relations(aiModels, ({ many }) => ({
 	schools: many(schools),
 }));
 
-export const departmentsRelations = relations(departments, ({many}) => ({
+export const departmentsRelations = relations(departments, ({ many }) => ({
 	sections: many(sections),
 }));
 
-export const studentAnswersRelations = relations(studentAnswers, ({one}) => ({
+export const studentAnswersRelations = relations(studentAnswers, ({ one }) => ({
 	question: one(questions, {
 		fields: [studentAnswers.questionId],
 		references: [questions.id]
@@ -503,7 +529,7 @@ export const studentAnswersRelations = relations(studentAnswers, ({one}) => ({
 	}),
 }));
 
-export const studentBadgeRelations = relations(studentBadge, ({one}) => ({
+export const studentBadgeRelations = relations(studentBadge, ({ one }) => ({
 	activity: one(activities, {
 		fields: [studentBadge.activityId],
 		references: [activities.id]
@@ -528,14 +554,14 @@ export const studentBadgeRelations = relations(studentBadge, ({one}) => ({
 	}),
 }));
 
-export const studentHubFlashCardRelations = relations(studentHubFlashCard, ({one}) => ({
+export const studentHubFlashCardRelations = relations(studentHubFlashCard, ({ one }) => ({
 	studentHubNote: one(studentHubNote, {
 		fields: [studentHubFlashCard.noteId],
 		references: [studentHubNote.id]
 	}),
 }));
 
-export const studentHubNoteRelations = relations(studentHubNote, ({one, many}) => ({
+export const studentHubNoteRelations = relations(studentHubNote, ({ one, many }) => ({
 	studentHubFlashCards: many(studentHubFlashCard),
 	user: one(users, {
 		fields: [studentHubNote.createdBy],
@@ -543,7 +569,7 @@ export const studentHubNoteRelations = relations(studentHubNote, ({one, many}) =
 	}),
 }));
 
-export const takersAnswersRelations = relations(takersAnswers, ({one}) => ({
+export const takersAnswersRelations = relations(takersAnswers, ({ one }) => ({
 	contentQuestion: one(contentQuestions, {
 		fields: [takersAnswers.contentQuestionId],
 		references: [contentQuestions.id]
@@ -554,7 +580,7 @@ export const takersAnswersRelations = relations(takersAnswers, ({one}) => ({
 	}),
 }));
 
-export const takersFeedbackRelations = relations(takersFeedback, ({one}) => ({
+export const takersFeedbackRelations = relations(takersFeedback, ({ one }) => ({
 	course: one(course, {
 		fields: [takersFeedback.courseId],
 		references: [course.id]
@@ -565,7 +591,7 @@ export const takersFeedbackRelations = relations(takersFeedback, ({one}) => ({
 	}),
 }));
 
-export const takersProgressRelations = relations(takersProgress, ({one}) => ({
+export const takersProgressRelations = relations(takersProgress, ({ one }) => ({
 	content: one(contents, {
 		fields: [takersProgress.contentId],
 		references: [contents.id]
@@ -576,7 +602,7 @@ export const takersProgressRelations = relations(takersProgress, ({one}) => ({
 	}),
 }));
 
-export const takersTopicsRelations = relations(takersTopics, ({one}) => ({
+export const takersTopicsRelations = relations(takersTopics, ({ one }) => ({
 	topic: one(topics, {
 		fields: [takersTopics.topicId],
 		references: [topics.id]

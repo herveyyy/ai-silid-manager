@@ -19,6 +19,7 @@ import { GetSchoolRoomsUsageUsecase } from "@/db/usecase/rooms/get_school_rooms_
 import { GetRoomUsageByIdUsecase } from "@/db/usecase/rooms/get_room_usage_by_id.usecase";
 
 import { GetPromptLogsUsecase } from "@/db/usecase/prompts/get_ai_prompts.usecase";
+import { GetPromptStatsUsecase } from "@/db/usecase/prompts/get_prompt_stats.usecase";
 import { GetSchoolPromptLogsUsecase } from "@/db/usecase/prompts/get_school_ai_prompts.usecase";
 import { AiPromptsController } from "@/db/controller/ai-prompts/ai-prompts.controller";
 import { AiPromptsService } from "@/db/service/ai-prompts.service";
@@ -28,6 +29,7 @@ import { GetAiModelsUsecase } from "@/db/usecase/ai-models/get_ai_models.usecase
 import { CreateAiModelUsecase } from "@/db/usecase/ai-models/create_ai_model.usecase";
 import { UpdateAiModelUsecase } from "@/db/usecase/ai-models/update_ai_model.usecase";
 import { requireDashboardAccess } from "@/lib/auth/require-dashboard-access";
+import { GetGlobalPromptOverviewUsecase } from "@/db/usecase/prompts/get_global_prompt_overview.usecase";
 
 export async function createSchoolsController(): Promise<SchoolsController> {
     await requireDashboardAccess();
@@ -73,6 +75,8 @@ export async function createAiPromptsController(): Promise<AiPromptsController> 
         new AiPromptsService(
             new GetPromptLogsUsecase(),
             new GetSchoolPromptLogsUsecase(),
+            new GetPromptStatsUsecase(),
+            new GetGlobalPromptOverviewUsecase(),
         ),
     );
 }

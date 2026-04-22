@@ -48,6 +48,8 @@ CREATE TABLE `ai_models` (
 	`created_at` datetime(3) NOT NULL DEFAULT (now(3)),
 	`updated_at` datetime(3) NOT NULL DEFAULT (now(3)),
 	`status` varchar(255) NOT NULL DEFAULT 'active',
+	`in_cost_value` text,
+	`out_cost_value` text,
 	CONSTRAINT `ai_models_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
@@ -213,6 +215,8 @@ CREATE TABLE `course` (
 	`created_by` char(36),
 	`status` enum('draft','published','archived') NOT NULL DEFAULT 'draft',
 	`reference_url` text,
+	`url_reference` text,
+	`schoolCodes` json,
 	CONSTRAINT `course_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
@@ -221,6 +225,21 @@ CREATE TABLE `course_level_tag` (
 	`course_id` char(36) NOT NULL,
 	`level_tag_id` char(36) NOT NULL,
 	CONSTRAINT `course_level_tag_id` PRIMARY KEY(`id`)
+);
+--> statement-breakpoint
+CREATE TABLE `course_permission` (
+	`id` char(36) NOT NULL,
+	`course_id` char(36) NOT NULL,
+	`user_id` char(36) NOT NULL,
+	`accessRole` enum('admin','editor','viewer') NOT NULL,
+	CONSTRAINT `course_permission_id` PRIMARY KEY(`id`)
+);
+--> statement-breakpoint
+CREATE TABLE `course_school` (
+	`id` char(36) NOT NULL,
+	`course_id` char(36) NOT NULL,
+	`school_id` char(36) NOT NULL,
+	CONSTRAINT `course_school_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
 CREATE TABLE `course_topic` (
@@ -269,6 +288,7 @@ CREATE TABLE `lessons` (
 	`created_by` char(36),
 	`created_at` datetime(3) NOT NULL DEFAULT (now(3)),
 	`updated_at` datetime(3) NOT NULL DEFAULT (now(3)),
+	`url_reference` text,
 	CONSTRAINT `lessons_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
@@ -359,6 +379,7 @@ CREATE TABLE `prompt` (
 	`status` text NOT NULL,
 	`createdBy` char(36) NOT NULL,
 	`bypassed_process` tinyint(1) NOT NULL DEFAULT 0,
+	`cost_value` text,
 	CONSTRAINT `prompt_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
@@ -652,6 +673,10 @@ ALTER TABLE `contents` ADD CONSTRAINT `contents_lesson_id_lessons_id_fk` FOREIGN
 ALTER TABLE `course` ADD CONSTRAINT `course_created_by_users_id_fk` FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `course_level_tag` ADD CONSTRAINT `course_level_tag_course_id_course_id_fk` FOREIGN KEY (`course_id`) REFERENCES `course`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `course_level_tag` ADD CONSTRAINT `course_level_tag_level_tag_id_level_tags_id_fk` FOREIGN KEY (`level_tag_id`) REFERENCES `level_tags`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `course_permission` ADD CONSTRAINT `course_permission_course_id_course_id_fk` FOREIGN KEY (`course_id`) REFERENCES `course`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `course_permission` ADD CONSTRAINT `course_permission_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `course_school` ADD CONSTRAINT `course_school_course_id_course_id_fk` FOREIGN KEY (`course_id`) REFERENCES `course`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `course_school` ADD CONSTRAINT `course_school_school_id_schools_id_fk` FOREIGN KEY (`school_id`) REFERENCES `schools`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `course_topic` ADD CONSTRAINT `course_topic_course_id_course_id_fk` FOREIGN KEY (`course_id`) REFERENCES `course`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `course_topic` ADD CONSTRAINT `course_topic_topic_id_topics_id_fk` FOREIGN KEY (`topic_id`) REFERENCES `topics`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `grading` ADD CONSTRAINT `grading_classCardId_class_card_id_fk` FOREIGN KEY (`classCardId`) REFERENCES `class_card`(`id`) ON DELETE no action ON UPDATE no action;--> statement-breakpoint

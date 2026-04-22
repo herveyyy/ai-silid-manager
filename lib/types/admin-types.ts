@@ -9,7 +9,6 @@ export type AttachmentParentType = (typeof attachmentType.enumValues)[number];
 
 export type InsertSchool = typeof schools.$inferInsert;
 export type SelectSchool = typeof schools.$inferSelect;
-/** `schools` — tinyint flags are typed as booleans for the app layer */
 export type School = Omit<
     SelectSchool,
     "aiFeat" | "unlimitedStorage" | "unlimitedToken"
@@ -19,11 +18,9 @@ export type School = Omit<
     unlimitedToken: boolean;
 };
 export type SchoolDTO = Omit<School, "password"> & {
-    /** True when a password value is stored; the value is never sent to the client. */
     passwordCredentialSet: boolean;
 };
 
-/** Values ready for DB insert (school password stored as plain text when set). */
 export type CreateSchoolPayload = {
     name: string;
     schoolCode: string;
@@ -34,7 +31,6 @@ export type CreateSchoolPayload = {
     apiKey: string | null;
 };
 
-/** Updatable registry fields on `schools` (excludes password — use password action). */
 export type UpdateSchoolProfilePayload = {
     name: string;
     schoolCode: string;
@@ -69,10 +65,9 @@ export type SelectAiModel = typeof aiModels.$inferSelect;
 export type AiModelDTO = SelectAiModel;
 export type AiModelMutationInput = Pick<
     AiModelDTO,
-    "name" | "description" | "status"
+    "name" | "description" | "status" | "inCostValue" | "outCostValue"
 >;
 
-/** Admin quotas and usage (mock / future API — not in `schools` table yet). */
 export type SchoolAdminMetrics = {
     storageUsedBytes: number;
     tokensUsed: number;
@@ -104,7 +99,6 @@ export type PaginatedSchoolUsageViewDTO = {
     offset: number;
 };
 
-/** `attachments` */
 export type SelectAttachment = typeof attachments.$inferSelect;
 export type Attachment = SelectAttachment;
 export type PaginatedAttachmentsDTO = {
@@ -115,7 +109,6 @@ export type PaginatedAttachmentsDTO = {
     offset: number;
 };
 
-/** `prompt` — AI feature usage log */
 export type PromptLog = {
     id: string;
     featType: string;
@@ -128,6 +121,8 @@ export type PromptLog = {
     completedAt: string | null;
     tokenAiValue: number | null;
     creditsSpent: number | null;
+    /** `prompt.cost_value` — opaque text (e.g. serialized pricing snapshot). */
+    costValue: string | null;
     status: string;
     createdBy: string;
 };
@@ -138,4 +133,43 @@ export type PaginatedPromptLogDTO = {
     page: number;
     limit: number;
     offset: number;
+};
+
+/** Sum/count aggregates over `prompt` (global). */
+export type PromptStatsDTO = {
+    totalCount: number;
+    totalTokenAiValue: number;
+    totalCreditsSpent: number;
+};
+
+/** Daily bucket for fleet-wide prompt charts. */
+export type GlobalPromptOverviewDay = {
+    day: string;
+    prompts: number;
+    tokens: number;
+    cost: number;
+};
+
+/** Full-database prompt rollup for schools fleet overview (all tenants). */
+export type GlobalPromptOverviewDTO = {
+    totalPrompts: number;
+    totalTokens: number;
+    totalCredits: number;
+    totalEstCost: number;
+    completed: number;
+    failed: number;
+    running: number;
+    otherStatus: number;
+    avgPromptsPerDay: number;
+    avgTokensPerDay: number;
+    avgEstCostPerDay: number;
+    avgTokensPerPrompt: number;
+    avgEstCostPerPrompt: number;
+    spanDays: number;
+    periodLabel: string;
+    /** Days with ≥1 prompt (calendar). */
+    trackedCalendarDays: number;
+    /** Daily chart shows last 90 days when history is longer. */
+    dailySeriesTruncated: boolean;
+    dailySeries: GlobalPromptOverviewDay[];
 };

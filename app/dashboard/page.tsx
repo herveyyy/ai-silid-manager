@@ -1,6 +1,7 @@
 
 import Link from "next/link";
 import { SchoolsDirectory } from "@/components/organisms/schools-directory";
+import { SchoolsFleetAiOverview } from "@/components/organisms/schools-fleet-ai-overview";
 import { AdminPanel } from "@/components/molecules/admin-panel";
 import { AdminStatCard } from "@/components/molecules/admin-stat-card";
 import {
@@ -9,16 +10,25 @@ import {
   mockPromptLogs,
   totalAttachmentBytes,
 } from "@/lib/admin-mock-data";
-import { createSchoolsController } from "../actions";
+import {
+  createAiPromptsController,
+  createSchoolsController,
+} from "@/app/actions";
+
 export default async function DashboardPage() {
   const schoolsController = await createSchoolsController();
-  const schools = await schoolsController.getAllSchools();
+  const aiPromptsController = await createAiPromptsController();
+  const [schools, promptOverview] = await Promise.all([
+    schoolsController.getAllSchools(),
+    aiPromptsController.getGlobalPromptOverview(),
+  ]);
   const storageUsed = totalAttachmentBytes(
     mockAttachments.filter((a) => !a.isDeleted),
   );
   const aiTokens = mockPromptLogs.reduce((a, r) => a + (r.tokenAiValue ?? 0), 0);
   const aiCredits = mockPromptLogs.reduce((a, r) => a + (r.creditsSpent ?? 0), 0);
   const schoolCount = schools.length;
+  const schoolsWithAiEnabled = schools.filter((s) => s.aiFeat).length;
 
   return (
     <div className="space-y-8">
@@ -36,28 +46,16 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminStatCard
-          label="Schools registered"
-          value={String(schoolCount)}
-          hint="COUNT(*) · schools table"
+      <AdminPanel
+        title="Fleet AI overview"
+        subtitle="All tenants · totals and rates from the prompt table (cross-school)"
+      >
+        <SchoolsFleetAiOverview
+          schoolsInFleet={schoolCount}
+          schoolsWithAiEnabled={schoolsWithAiEnabled}
+          {...promptOverview}
         />
-        <AdminStatCard
-          label="Storage used (attachments)"
-          value={formatBytes(storageUsed)}
-          hint="Fleet-wide mock · file_size sum"
-        />
-        <AdminStatCard
-          label="AI tokens (prompt)"
-          value={aiTokens.toLocaleString()}
-          hint="Sum of token_ai_value (mock)"
-        />
-        <AdminStatCard
-          label="AI credits spent"
-          value={aiCredits.toLocaleString()}
-          hint="Sum of credits_spent (mock)"
-        />
-      </div>
+      </AdminPanel>
 
       <AdminPanel
         title="School directory"

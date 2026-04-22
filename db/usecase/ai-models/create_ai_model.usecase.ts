@@ -15,6 +15,8 @@ export class CreateAiModelUsecase {
                 name: data.name,
                 description: data.description,
                 status: data.status,
+                inCostValue: data.inCostValue,
+                outCostValue: data.outCostValue,
             });
             const [row] = await this.db
                 .select()
