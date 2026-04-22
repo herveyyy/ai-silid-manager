@@ -9,14 +9,16 @@ RUN bun install --frozen-lockfile
 FROM oven/bun:1.2-alpine AS builder
 WORKDIR /app
 
+RUN apk add --no-cache nodejs
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN bun run build
+RUN bun --bun run build
 
 # Stage 3: Production runner
-FROM node:22-alpine AS runner
+FROM oven/bun:1.2-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -38,4 +40,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["bun", "server.js"]
