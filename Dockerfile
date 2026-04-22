@@ -15,7 +15,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN bun --bun run build
+RUN node node_modules/.bin/next build
 
 # Stage 3: Production runner
 FROM oven/bun:1.2-alpine AS runner
