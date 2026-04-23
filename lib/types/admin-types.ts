@@ -1,12 +1,13 @@
 import {
     aiModels,
-    attachmentType,
     attachments,
     classrooms,
     schools,
+    users,
 } from "@/drizzle/schema";
 export type AttachmentParentType = (typeof attachmentType.enumValues)[number];
-
+export const attachmentType = attachments.parentType;
+export const userRoleType = users.role;
 export type InsertSchool = typeof schools.$inferInsert;
 export type SelectSchool = typeof schools.$inferSelect;
 export type School = Omit<
@@ -85,6 +86,7 @@ export type SchoolUsageViewDTO = {
     aiFeat: boolean;
     unlimitedStorage: boolean;
     unlimitedToken: boolean;
+    /** DB value is megabytes; multiply by 10⁶ for byte ceiling vs usage. */
     storageLimit: number;
     tokenLimit: number;
     storageUsedBytes: number;
@@ -165,6 +167,10 @@ export type GlobalPromptOverviewDTO = {
     avgEstCostPerDay: number;
     avgTokensPerPrompt: number;
     avgEstCostPerPrompt: number;
+    /** Rows where parsed cost_value > 0 (divisor for avg est. cost / prompt). */
+    promptsWithRecordedCost: number;
+    /** Distinct days with summed parsed cost > 0, or 1 fallback when cost exists but no day buckets (divisor for avg est. cost / day). */
+    daysWithRecordedCost: number;
     spanDays: number;
     periodLabel: string;
     /** Days with ≥1 prompt (calendar). */
@@ -172,4 +178,15 @@ export type GlobalPromptOverviewDTO = {
     /** Daily chart shows last 90 days when history is longer. */
     dailySeriesTruncated: boolean;
     dailySeries: GlobalPromptOverviewDay[];
+};
+
+/** Aggregates over `users` (global). */
+export type UserOverviewDTO = {
+    totalUsers: number;
+    byRole: {
+        student: number;
+        teacher: number;
+        admin: number;
+        partner: number;
+    };
 };

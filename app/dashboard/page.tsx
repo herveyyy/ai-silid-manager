@@ -2,109 +2,166 @@
 import Link from "next/link";
 import { SchoolsDirectory } from "@/components/organisms/schools-directory";
 import { SchoolsFleetAiOverview } from "@/components/organisms/schools-fleet-ai-overview";
+import { StorageOverview } from "@/components/organisms/storage-overview";
 import { AdminPanel } from "@/components/molecules/admin-panel";
 import { AdminStatCard } from "@/components/molecules/admin-stat-card";
-import {
-  formatBytes,
-  mockAttachments,
-  mockPromptLogs,
-  totalAttachmentBytes,
-} from "@/lib/admin-mock-data";
+import { totalAttachmentBytes } from "@/lib/admin-mock-data";
 import {
   createAiPromptsController,
+  createAttachmentsController,
   createSchoolsController,
+  createUsersController,
 } from "@/app/actions";
 
 export default async function DashboardPage() {
   const schoolsController = await createSchoolsController();
   const aiPromptsController = await createAiPromptsController();
-  const [schools, promptOverview] = await Promise.all([
-    schoolsController.getAllSchools(),
-    aiPromptsController.getGlobalPromptOverview(),
-  ]);
-  const storageUsed = totalAttachmentBytes(
-    mockAttachments.filter((a) => !a.isDeleted),
+  const attachmentsController = await createAttachmentsController();
+  const usersController = await createUsersController();
+
+  const [schools, promptOverview, attachmentRows, userOverview, schoolsUsage] =
+    await Promise.all([
+      schoolsController.getAllSchools(),
+      aiPromptsController.getGlobalPromptOverview(),
+      attachmentsController.getAttachments(),
+      usersController.getUserOverview(),
+      schoolsController.getSchoolsUsageView(),
+    ]);
+
+  const activeAttachments = attachmentRows.filter(
+    (a) => (a.isDeleted ?? 0) === 0,
   );
-  const aiTokens = mockPromptLogs.reduce((a, r) => a + (r.tokenAiValue ?? 0), 0);
-  const aiCredits = mockPromptLogs.reduce((a, r) => a + (r.creditsSpent ?? 0), 0);
+  const deletedAttachments = attachmentRows.filter(
+    (a) => (a.isDeleted ?? 0) !== 0,
+  ).length;
+  const storageUsedBytes = totalAttachmentBytes(activeAttachments);
   const schoolCount = schools.length;
   const schoolsWithAiEnabled = schools.filter((s) => s.aiFeat).length;
 
   return (
-    <div className="space-y-8">
-      <div>
+    <div className="space-y-10">
+      <header>
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-(--muted)">
-          schools · fleet registry
+          silid · admin overview
         </p>
         <h1 className="mt-1 text-2xl font-bold uppercase tracking-[0.12em] text-foreground">
-          All schools
+          Fleet console
         </h1>
         <p className="mt-2 max-w-2xl font-mono text-[12px] leading-relaxed text-(--muted)">
-          Admin view over every row in{" "}
-          <span className="text-(--muted-strong)">schools</span> from the
-          database via the schools controller.
+          Cross-tenant summaries aligned with{" "}
+          <span className="text-(--muted-strong)">prompt</span>,{" "}
+          <span className="text-(--muted-strong)">attachments</span>, and{" "}
+          <span className="text-(--muted-strong)">users</span> (see drizzle
+          schema). School registry follows below.
         </p>
-      </div>
+      </header>
 
-      <AdminPanel
-        title="Fleet AI overview"
-        subtitle="All tenants · totals and rates from the prompt table (cross-school)"
+      <section
+        id="prompt-overview"
+        className="scroll-mt-24 space-y-4"
+        aria-labelledby="prompt-overview-heading"
       >
-        <SchoolsFleetAiOverview
-          schoolsInFleet={schoolCount}
-          schoolsWithAiEnabled={schoolsWithAiEnabled}
-          {...promptOverview}
+        <AdminPanel
+          title="Prompt overview"
+          subtitle="Table `prompt` — tokens, credits, status, cost_value; fleet-wide"
+        >
+          <h2 id="prompt-overview-heading" className="sr-only">
+            Prompt overview
+          </h2>
+          <SchoolsFleetAiOverview
+            schoolsInFleet={schoolCount}
+            schoolsWithAiEnabled={schoolsWithAiEnabled}
+            {...promptOverview}
+          />
+        </AdminPanel>
+      </section>
+
+      <section
+        id="storage-overview"
+        className="scroll-mt-24 space-y-4"
+        aria-labelledby="storage-overview-heading"
+      >
+        <StorageOverview
+          attachmentRowsCount={attachmentRows.length}
+          activeAttachmentsCount={activeAttachments.length}
+          deletedAttachmentsCount={deletedAttachments}
+          storedBytesActive={storageUsedBytes}
+          schoolsUsage={schoolsUsage}
         />
-      </AdminPanel>
+      </section>
 
-      <AdminPanel
-        title="School directory"
-        subtitle="Live schools query via controller → service → usecase"
+      <section
+        id="user-overview"
+        className="scroll-mt-24 space-y-4"
+        aria-labelledby="user-overview-heading"
       >
-        <SchoolsDirectory schools={schools} />
-      </AdminPanel>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <AdminPanel title="Platform snapshot" subtitle="Mock aggregates (not per school yet)">
-          <ul className="space-y-3 font-mono text-[12px] text-(--muted-strong)">
-            <li className="flex justify-between border-b py-2" style={{ borderColor: "var(--border)" }}>
-              <span className="text-(--muted)">attachments rows (mock)</span>
-              <span className="text-foreground">{mockAttachments.length}</span>
-            </li>
-            <li className="flex justify-between py-2">
-              <span className="text-(--muted)">prompt rows (mock)</span>
-              <span className="text-foreground">{mockPromptLogs.length}</span>
-            </li>
-          </ul>
-        </AdminPanel>
-
-        <AdminPanel title="Shortcuts" subtitle="Cross-cutting views">
-          <div className="flex flex-col gap-3">
-            <Link
-              href="/dashboard/schools"
-              className="theme-button-secondary border px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.25em] transition-colors"
-            >
-              School list & profiles
-            </Link>
-            <Link
-              href="/dashboard/storage"
-              className="theme-button-secondary border px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.25em] transition-colors"
-            >
-              Storage
-            </Link>
-            <Link
-              href="/dashboard/ai"
-              className="theme-button-secondary border px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.25em] transition-colors"
-            >
-              AI
-            </Link>
+        <AdminPanel
+          title="User overview"
+          subtitle="Table `users` — role enum: student · teacher · admin · partner"
+        >
+          <h2 id="user-overview-heading" className="sr-only">
+            User overview
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <AdminStatCard
+              label="Total users"
+              value={userOverview.totalUsers.toLocaleString()}
+            />
+            <AdminStatCard
+              label="Students"
+              value={userOverview.byRole.student.toLocaleString()}
+            />
+            <AdminStatCard
+              label="Teachers"
+              value={userOverview.byRole.teacher.toLocaleString()}
+            />
+            <AdminStatCard
+              label="Admins"
+              value={userOverview.byRole.admin.toLocaleString()}
+            />
+            <AdminStatCard
+              label="Partners"
+              value={userOverview.byRole.partner.toLocaleString()}
+            />
           </div>
-          <p className="mt-4 font-mono text-[10px] leading-relaxed text-(--muted)">
-            Per-school quotas (storage & tokens) are editable under each school
-            profile; usage remains mock until API wiring.
-          </p>
         </AdminPanel>
-      </div>
+      </section>
+
+      <section className="space-y-4">
+        <AdminPanel
+          title="School directory"
+          subtitle="Table `schools` — live query via controller"
+        >
+          <SchoolsDirectory schools={schools} />
+        </AdminPanel>
+      </section>
+
+      <AdminPanel title="Shortcuts" subtitle="Per-school settings & tools">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <Link
+            href="/dashboard/schools"
+            className="theme-button-secondary border px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.25em] transition-colors"
+          >
+            School list & profiles
+          </Link>
+          <Link
+            href="/dashboard/storage"
+            className="theme-button-secondary border px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.25em] transition-colors"
+          >
+            Storage
+          </Link>
+          <Link
+            href="/dashboard/ai"
+            className="theme-button-secondary border px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.25em] transition-colors"
+          >
+            AI
+          </Link>
+        </div>
+        <p className="mt-4 font-mono text-[10px] leading-relaxed text-(--muted)">
+          Per-school quotas (storage & tokens) are editable under each school
+          profile.
+        </p>
+      </AdminPanel>
     </div>
   );
 }

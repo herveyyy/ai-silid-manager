@@ -8,7 +8,7 @@ import { IAIPrompts } from "./ai-prompts.interface";
 import { AiPromptsService } from "@/db/service/ai-prompts.service";
 
 export class AiPromptsController implements IAIPrompts {
-    constructor(private readonly aiPromptsService: AiPromptsService) {}
+    constructor(private readonly aiPromptsService: AiPromptsService) { }
 
     async getAIPrompts(): Promise<PromptLog[]> {
         return await this.aiPromptsService.getPromptLogs();

@@ -1,4 +1,5 @@
 import { UserService } from "@/db/service/user.service";
+import type { UserOverviewDTO } from "@/lib/types/admin-types";
 import { SelectUser } from "@/lib/types/user-types";
 import { IUsers } from "./users.interface";
 
@@ -15,5 +16,9 @@ export class UsersController implements IUsers {
             console.error(error);
             throw new Error("Failed to get user by credentials");
         }
+    }
+
+    async getUserOverview(): Promise<UserOverviewDTO> {
+        return await this.userService.getUserOverview();
     }
 }

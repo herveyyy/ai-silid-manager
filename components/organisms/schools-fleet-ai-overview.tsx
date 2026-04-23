@@ -15,6 +15,7 @@ import {
 } from "recharts";
 
 import { ChartContainer } from "@/components/ui/chart";
+import { formatUsd } from "@/lib/format-currency";
 import type {
   GlobalPromptOverviewDay,
   GlobalPromptOverviewDTO,
@@ -29,13 +30,6 @@ function fmt(n: number, maxFrac = 2) {
   return n.toLocaleString(undefined, {
     minimumFractionDigits: 0,
     maximumFractionDigits: maxFrac,
-  });
-}
-
-function fmtCost(n: number) {
-  return n.toLocaleString(undefined, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 8,
   });
 }
 
@@ -55,6 +49,8 @@ export function SchoolsFleetAiOverview({
   avgEstCostPerDay,
   avgTokensPerPrompt,
   avgEstCostPerPrompt,
+  promptsWithRecordedCost,
+  daysWithRecordedCost,
   spanDays,
   periodLabel,
   trackedCalendarDays,
@@ -146,13 +142,13 @@ export function SchoolsFleetAiOverview({
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <div className="theme-panel-strong border px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
-            Est. total cost (parsed)
+            Est. total cost (USD)
           </p>
           <p className="mt-1 font-mono text-2xl tabular-nums text-foreground">
-            {fmtCost(totalEstCost)}
+            {formatUsd(totalEstCost)}
           </p>
           <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-(--muted)">
-            from cost_value across all prompts
+            sum of parsed cost_value (defaults to USD)
           </p>
         </div>
         <div className="theme-panel-strong border px-4 py-3">
@@ -163,7 +159,8 @@ export function SchoolsFleetAiOverview({
             {fmt(avgPromptsPerDay, 4)}
           </p>
           <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-(--muted)">
-            ÷ {spanDays || "—"} calendar days (first→last log)
+            ÷ {trackedCalendarDays || "—"} active day(s) · window{" "}
+            {spanDays || "—"} calendar day(s)
           </p>
         </div>
         <div className="theme-panel-strong border px-4 py-3">
@@ -176,10 +173,13 @@ export function SchoolsFleetAiOverview({
         </div>
         <div className="theme-panel-strong border px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
-            Avg est. cost / day
+            Avg est. cost / day (USD)
           </p>
           <p className="mt-1 font-mono text-2xl tabular-nums text-foreground">
-            {fmtCost(avgEstCostPerDay)}
+            {formatUsd(avgEstCostPerDay)}
+          </p>
+          <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-(--muted)">
+            total parsed USD ÷ {daysWithRecordedCost || "—"} day(s) with cost
           </p>
         </div>
         <div className="theme-panel-strong border px-4 py-3">
@@ -192,10 +192,14 @@ export function SchoolsFleetAiOverview({
         </div>
         <div className="theme-panel-strong border px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
-            Avg est. cost / prompt
+            Avg est. cost / prompt (USD)
           </p>
           <p className="mt-1 font-mono text-2xl tabular-nums text-foreground">
-            {fmtCost(avgEstCostPerPrompt)}
+            {formatUsd(avgEstCostPerPrompt)}
+          </p>
+          <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-(--muted)">
+            total parsed USD ÷{" "}
+            {promptsWithRecordedCost || "—"} prompt(s) with parsed cost
           </p>
         </div>
       </div>
@@ -274,7 +278,7 @@ export function SchoolsFleetAiOverview({
             Daily trend (fleet)
           </p>
           <p className="mt-1 font-mono text-[11px] text-(--muted-strong)">
-            Bars = prompts · green = tokens · amber = est. cost
+            Bars = prompts · green = tokens · amber = est. cost USD
           </p>
           {!hasDaily ? (
             <p className="mt-8 font-mono text-[12px] text-(--muted)">
@@ -338,10 +342,10 @@ export function SchoolsFleetAiOverview({
                     tickLine={false}
                     axisLine={{ stroke: "var(--border-strong)" }}
                     tick={{ fill: "var(--muted)", fontSize: 9 }}
-                    tickFormatter={(v) => fmtCost(Number(v))}
+                    tickFormatter={(v) => formatUsd(Number(v))}
                     width={64}
                     label={{
-                      value: "Est. cost",
+                      value: "USD",
                       angle: 90,
                       position: "insideRight",
                       fill: "var(--chart-3)",
@@ -368,8 +372,8 @@ export function SchoolsFleetAiOverview({
                             </span>
                           </p>
                           <p className="text-sm text-foreground">
-                            Est. cost:{" "}
-                            <span className="tabular-nums">{fmtCost(row.cost)}</span>
+                            Est. cost (USD):{" "}
+                            <span className="tabular-nums">{formatUsd(row.cost)}</span>
                           </p>
                         </div>
                       );
@@ -403,7 +407,7 @@ export function SchoolsFleetAiOverview({
                     yAxisId="cost"
                     type="monotone"
                     dataKey="cost"
-                    name="Est. cost / day"
+                    name="Est. cost (USD) / day"
                     stroke="var(--accent)"
                     strokeWidth={2}
                     dot={{ r: 2, fill: "var(--accent)" }}

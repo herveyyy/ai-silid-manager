@@ -1,4 +1,4 @@
-import { mysqlTable, mysqlSchema, AnyMySqlColumn, foreignKey, primaryKey, char, mysqlEnum, json, text, int, tinyint, datetime, varchar, decimal } from "drizzle-orm/mysql-core"
+import { mysqlTable, mysqlSchema, AnyMySqlColumn, tinyint, foreignKey, primaryKey, char, mysqlEnum, json, text, int, datetime, varchar, decimal } from "drizzle-orm/mysql-core"
 import { sql } from "drizzle-orm"
 
 export const activities = mysqlTable("activities", {
@@ -15,8 +15,8 @@ export const activities = mysqlTable("activities", {
 	termId: char({ length: 36 }).references(() => term.id),
 	availableToStudents: json(),
 	notAvailableToStudents: json(),
-	bank: tinyint('bank').default(0).notNull(),
-	archive: tinyint('archive').default(0).notNull(),
+	bank: tinyint().default(0).notNull(),
+	archive: tinyint().default(0).notNull(),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	createdBy: char({ length: 36 }).references(() => users.id),
@@ -122,7 +122,7 @@ export const chatbox = mysqlTable("chatbox", {
 	groupIcon: text(),
 	createdAt: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
-	archive: tinyint("archive").default(0),
+	archive: tinyint().default(0),
 },
 	(table) => [
 		primaryKey({ columns: [table.id], name: "chatbox_id" }),
@@ -149,7 +149,7 @@ export const chatboxMessages = mysqlTable("chatbox_messages", {
 	emojis: json(),
 	createdAt: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 	updatedAt: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`),
-	pinned: tinyint("pinned").default(0),
+	pinned: tinyint().default(0),
 },
 	(table) => [
 		primaryKey({ columns: [table.id], name: "chatbox_messages_id" }),
@@ -166,11 +166,11 @@ export const classCard = mysqlTable("class_card", {
 	endTime: datetime("end_time", { mode: 'string', fsp: 3 }),
 	bgImage: text(),
 	color: varchar({ length: 255 }).default('#f48618ff').notNull(),
-	archive: tinyint("archive").default(0).notNull(),
+	archive: tinyint().default(0).notNull(),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	meetingLink: text("meeting_link"),
-	requestPosting: tinyint('request_posting').default(0).notNull(),
+	requestPosting: tinyint("request_posting").default(0).notNull(),
 },
 	(table) => [
 		primaryKey({ columns: [table.id], name: "class_card_id" }),
@@ -488,6 +488,8 @@ export const requestCache = mysqlTable("request_cache", {
 	id: char({ length: 36 }).notNull(),
 	requestToken: text().notNull(),
 	expiredDate: datetime({ mode: 'string', fsp: 3 }).notNull(),
+	userId: char("user_id", { length: 36 }).references(() => users.id),
+	schoolCode: char("school_code", { length: 50 }),
 },
 	(table) => [
 		primaryKey({ columns: [table.id], name: "request_cache_id" }),
@@ -541,6 +543,7 @@ export const schools = mysqlTable("schools", {
 	unlimitedStorage: tinyint("unlimited_storage").default(0).notNull(),
 	unlimitedToken: tinyint("unlimited_token").default(0).notNull(),
 	tokenLimit: int("token_limit").default(10000).notNull(),
+	/** Storage cap in megabytes (e.g. 10_000 = 10,000 MB), not bytes. */
 	storageLimit: int("storage_limit").default(10000).notNull(),
 	defaultAiModelId: char("default_ai_model_id", { length: 36 }).references(() => aiModels.id),
 },
@@ -750,5 +753,3 @@ export const users = mysqlTable("users", {
 	(table) => [
 		primaryKey({ columns: [table.id], name: "users_id" }),
 	]);
-export const attachmentType = attachments.parentType;
-export const userRoleType = users.role;

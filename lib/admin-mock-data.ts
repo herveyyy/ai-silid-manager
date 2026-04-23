@@ -99,39 +99,7 @@ export const mockSchools: SchoolDTO[] = [
     },
 ];
 
-/** Per-school usage and default quotas (mock). Replace with API joins later. */
-export const mockSchoolMetricsById: Record<string, SchoolAdminMetrics> = {
-    "a1b2c3d4-e5f6-7890-abcd-ef1234567890": {
-        storageUsedBytes: 6_516_480,
-        tokensUsed: 12_400,
-        quotaStorageBytes: 10 * 1024 * 1024 * 1024,
-        quotaTokens: 500_000,
-    },
-    "b2c3d4e5-f6a7-8901-bcde-f12345678901": {
-        storageUsedBytes: 1_048_576,
-        tokensUsed: 3_200,
-        quotaStorageBytes: 5 * 1024 * 1024 * 1024,
-        quotaTokens: 250_000,
-    },
-    "c3d4e5f6-a7b8-9012-cdef-123456789012": {
-        storageUsedBytes: 512_000,
-        tokensUsed: 890,
-        quotaStorageBytes: 2 * 1024 * 1024 * 1024,
-        quotaTokens: 100_000,
-    },
-    "d4e5f6a7-b8c9-0123-def0-234567890123": {
-        storageUsedBytes: 8_388_608,
-        tokensUsed: 45_000,
-        quotaStorageBytes: 20 * 1024 * 1024 * 1024,
-        quotaTokens: 1_000_000,
-    },
-    "e5f6a7b8-c9d0-1234-ef01-345678901234": {
-        storageUsedBytes: 2_097_152,
-        tokensUsed: 7_650,
-        quotaStorageBytes: 8 * 1024 * 1024 * 1024,
-        quotaTokens: 400_000,
-    },
-};
+
 
 export function getSchoolById(id: string): SchoolDTO | undefined {
     return mockSchools.find((s) => s.id === id);
@@ -139,7 +107,7 @@ export function getSchoolById(id: string): SchoolDTO | undefined {
 
 export function getDefaultSchoolMetrics(id: string): SchoolAdminMetrics {
     return (
-        mockSchoolMetricsById[id] ?? {
+        {
             storageUsedBytes: 0,
             tokensUsed: 0,
             quotaStorageBytes: 1024 * 1024 * 1024,

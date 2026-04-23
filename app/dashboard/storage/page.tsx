@@ -1,7 +1,6 @@
 import { createAttachmentsController } from "@/app/actions";
 import { StorageConsole } from "@/components/organisms/storage-console";
-import { attachmentType } from "@/drizzle/schema";
-
+import { attachmentType } from "@/lib/types/admin-types";
 export default async function StoragePage({
   searchParams,
 }: {

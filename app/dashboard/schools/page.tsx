@@ -3,6 +3,7 @@ import { AdminPanel } from "@/components/molecules/admin-panel";
 import { AddSchoolModal } from "@/components/organisms/add-school-modal";
 import { SchoolsFleetTable } from "@/components/organisms/schools-fleet-table";
 import { createSchoolsController } from "@/app/actions";
+import { storageLimitMbToBytes } from "@/lib/storage.utils";
 
 export default async function SchoolsListPage({
   searchParams,
@@ -56,7 +57,9 @@ export default async function SchoolsListPage({
     metrics: {
       storageUsedBytes: Number(school.storageUsedBytes ?? 0),
       tokensUsed: Number(school.tokensUsed ?? 0),
-      quotaStorageBytes: Number(school.storageLimit ?? 0),
+      quotaStorageBytes: storageLimitMbToBytes(
+        Number(school.storageLimit ?? 0),
+      ),
       quotaTokens: Number(school.tokenLimit ?? 0),
     },
   }));

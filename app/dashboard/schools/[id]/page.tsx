@@ -10,6 +10,7 @@ import {
   createSchoolsController,
 } from "@/app/actions";
 import { buildPromptDailyStats } from "@/lib/prompt-daily-stats";
+import { storageLimitMbToBytes } from "@/lib/storage.utils";
 import { SchoolPromptMetricsChart } from "@/components/organisms/school-prompt-metrics-chart";
 
 export default async function SchoolProfilePage({
@@ -49,7 +50,7 @@ export default async function SchoolProfilePage({
   const metrics = {
     storageUsedBytes: Number(schoolReport?.storageUsedBytes ?? 0),
     tokensUsed: Number(schoolReport?.tokensUsed ?? 0),
-    quotaStorageBytes: Number(school.storageLimit ?? 0),
+    quotaStorageBytes: storageLimitMbToBytes(Number(school.storageLimit ?? 0)),
     quotaTokens: Number(school.tokenLimit ?? 0),
   };
   const promptDailyStats = buildPromptDailyStats(promptLogs);
@@ -96,6 +97,12 @@ export default async function SchoolProfilePage({
           avgEstCostPerPrompt={promptDailyStats.avgEstCostPerPrompt}
           spanDays={promptDailyStats.spanDays}
           activeDays={promptDailyStats.activeDays}
+          promptsWithRecordedCost={
+            promptDailyStats.promptsWithRecordedCost
+          }
+          daysWithRecordedCost={
+            promptDailyStats.daysWithRecordedCost
+          }
           periodLabel={promptDailyStats.periodLabel}
           series={promptDailyStats.series}
         />

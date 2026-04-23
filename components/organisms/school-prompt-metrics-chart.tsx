@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { ChartContainer } from "@/components/ui/chart";
+import { formatUsd } from "@/lib/format-currency";
 import type { PromptDailyPoint } from "@/lib/prompt-daily-stats";
 
 export type SchoolPromptMetricsChartProps = {
@@ -23,6 +24,10 @@ export type SchoolPromptMetricsChartProps = {
   avgEstCostPerPrompt: number;
   spanDays: number;
   activeDays: number;
+  /** Rows with parsed cost_value > 0 — divisor for avg cost / prompt. */
+  promptsWithRecordedCost: number;
+  /** Days used as divisor for avg cost / day (≥1 day with summed parsed USD). */
+  daysWithRecordedCost: number;
   periodLabel: string;
   series: PromptDailyPoint[];
 };
@@ -31,13 +36,6 @@ function fmt(n: number, maxFrac = 2) {
   return n.toLocaleString(undefined, {
     minimumFractionDigits: 0,
     maximumFractionDigits: maxFrac,
-  });
-}
-
-function fmtCost(n: number) {
-  return n.toLocaleString(undefined, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 8,
   });
 }
 
@@ -50,6 +48,8 @@ export function SchoolPromptMetricsChart({
   avgEstCostPerPrompt,
   spanDays,
   activeDays,
+  promptsWithRecordedCost,
+  daysWithRecordedCost,
   periodLabel,
   series,
 }: SchoolPromptMetricsChartProps) {
@@ -66,7 +66,8 @@ export function SchoolPromptMetricsChart({
             {fmt(avgPromptsPerDay, 4)}
           </p>
           <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-(--muted)">
-            total prompts ÷ {spanDays || "—"} calendar days (first→last log)
+            total prompts ÷ {activeDays || "—"} active day(s) · window{" "}
+            {spanDays || "—"} calendar day(s)
           </p>
         </div>
         <div className="theme-panel-strong border px-4 py-3">
@@ -77,7 +78,7 @@ export function SchoolPromptMetricsChart({
             {fmt(avgTokensPerDay, 2)}
           </p>
           <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-(--muted)">
-            sum token_ai_value ÷ same day span
+            sum token_ai_value ÷ {activeDays || "—"} active day(s)
           </p>
         </div>
         <div className="theme-panel-strong border px-4 py-3">
@@ -93,10 +94,10 @@ export function SchoolPromptMetricsChart({
         </div>
         <div className="theme-panel-strong border px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
-            Est. total cost (parsed)
+            Est. total cost (USD)
           </p>
           <p className="mt-1 font-mono text-2xl tabular-nums text-foreground">
-            {fmtCost(totalEstCost)}
+            {formatUsd(totalEstCost)}
           </p>
           <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-(--muted)">
             sum of numeric / JSON from cost_value
@@ -104,24 +105,25 @@ export function SchoolPromptMetricsChart({
         </div>
         <div className="theme-panel-strong border px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
-            Avg est. cost / day
+            Avg est. cost / day (USD)
           </p>
           <p className="mt-1 font-mono text-2xl tabular-nums text-foreground">
-            {fmtCost(avgEstCostPerDay)}
+            {formatUsd(avgEstCostPerDay)}
           </p>
           <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-(--muted)">
-            parsed cost ÷ calendar day span
+            total parsed USD ÷ {daysWithRecordedCost || "—"} day(s) with cost
           </p>
         </div>
         <div className="theme-panel-strong border px-4 py-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
-            Avg est. cost / prompt
+            Avg est. cost / prompt (USD)
           </p>
           <p className="mt-1 font-mono text-2xl tabular-nums text-foreground">
-            {fmtCost(avgEstCostPerPrompt)}
+            {formatUsd(avgEstCostPerPrompt)}
           </p>
           <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.15em] text-(--muted)">
-            parsed cost ÷ prompt count
+            total parsed USD ÷{" "}
+            {promptsWithRecordedCost || "—"} prompt(s) with parsed cost
           </p>
         </div>
       </div>
@@ -135,7 +137,7 @@ export function SchoolPromptMetricsChart({
           Daily breakdown
         </p>
         <p className="mt-1 font-mono text-[11px] text-(--muted-strong)">
-          Bars = prompts · green line = tokens · amber line = est. cost (
+          Bars = prompts · green line = tokens · amber line = est. cost USD (
           {activeDays} day{activeDays === 1 ? "" : "s"} with activity)
         </p>
         {!hasDaily ? (
@@ -144,7 +146,7 @@ export function SchoolPromptMetricsChart({
             on prompt rows to plot this chart.
           </p>
         ) : (
-          <ChartContainer className="mt-4 h-[340px]!">
+          <ChartContainer className="mt-4 h-[340px]">
             <ComposedChart
               data={series}
               margin={{ top: 12, right: 24, left: 4, bottom: 8 }}
@@ -199,10 +201,10 @@ export function SchoolPromptMetricsChart({
                 tickLine={false}
                 axisLine={{ stroke: "var(--border-strong)" }}
                 tick={{ fill: "var(--muted)", fontSize: 9 }}
-                tickFormatter={(v) => fmtCost(Number(v))}
+                tickFormatter={(v) => formatUsd(Number(v))}
                 width={64}
                 label={{
-                  value: "Est. cost",
+                  value: "USD",
                   angle: 90,
                   position: "insideRight",
                   fill: "var(--chart-3)",
@@ -229,8 +231,8 @@ export function SchoolPromptMetricsChart({
                         </span>
                       </p>
                       <p className="text-sm text-foreground">
-                        Est. cost:{" "}
-                        <span className="tabular-nums">{fmtCost(row.cost)}</span>
+                        Est. cost (USD):{" "}
+                        <span className="tabular-nums">{formatUsd(row.cost)}</span>
                       </p>
                     </div>
                   );
@@ -264,7 +266,7 @@ export function SchoolPromptMetricsChart({
                 yAxisId="cost"
                 type="monotone"
                 dataKey="cost"
-                name="Est. cost / day"
+                name="Est. cost (USD) / day"
                 stroke="var(--accent)"
                 strokeWidth={2}
                 dot={{ r: 2, fill: "var(--accent)" }}

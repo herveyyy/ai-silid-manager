@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminPanel } from "@/components/molecules/admin-panel";
 import { createRoomsController, createSchoolsController } from "@/app/actions";
-import { formatBytes } from "@/lib/admin-mock-data";
+import { formatStorageSize } from "@/lib/storage.utils";
 
 export default async function RoomProfilePage({
   params,
@@ -94,7 +94,7 @@ export default async function RoomProfilePage({
               Storage
             </p>
             <p className="mt-1 font-mono text-xl tabular-nums text-foreground">
-              {formatBytes(Number(room.storageUsedBytes ?? 0))}
+              {formatStorageSize(Number(room.storageUsedBytes ?? 0))}
             </p>
           </div>
           <div className="theme-panel-strong border px-4 py-3">

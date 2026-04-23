@@ -6,6 +6,7 @@ import { GetSchoolsUsageViewUsecase } from "@/db/usecase/schools/get_schools_usa
 import { UsersController } from "@/db/controller/users/users.controller";
 import { UserService } from "@/db/service/user.service";
 import { GetUserByCredsUsecase } from "@/db/usecase/user/get_user_by_creds.usecase";
+import { GetUserOverviewUsecase } from "@/db/usecase/user/get_user_overview.usecase";
 import { UpdateSchoolConfigurationUsecase } from "@/db/usecase/schools/update_school_configuration.usecase";
 import { CreateSchoolUsecase } from "@/db/usecase/schools/create_school.usecase";
 import { UpdateSchoolPasswordUsecase } from "@/db/usecase/schools/update_school_password.usecase";
@@ -48,7 +49,10 @@ export async function createSchoolsController(): Promise<SchoolsController> {
 export async function createUsersController(): Promise<UsersController> {
     await requireDashboardAccess();
     return new UsersController(
-        new UserService(new GetUserByCredsUsecase()),
+        new UserService(
+            new GetUserByCredsUsecase(),
+            new GetUserOverviewUsecase(),
+        ),
     );
 }
 
