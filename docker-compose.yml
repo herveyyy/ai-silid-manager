@@ -1,0 +1,9 @@
+services:
+  app:
+    image: swr.ap-southeast-2.myhuaweicloud.com/silid-v3-staging-1/school-monitoring-manager:latest
+    container_name: silid-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env

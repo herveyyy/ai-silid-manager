@@ -53,29 +53,22 @@ jobs:
       - name: Image digest
         run: echo "Image pushed with digest ${{ steps.build-and-push.outputs.digest }}"
 
-  # deploy:
-  #   name: Deploy to VM
-  #   needs: build-and-push
-  #   if: github.event_name == 'push'
-  #   runs-on: ubuntu-latest
+  deploy:
+    name: Deploy to VM
+    needs: build-and-push
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Deploy via SSH
-  #       uses: appleboy/ssh-action@v1
-  #       with:
-  #         host: ${{ secrets.VM_HOST }}
-  #         username: ${{ secrets.VM_USERNAME }}
-  #         key: ${{ secrets.VM_SSH_KEY }}
-  #         script: |
-  #           IMAGE=swr.${{ env.HUAWEI_REGION }}.myhuaweicloud.com/${{ env.SWR_ORGANIZATION }}/${{ env.SWR_REPOSITORY }}:latest
-  #           docker pull $IMAGE
-  #           docker stop silid-app || true
-  #           docker rm silid-app || true
-  #           docker run -d \
-  #             --name silid-app \
-  #             --restart unless-stopped \
-  #             -p 3000:3000 \
-  #             --env-file /home/${{ secrets.VM_USERNAME }}/.env.silid \
-  #             $IMAGE
-  #           docker image prune -f
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd ~/silid-app
+            docker compose pull
+            docker compose up -d
+            docker image prune -f
 
