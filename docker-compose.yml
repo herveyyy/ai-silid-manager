@@ -1,0 +1,27 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: silid-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+  app:
+    image: swr.ap-southeast-2.myhuaweicloud.com/silid-v3-staging-1/school-monitoring-manager:latest
+    container_name: silid-app
+    restart: unless-stopped
+    expose:
+      - "3000"
+    env_file:
+      - .env
+
+volumes:
+  caddy_data:
+  caddy_config:

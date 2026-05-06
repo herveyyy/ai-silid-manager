@@ -1,0 +1,75 @@
+name: Build and Push to Huawei Cloud SWR
+
+on:
+  push:
+    branches:
+      - huawei
+  pull_request:
+    branches:
+      - huawei
+  workflow_dispatch:
+
+env:
+  HUAWEI_REGION: ap-southeast-2
+  SWR_ORGANIZATION: silid-v3-staging-1
+  SWR_REPOSITORY: school-monitoring-manager
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Huawei Cloud SWR
+        run: docker login -u ap-southeast-2@${{ vars.SWR_LOGIN_USER }} -p ${{ secrets.SWR_LOGIN_PASSWORD }} swr.${{ env.HUAWEI_REGION }}.myhuaweicloud.com
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: swr.${{ env.HUAWEI_REGION }}.myhuaweicloud.com/${{ env.SWR_ORGANIZATION }}/${{ env.SWR_REPOSITORY }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
+          platforms: linux/amd64
+
+      - name: Image digest
+        run: echo "Image pushed with digest ${{ steps.build-and-push.outputs.digest }}"
+
+  deploy:
+    name: Deploy to VM
+    needs: build-and-push
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd ~/silid-school-manager
+            git pull
+            docker compose pull
+            docker compose up -d
+            docker image prune -f
+
