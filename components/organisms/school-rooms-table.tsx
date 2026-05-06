@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { PaginatedRoomUsageDTO } from "@/lib/types/admin-types";
-import { formatBytes } from "@/lib/admin-mock-data";
+import { formatStorageSize } from "@/lib/storage.utils";
 
 function shortId(id: string): string {
   return `${id.slice(0, 8)}…`;
@@ -78,7 +78,7 @@ export function SchoolRoomsTable({
                   storage
                 </dt>
                 <dd className="mt-1 tabular-nums text-foreground">
-                  {formatBytes(Number(room.storageUsedBytes ?? 0))}
+                  {formatStorageSize(Number(room.storageUsedBytes ?? 0))}
                 </dd>
               </div>
               <div className="theme-panel-strong border px-3 py-2">
@@ -162,7 +162,7 @@ export function SchoolRoomsTable({
                 <td className="px-4 py-3 tabular-nums">{room.classCardCount}</td>
                 <td className="px-4 py-3 tabular-nums">{room.participantCount}</td>
                 <td className="px-4 py-3 tabular-nums">
-                  {formatBytes(Number(room.storageUsedBytes ?? 0))}
+                  {formatStorageSize(Number(room.storageUsedBytes ?? 0))}
                 </td>
                 <td className="px-4 py-3 tabular-nums">
                   {Number(room.tokensUsed ?? 0).toLocaleString()}

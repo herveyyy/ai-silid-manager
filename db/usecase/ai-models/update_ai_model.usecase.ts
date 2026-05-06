@@ -17,6 +17,8 @@ export class UpdateAiModelUsecase {
                     name: data.name,
                     description: data.description,
                     status: data.status,
+                    inCostValue: data.inCostValue,
+                    outCostValue: data.outCostValue,
                     updatedAt: sql`now()`,
                 })
                 .where(eq(aiModels.id, modelId));

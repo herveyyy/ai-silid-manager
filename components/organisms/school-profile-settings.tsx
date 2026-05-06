@@ -8,27 +8,11 @@ import type {
   SchoolDTO,
 } from "@/lib/types/admin-types";
 import {
-  readQuotaOverride,
-  writeQuotaOverride,
-} from "@/lib/school-quota-storage";
-import { formatBytes } from "@/lib/admin-mock-data";
-import {
   updateSchoolConfigurationAction,
   updateSchoolPasswordAction,
   updateSchoolProfileAction,
 } from "@/app/dashboard/schools/actions";
-
-function bytesToGb(n: number): string {
-  return (n / (1024 * 1024 * 1024)).toFixed(2);
-}
-
-function parseGbInput(s: string): number | null {
-  const t = s.trim().replace(",", ".");
-  if (t === "") return null;
-  const v = Number(t);
-  if (!Number.isFinite(v) || v < 0) return null;
-  return Math.round(v * 1024 * 1024 * 1024);
-}
+import { formatStorageSize } from "@/lib/storage.utils";
 
 export function SchoolProfileSettings({
   school,
@@ -40,15 +24,6 @@ export function SchoolProfileSettings({
   aiModels: AiModelDTO[];
 }) {
   const router = useRouter();
-  const [quotaStorageBytes, setQuotaStorageBytes] = useState(
-    metrics.quotaStorageBytes,
-  );
-  const [quotaTokens, setQuotaTokens] = useState(metrics.quotaTokens);
-  const [storageGbInput, setStorageGbInput] = useState(
-    bytesToGb(metrics.quotaStorageBytes),
-  );
-  const [tokensInput, setTokensInput] = useState(String(metrics.quotaTokens));
-  const [savedFlash, setSavedFlash] = useState(false);
   const [aiFeat, setAiFeat] = useState(school.aiFeat);
   const [unlimitedStorage, setUnlimitedStorage] = useState(
     school.unlimitedStorage,
@@ -81,14 +56,7 @@ export function SchoolProfileSettings({
   const [profileSavedFlash, setProfileSavedFlash] = useState(false);
   const [isProfilePending, startProfileTransition] = useTransition();
   useEffect(() => {
-    const o = readQuotaOverride(school.id);
-    const base = o ? { ...metrics, ...o } : metrics;
-
     setTimeout(() => {
-      setQuotaStorageBytes(base.quotaStorageBytes);
-      setQuotaTokens(base.quotaTokens);
-      setStorageGbInput(bytesToGb(base.quotaStorageBytes));
-      setTokensInput(String(base.quotaTokens));
       setAiFeat(school.aiFeat);
       setDefaultAiModelId(school.defaultAiModelId ?? "");
       setUnlimitedStorage(school.unlimitedStorage);
@@ -102,33 +70,19 @@ export function SchoolProfileSettings({
       setSiteInput(school.site);
       setUsernameInput(school.username ?? "");
     }, 0);
-  }, [school, metrics]);
+  }, [school]);
 
   const storagePct =
-    quotaStorageBytes > 0
+    !unlimitedStorage && metrics.quotaStorageBytes > 0
       ? Math.min(
           100,
-          (metrics.storageUsedBytes / quotaStorageBytes) * 100,
+          (metrics.storageUsedBytes / metrics.quotaStorageBytes) * 100,
         )
       : 0;
   const tokenPct =
-    quotaTokens > 0
-      ? Math.min(100, (metrics.tokensUsed / quotaTokens) * 100)
+    !unlimitedToken && metrics.quotaTokens > 0
+      ? Math.min(100, (metrics.tokensUsed / metrics.quotaTokens) * 100)
       : 0;
-
-  const applySave = useCallback(() => {
-    const gb = parseGbInput(storageGbInput);
-    const tokens = Number(tokensInput.replace(/,/g, ""));
-    if (gb === null || !Number.isFinite(tokens) || tokens < 0) return;
-    writeQuotaOverride(school.id, {
-      quotaStorageBytes: gb,
-      quotaTokens: Math.floor(tokens),
-    });
-    setQuotaStorageBytes(gb);
-    setQuotaTokens(Math.floor(tokens));
-    setSavedFlash(true);
-    window.setTimeout(() => setSavedFlash(false), 2200);
-  }, [school.id, storageGbInput, tokensInput]);
 
   const applyConfigSave = useCallback(() => {
     const tokenLimit = Number(tokenLimitInput.replace(/,/g, ""));
@@ -572,6 +526,9 @@ export function SchoolProfileSettings({
                 onChange={(e) => setStorageLimitInput(e.target.value)}
                 className="theme-input mt-3 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
               />
+              <p className="mt-2 font-mono text-[10px] leading-relaxed text-(--muted)">
+                Number is megabytes: 10,000 = 10,000 MB. Schema default 10,000.
+              </p>
             </div>
 
             <div className="theme-panel border p-4 sm:col-span-2 xl:col-span-3">
@@ -636,7 +593,7 @@ export function SchoolProfileSettings({
 
       <div className="theme-panel-strong border p-5">
         <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted)">
-          Usage · mock aggregates
+          Usage
         </p>
         <div className="mt-4 grid gap-6 sm:grid-cols-2">
           <div>
@@ -644,11 +601,11 @@ export function SchoolProfileSettings({
               Storage used / total quota
             </p>
             <p className="mt-1 font-mono text-sm text-foreground">
-              {formatBytes(metrics.storageUsedBytes)} /{" "}
+              {formatStorageSize(metrics.storageUsedBytes)} /{" "}
               {unlimitedStorage ? (
                 <span className="text-(--accent)">&infin;</span>
               ) : (
-                formatBytes(quotaStorageBytes)
+                formatStorageSize(metrics.quotaStorageBytes)
               )}
             </p>
             <div className="mt-2 h-2 w-full bg-background">
@@ -667,7 +624,7 @@ export function SchoolProfileSettings({
               {unlimitedToken ? (
                 <span className="text-(--accent)">&infin;</span>
               ) : (
-                quotaTokens.toLocaleString()
+                metrics.quotaTokens.toLocaleString()
               )}
             </p>
             <div className="mt-2 h-2 w-full bg-background">
@@ -677,59 +634,6 @@ export function SchoolProfileSettings({
               />
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="theme-panel border p-5">
-        <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-(--muted)">
-          Quotas · admin
-        </p>
-        <p className="mt-2 max-w-xl font-mono text-[11px] leading-relaxed text-(--muted)">
-          Set total storage and total AI token allowance for this school. Values
-          persist in <span className="text-(--muted-strong)">localStorage</span> in
-          this browser until an API is connected.
-        </p>
-        <div className="mt-6 grid gap-5 sm:grid-cols-2">
-          <label className="block font-mono text-[11px] uppercase tracking-[0.15em] text-(--muted-strong)">
-            Total storage (GB)
-            {unlimitedStorage ? (
-              <span className="mt-2 block text-(--accent)">&infin; Unlimited</span>
-            ) : null}
-            <input
-              type="text"
-              inputMode="decimal"
-              value={storageGbInput}
-              onChange={(e) => setStorageGbInput(e.target.value)}
-              className="theme-input mt-2 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
-            />
-          </label>
-          <label className="block font-mono text-[11px] uppercase tracking-[0.15em] text-(--muted-strong)">
-            Total tokens
-            {unlimitedToken ? (
-              <span className="mt-2 block text-(--accent)">&infin; Unlimited</span>
-            ) : null}
-            <input
-              type="text"
-              inputMode="numeric"
-              value={tokensInput}
-              onChange={(e) => setTokensInput(e.target.value)}
-              className="theme-input mt-2 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
-            />
-          </label>
-        </div>
-        <div className="mt-6 flex flex-wrap items-center gap-4">
-          <button
-            type="button"
-            onClick={applySave}
-            className="theme-button border px-5 py-2.5 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] transition-colors"
-          >
-            Save quotas
-          </button>
-          {savedFlash ? (
-            <span className="font-mono text-[11px] text-(--success)">
-              Saved locally
-            </span>
-          ) : null}
         </div>
       </div>
     </div>

@@ -11,6 +11,7 @@ const nav = [
     { href: "/dashboard/schools", label: "Schools" },
     { href: "/dashboard/storage", label: "Storage" },
     { href: "/dashboard/ai", label: "AI" },
+    { href: "/dashboard/db-error-logger", label: "DB Error Logger" },
 ] as const;
 
 export function AdminShell({
@@ -30,7 +31,7 @@ export function AdminShell({
     }, [pathname]);
 
     return (
-        <div className="flex h-screen bg-background font-sans text-foreground">
+        <div className="flex h-screen overflow-hidden bg-background font-sans text-foreground">
             <div className="theme-grid pointer-events-none fixed inset-0 opacity-[0.85]" />
 
             {isMobileSidebarOpen ? (
@@ -46,9 +47,8 @@ export function AdminShell({
 
             <aside
                 id="admin-sidebar"
-                className={`theme-panel-strong fixed inset-y-0 left-0 z-30 flex w-56 shrink-0 flex-col border-r transition-transform duration-200 lg:relative lg:z-10 lg:translate-x-0 ${
-                    isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
-                }`}
+                className={`theme-panel-strong fixed inset-y-0 left-0 z-30 flex w-56 shrink-0 flex-col border-r transition-transform duration-200 lg:relative lg:z-10 lg:translate-x-0 ${isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+                    }`}
             >
                 <div
                     className="border-b px-4 py-6 flex w-full justify-between "
@@ -73,25 +73,24 @@ export function AdminShell({
                             item.href === "/dashboard"
                                 ? pathname === "/dashboard"
                                 : item.href === "/dashboard/schools"
-                                  ? pathname === "/dashboard/schools" ||
+                                    ? pathname === "/dashboard/schools" ||
                                     pathname.startsWith("/dashboard/schools/")
-                                  : pathname === item.href ||
+                                    : pathname === item.href ||
                                     pathname.startsWith(`${item.href}/`);
                         return (
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`border px-3 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.25em] transition-colors ${
-                                    active
+                                className={`border px-3 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.25em] transition-colors ${active
                                         ? "text-(--accent-contrast)"
                                         : "border-transparent text-(--muted)"
-                                }`}
+                                    }`}
                                 style={
                                     active
                                         ? {
-                                              borderColor: "var(--accent)",
-                                              backgroundColor: "var(--accent)",
-                                          }
+                                            borderColor: "var(--accent)",
+                                            backgroundColor: "var(--accent)",
+                                        }
                                         : undefined
                                 }
                             >
@@ -109,9 +108,9 @@ export function AdminShell({
                     </p>
                     <button
                         className="theme-link mt-3 inline-block font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)"
-                    onClick={() => {
-                        signOut();
-                    }}
+                        onClick={() => {
+                            signOut();
+                        }}
                     >
                         Sign out
                     </button>
@@ -153,11 +152,10 @@ export function AdminShell({
                                 {environmentLabel}
                             </p>
                             <p
-                                className={`font-mono text-[11px] ${
-                                    isDatabaseConnected
+                                className={`font-mono text-[11px] ${isDatabaseConnected
                                         ? "text-(--success)"
                                         : "text-(--danger)"
-                                }`}
+                                    }`}
                             >
                                 {isDatabaseConnected
                                     ? "DATA_CONNECTED"

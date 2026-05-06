@@ -1,29 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import type {
   PaginatedSchoolUsageViewDTO,
   SchoolAdminMetrics,
   SchoolDTO,
 } from "@/lib/types/admin-types";
-import { formatBytes } from "@/lib/admin-mock-data";
-import {
-  readQuotaOverride,
-  SCHOOL_QUOTA_STORAGE_KEY,
-} from "@/lib/school-quota-storage";
+import { formatStorageSize } from "@/lib/storage.utils";
 
 function shortId(id: string): string {
   return `${id.slice(0, 8)}…`;
-}
-
-function mergeMetrics(
-  schoolId: string,
-  base: SchoolAdminMetrics,
-): SchoolAdminMetrics {
-  const o = readQuotaOverride(schoolId);
-  if (!o) return base;
-  return { ...base, ...o };
 }
 
 export function SchoolsFleetTable({
@@ -33,24 +19,9 @@ export function SchoolsFleetTable({
   rows: { school: SchoolDTO ; metrics: SchoolAdminMetrics }[];
   paginatedSchools: PaginatedSchoolUsageViewDTO;
 }) {
-  const [tick, setTick] = useState(0);
   const { total, page, limit, offset } = paginatedSchools;
   const hasPrevious = offset > 0;
   const hasNext = offset + rows.length < total;
-
-  useEffect(() => {
-    const bump = () => setTick((t) => t + 1);
-    bump();
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === SCHOOL_QUOTA_STORAGE_KEY) bump();
-    };
-    window.addEventListener("silid-school-quotas-updated", bump);
-    window.addEventListener("storage", onStorage);
-    return () => {
-      window.removeEventListener("silid-school-quotas-updated", bump);
-      window.removeEventListener("storage", onStorage);
-    };
-  }, []);
 
   function createPageHref(nextPage: number, nextOffset: number): string {
     const params = new URLSearchParams({
@@ -65,10 +36,8 @@ export function SchoolsFleetTable({
   return (
     <div className="theme-panel border">
       <div className="divide-y md:hidden" style={{ borderColor: "var(--border)" }}>
-        {rows.map(({ school, metrics }) => {
-          const m = mergeMetrics(school.id, metrics);
-          void tick;
-          const storageLabel = `${formatBytes(m.storageUsedBytes)} / ${formatBytes(m.quotaStorageBytes)}`;
+        {rows.map(({ school, metrics: m }) => {
+          const storageLabel = `${formatStorageSize(m.storageUsedBytes)} / ${formatStorageSize(m.quotaStorageBytes)}`;
           const tokenLabel = `${m.tokensUsed.toLocaleString()} / ${m.quotaTokens.toLocaleString()}`;
 
           return (
@@ -152,10 +121,8 @@ export function SchoolsFleetTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ school, metrics }) => {
-              const m = mergeMetrics(school.id, metrics);
-              void tick;
-              const storageLabel = `${formatBytes(m.storageUsedBytes)} / ${formatBytes(m.quotaStorageBytes)}`;
+            {rows.map(({ school, metrics: m }) => {
+              const storageLabel = `${formatStorageSize(m.storageUsedBytes)} / ${formatStorageSize(m.quotaStorageBytes)}`;
               const tokenLabel = `${m.tokensUsed.toLocaleString()} / ${m.quotaTokens.toLocaleString()}`;
               return (
                 <tr
@@ -204,7 +171,7 @@ export function SchoolsFleetTable({
         style={{ borderColor: "var(--border)" }}
       >
         schools · showing {rows.length} of {total} · page {page} · offset {offset}
-        {" "}· limit {limit} · local quota overrides apply in this browser
+        {" "}· limit {limit}
       </p>
       <div
         className="flex flex-col gap-3 border-t px-4 py-3 font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted) sm:flex-row sm:items-center sm:justify-between"

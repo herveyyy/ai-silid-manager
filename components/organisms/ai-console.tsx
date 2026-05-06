@@ -19,6 +19,8 @@ function buildDraft(model: AiModelDTO): AiModelMutationInput {
     name: model.name,
     description: model.description,
     status: model.status,
+    inCostValue: model.inCostValue,
+    outCostValue: model.outCostValue,
   };
 }
 
@@ -38,6 +40,8 @@ export function AiConsole({
   const [featFilter, setFeatFilter] = useState<string>("all");
   const [newModelName, setNewModelName] = useState("");
   const [newModelDescription, setNewModelDescription] = useState("");
+  const [newModelInCostValue, setNewModelInCostValue] = useState("");
+  const [newModelOutCostValue, setNewModelOutCostValue] = useState("");
   const [newModelStatus, setNewModelStatus] =
     useState<(typeof STATUS_OPTIONS)[number]>("active");
   const [createMessage, setCreateMessage] = useState<string | null>(null);
@@ -113,6 +117,8 @@ export function AiConsole({
         name: newModelName,
         description: newModelDescription,
         status: newModelStatus,
+        inCostValue: newModelInCostValue || null,
+        outCostValue: newModelOutCostValue || null,
       });
 
       setCreateMessage(result.message);
@@ -120,6 +126,8 @@ export function AiConsole({
 
       setNewModelName("");
       setNewModelDescription("");
+      setNewModelInCostValue("");
+      setNewModelOutCostValue("");
       setNewModelStatus("active");
       router.refresh();
     });
@@ -274,6 +282,26 @@ export function AiConsole({
                 />
               </label>
               <label className="block font-mono text-[11px] uppercase tracking-[0.12em] text-(--muted-strong)">
+                In cost value
+                <input
+                  type="text"
+                  value={newModelInCostValue}
+                  onChange={(e) => setNewModelInCostValue(e.target.value)}
+                  className="theme-input mt-2 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+                  placeholder="INPUT · COST"
+                />
+              </label>
+              <label className="block font-mono text-[11px] uppercase tracking-[0.12em] text-(--muted-strong)">
+                Out cost value
+                <input
+                  type="text"
+                  value={newModelOutCostValue}
+                  onChange={(e) => setNewModelOutCostValue(e.target.value)}
+                  className="theme-input mt-2 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
+                  placeholder="OUTPUT · COST"
+                />
+              </label>
+              <label className="block font-mono text-[11px] uppercase tracking-[0.12em] text-(--muted-strong)">
                 Status
                 <select
                   value={newModelStatus}
@@ -301,12 +329,11 @@ export function AiConsole({
               </button>
               {createMessage ? (
                 <p
-                  className={`font-mono text-[11px] ${
-                    createMessage.includes("Failed") ||
+                  className={`font-mono text-[11px] ${createMessage.includes("Failed") ||
                     createMessage.includes("required")
-                      ? "text-(--danger)"
-                      : "text-(--success)"
-                  }`}
+                    ? "text-(--danger)"
+                    : "text-(--success)"
+                    }`}
                 >
                   {createMessage}
                 </p>
@@ -358,6 +385,46 @@ export function AiConsole({
                           {model.description ?? "—"}
                         </p>
                       )}
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="theme-panel-strong border px-3 py-2">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
+                          in_cost_value
+                        </p>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={draft.inCostValue ?? ""}
+                            onChange={(e) =>
+                              updateDraft(model.id, "inCostValue", e.target.value)
+                            }
+                            className="theme-input mt-2 w-full border px-3 py-2 font-mono text-[12px] outline-none"
+                          />
+                        ) : (
+                          <p className="mt-1 whitespace-pre-wrap text-(--muted-strong)">
+                            {model.inCostValue ?? "—"}
+                          </p>
+                        )}
+                      </div>
+                      <div className="theme-panel-strong border px-3 py-2">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
+                          out_cost_value
+                        </p>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={draft.outCostValue ?? ""}
+                            onChange={(e) =>
+                              updateDraft(model.id, "outCostValue", e.target.value)
+                            }
+                            className="theme-input mt-2 w-full border px-3 py-2 font-mono text-[12px] outline-none"
+                          />
+                        ) : (
+                          <p className="mt-1 whitespace-pre-wrap text-(--muted-strong)">
+                            {model.outCostValue ?? "—"}
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="theme-panel-strong border px-3 py-2">
@@ -430,13 +497,12 @@ export function AiConsole({
                   </div>
                   {message ? (
                     <p
-                      className={`font-mono text-[10px] ${
-                        message.includes("Failed") ||
+                      className={`font-mono text-[10px] ${message.includes("Failed") ||
                         message.includes("Invalid") ||
                         message.includes("not found")
-                          ? "text-(--danger)"
-                          : "text-(--success)"
-                      }`}
+                        ? "text-(--danger)"
+                        : "text-(--success)"
+                        }`}
                     >
                       {message}
                     </p>
@@ -446,7 +512,7 @@ export function AiConsole({
             })}
           </div>
           <div className="hidden overflow-x-auto md:block">
-            <table className="w-full min-w-[860px] border-collapse font-mono text-[11px]">
+            <table className="w-full min-w-[1040px] border-collapse font-mono text-[11px]">
               <thead>
                 <tr
                   className="border-b text-left text-(--muted)"
@@ -457,6 +523,12 @@ export function AiConsole({
                   </th>
                   <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
                     description
+                  </th>
+                  <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
+                    in_cost_value
+                  </th>
+                  <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
+                    out_cost_value
                   </th>
                   <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
                     status
@@ -507,6 +579,38 @@ export function AiConsole({
                         ) : (
                           <p className="max-w-[260px] whitespace-pre-wrap text-(--muted-strong)">
                             {model.description ?? "—"}
+                          </p>
+                        )}
+                      </td>
+                      <td className="py-3 pr-3 align-top">
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={draft.inCostValue ?? ""}
+                            onChange={(e) =>
+                              updateDraft(model.id, "inCostValue", e.target.value)
+                            }
+                            className="theme-input w-full border px-3 py-2 font-mono text-[12px] outline-none"
+                          />
+                        ) : (
+                          <p className="max-w-[140px] whitespace-pre-wrap text-(--muted-strong)">
+                            {model.inCostValue ?? "—"}
+                          </p>
+                        )}
+                      </td>
+                      <td className="py-3 pr-3 align-top">
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={draft.outCostValue ?? ""}
+                            onChange={(e) =>
+                              updateDraft(model.id, "outCostValue", e.target.value)
+                            }
+                            className="theme-input w-full border px-3 py-2 font-mono text-[12px] outline-none"
+                          />
+                        ) : (
+                          <p className="max-w-[140px] whitespace-pre-wrap text-(--muted-strong)">
+                            {model.outCostValue ?? "—"}
                           </p>
                         )}
                       </td>
@@ -571,13 +675,12 @@ export function AiConsole({
                         </div>
                         {message ? (
                           <p
-                            className={`mt-2 max-w-32 font-mono text-[10px] ${
-                              message.includes("Failed") ||
+                            className={`mt-2 max-w-32 font-mono text-[10px] ${message.includes("Failed") ||
                               message.includes("Invalid") ||
                               message.includes("not found")
-                                ? "text-(--danger)"
-                                : "text-(--success)"
-                            }`}
+                              ? "text-(--danger)"
+                              : "text-(--success)"
+                              }`}
                           >
                             {message}
                           </p>
@@ -682,6 +785,14 @@ export function AiConsole({
                 </div>
                 <div className="theme-panel-strong border px-3 py-2 col-span-2">
                   <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    cost_value
+                  </dt>
+                  <dd className="mt-1 wrap-break-word text-foreground">
+                    {r.costValue ?? "—"}
+                  </dd>
+                </div>
+                <div className="theme-panel-strong border px-3 py-2 col-span-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
                     prompt_title
                   </dt>
                   <dd className="mt-1 wrap-break-word text-foreground">
@@ -693,7 +804,7 @@ export function AiConsole({
           ))}
         </div>
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[960px] border-collapse font-mono text-[11px]">
+          <table className="w-full min-w-[1060px] border-collapse font-mono text-[11px]">
             <thead>
               <tr
                 className="border-b text-left text-(--muted)"
@@ -713,6 +824,9 @@ export function AiConsole({
                 </th>
                 <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
                   credits_spent
+                </th>
+                <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
+                  cost_value
                 </th>
                 <th className="pb-2 pr-3 font-normal uppercase tracking-[0.12em]">
                   prompt_title
@@ -737,6 +851,12 @@ export function AiConsole({
                   </td>
                   <td className="py-2 pr-3 tabular-nums">
                     {(r.creditsSpent ?? 0).toLocaleString()}
+                  </td>
+                  <td
+                    className="max-w-[160px] truncate py-2 pr-3"
+                    title={r.costValue ?? ""}
+                  >
+                    {r.costValue ?? "—"}
                   </td>
                   <td
                     className="max-w-[140px] truncate py-2 pr-3"

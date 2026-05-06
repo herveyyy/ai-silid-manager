@@ -7,7 +7,8 @@ import type {
   AttachmentParentType,
   PaginatedAttachmentsDTO,
 } from "@/lib/types/admin-types";
-import { formatBytes, totalAttachmentBytes } from "@/lib/admin-mock-data";
+import { totalAttachmentBytes } from "@/lib/admin-mock-data";
+import { BYTES_PER_MB, formatStorageSize } from "@/lib/storage.utils";
 import { AdminPanel } from "@/components/molecules/admin-panel";
 
 function bytesByParentType(rows: Attachment[]): Partial<
@@ -33,8 +34,10 @@ export function StorageConsole({
 }) {
   const { rows: paginatedRows, total, page, limit, offset } = paginatedAttachments;
   const used = totalAttachmentBytes(rows.filter((r) => !r.isDeleted));
-  const [ceilingGb, setCeilingGb] = useState(50);
-  const ceilingBytes = ceilingGb * 1024 ** 3;
+  /** Slider 1–500 → thousands of MB (500 = 500,000 MB ≈ “500 GB”). */
+  const [ceilingKmb, setCeilingKmb] = useState(50);
+  const ceilingMb = ceilingKmb * 1000;
+  const ceilingBytes = ceilingMb * BYTES_PER_MB;
   const pct = Math.min(100, (used / ceilingBytes) * 100);
   const byType = useMemo(() => bytesByParentType(rows), [rows]);
   const byTypeRows = [
@@ -74,8 +77,8 @@ export function StorageConsole({
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
                 Allocated capacity
               </p>
-              <p className="mt-1 font-mono text-xl text-foreground">
-                {ceilingGb} GB
+              <p className="mt-1 font-mono text-xl tabular-nums text-foreground">
+                {formatStorageSize(ceilingBytes)}
               </p>
             </div>
             <div className="text-right">
@@ -83,20 +86,20 @@ export function StorageConsole({
                 Used (attachments.file_size aggregate)
               </p>
               <p className="mt-1 font-mono text-xl tabular-nums text-foreground">
-                {formatBytes(used)}
+                {formatStorageSize(used)}
               </p>
             </div>
           </div>
           <label className="block">
             <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
-              Adjust ceiling
+              Adjust ceiling (× 1000 MB)
             </span>
             <input
               type="range"
               min={1}
               max={500}
-              value={ceilingGb}
-              onChange={(e) => setCeilingGb(Number(e.target.value))}
+              value={ceilingKmb}
+              onChange={(e) => setCeilingKmb(Number(e.target.value))}
               className="mt-3 w-full accent-(--accent)"
             />
           </label>
@@ -129,7 +132,9 @@ export function StorageConsole({
                 style={{ borderColor: "var(--border)" }}
               >
                 <span className="uppercase text-(--muted)">{key}</span>
-                <span className="tabular-nums text-foreground">{formatBytes(value)}</span>
+                <span className="tabular-nums text-foreground">
+                  {formatStorageSize(value)}
+                </span>
               </li>
             ))}
         </ul>
@@ -162,7 +167,7 @@ export function StorageConsole({
                     file_size
                   </dt>
                   <dd className="mt-1 tabular-nums text-foreground">
-                    {formatBytes(Number(r.fileSize))}
+                    {formatStorageSize(Number(r.fileSize))}
                   </dd>
                 </div>
                 <div className="theme-panel-strong border px-3 py-2">
@@ -223,7 +228,9 @@ export function StorageConsole({
                   style={{ borderColor: "var(--border)" }}
                 >
                   <td className="py-2 pr-4 text-foreground">{r.fileName}</td>
-                  <td className="py-2 pr-4 tabular-nums">{formatBytes(Number(r.fileSize))}</td>
+                  <td className="py-2 pr-4 tabular-nums">
+                    {formatStorageSize(Number(r.fileSize))}
+                  </td>
                   <td className="py-2 pr-4 uppercase">{r.parentType ?? "—"}</td>
                   <td className="py-2 pr-4">{r.isUsed ? "true" : "false"}</td>
                   <td className="py-2">{r.isDeleted ? "true" : "false"}</td>

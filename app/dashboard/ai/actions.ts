@@ -10,6 +10,8 @@ function normalizeAiModelInput(
     const name = data.name.trim();
     const description = data.description?.trim() || null;
     const status = data.status.trim().toLowerCase();
+    const inCostValue = data.inCostValue?.trim() || null;
+    const outCostValue = data.outCostValue?.trim() || null;
 
     if (!name || !status) {
         return null;
@@ -19,6 +21,8 @@ function normalizeAiModelInput(
         name,
         description,
         status,
+        inCostValue,
+        outCostValue,
     };
 }
 

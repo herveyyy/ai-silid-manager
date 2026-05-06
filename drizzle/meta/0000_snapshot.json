@@ -426,6 +426,20 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
+        },
+        "in_cost_value": {
+          "autoincrement": false,
+          "name": "in_cost_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "out_cost_value": {
+          "autoincrement": false,
+          "name": "out_cost_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "compositePrimaryKeys": {
@@ -1788,6 +1802,20 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "url_reference": {
+          "autoincrement": false,
+          "name": "url_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "schoolCodes": {
+          "autoincrement": false,
+          "name": "schoolCodes",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "compositePrimaryKeys": {
@@ -1871,6 +1899,143 @@
           "tableTo": "level_tags",
           "columnsFrom": [
             "level_tag_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "course_permission": {
+      "name": "course_permission",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "course_id": {
+          "autoincrement": false,
+          "name": "course_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "autoincrement": false,
+          "name": "user_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accessRole": {
+          "autoincrement": false,
+          "name": "accessRole",
+          "type": "enum('admin','editor','viewer')",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "course_permission_id": {
+          "name": "course_permission_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "course_permission_course_id_course_id_fk": {
+          "name": "course_permission_course_id_course_id_fk",
+          "tableFrom": "course_permission",
+          "tableTo": "course",
+          "columnsFrom": [
+            "course_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "course_permission_user_id_users_id_fk": {
+          "name": "course_permission_user_id_users_id_fk",
+          "tableFrom": "course_permission",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "course_school": {
+      "name": "course_school",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "course_id": {
+          "autoincrement": false,
+          "name": "course_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "school_id": {
+          "autoincrement": false,
+          "name": "school_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "course_school_id": {
+          "name": "course_school_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "course_school_course_id_course_id_fk": {
+          "name": "course_school_course_id_course_id_fk",
+          "tableFrom": "course_school",
+          "tableTo": "course",
+          "columnsFrom": [
+            "course_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "course_school_school_id_schools_id_fk": {
+          "name": "course_school_school_id_schools_id_fk",
+          "tableFrom": "course_school",
+          "tableTo": "schools",
+          "columnsFrom": [
+            "school_id"
           ],
           "columnsTo": [
             "id"
@@ -2217,6 +2382,13 @@
           "type": "datetime(3)",
           "primaryKey": false,
           "notNull": true
+        },
+        "url_reference": {
+          "autoincrement": false,
+          "name": "url_reference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "compositePrimaryKeys": {
@@ -2942,6 +3114,13 @@
           "type": "tinyint(1)",
           "primaryKey": false,
           "notNull": true
+        },
+        "cost_value": {
+          "autoincrement": false,
+          "name": "cost_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "compositePrimaryKeys": {

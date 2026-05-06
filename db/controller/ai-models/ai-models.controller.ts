@@ -3,7 +3,7 @@ import { AiModelsService } from "@/db/service/ai-models.service";
 import { IAiModels } from "./ai-models.interface";
 
 export class AiModelsController implements IAiModels {
-    constructor(private readonly aiModelsService: AiModelsService) {}
+    constructor(private readonly aiModelsService: AiModelsService) { }
 
     async getAiModels(): Promise<AiModelDTO[]> {
         return await this.aiModelsService.getAiModels();

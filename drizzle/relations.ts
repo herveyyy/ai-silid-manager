@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { classCard, activities, classWorkCategory, users, term, activityBadge, schoolBadge, activityWithTags, tags, attachments, attendance, course, certificateFormat, certificates, chatbox, chatboxMembers, chatboxMessages, classrooms, sections, subjects, schools, contents, contentQuestions, lessons, courseLevelTag, levelTags, courseTopic, topics, grading, notification, notificationDevice, participants, post, postComment, prompt, questions, sectionQuestions, studentActivity, quizEvidence, schoolMariadDb, aiModels, departments, studentAnswers, studentBadge, studentHubNote, studentHubFlashCard, takersAnswers, takersFeedback, takersProgress, takersTopics } from "./schema";
+import { classCard, activities, classWorkCategory, users, term, activityBadge, schoolBadge, activityWithTags, tags, attachments, attendance, course, certificateFormat, certificates, chatbox, chatboxMembers, chatboxMessages, classrooms, sections, subjects, schools, contents, contentQuestions, lessons, courseLevelTag, levelTags, coursePermission, courseSchool, courseTopic, topics, grading, notification, notificationDevice, participants, post, postComment, prompt, questions, sectionQuestions, studentActivity, quizEvidence, requestCache, schoolMariadDb, aiModels, departments, studentAnswers, studentBadge, studentHubNote, studentHubFlashCard, takersAnswers, takersFeedback, takersProgress, takersTopics } from "./schema";
 
 export const activitiesRelations = relations(activities, ({one, many}) => ({
 	classCard: one(classCard, {
@@ -76,6 +76,7 @@ export const usersRelations = relations(users, ({many}) => ({
 	contentQuestions: many(contentQuestions),
 	contents: many(contents),
 	courses: many(course),
+	coursePermissions: many(coursePermission),
 	gradings: many(grading),
 	lessons: many(lessons),
 	notifications: many(notification),
@@ -84,6 +85,7 @@ export const usersRelations = relations(users, ({many}) => ({
 	posts: many(post),
 	postComments: many(postComment),
 	prompts: many(prompt),
+	requestCaches: many(requestCache),
 	schoolBadges: many(schoolBadge),
 	studentActivities_gradedBy: many(studentActivity, {
 		relationName: "studentActivity_gradedBy_users_id"
@@ -196,6 +198,8 @@ export const courseRelations = relations(course, ({one, many}) => ({
 		references: [users.id]
 	}),
 	courseLevelTags: many(courseLevelTag),
+	coursePermissions: many(coursePermission),
+	courseSchools: many(courseSchool),
 	courseTopics: many(courseTopic),
 	lessons: many(lessons),
 	takersFeedbacks: many(takersFeedback),
@@ -281,6 +285,7 @@ export const subjectsRelations = relations(subjects, ({many}) => ({
 
 export const schoolsRelations = relations(schools, ({one, many}) => ({
 	classrooms: many(classrooms),
+	courseSchools: many(courseSchool),
 	schoolBadges: many(schoolBadge),
 	schoolMariadDbs: many(schoolMariadDb),
 	aiModel: one(aiModels, {
@@ -347,6 +352,28 @@ export const courseLevelTagRelations = relations(courseLevelTag, ({one}) => ({
 
 export const levelTagsRelations = relations(levelTags, ({many}) => ({
 	courseLevelTags: many(courseLevelTag),
+}));
+
+export const coursePermissionRelations = relations(coursePermission, ({one}) => ({
+	course: one(course, {
+		fields: [coursePermission.courseId],
+		references: [course.id]
+	}),
+	user: one(users, {
+		fields: [coursePermission.userId],
+		references: [users.id]
+	}),
+}));
+
+export const courseSchoolRelations = relations(courseSchool, ({one}) => ({
+	course: one(course, {
+		fields: [courseSchool.courseId],
+		references: [course.id]
+	}),
+	school: one(schools, {
+		fields: [courseSchool.schoolId],
+		references: [schools.id]
+	}),
 }));
 
 export const courseTopicRelations = relations(courseTopic, ({one}) => ({
@@ -475,6 +502,13 @@ export const studentActivityRelations = relations(studentActivity, ({one, many})
 		relationName: "studentActivity_userId_users_id"
 	}),
 	studentAnswers: many(studentAnswers),
+}));
+
+export const requestCacheRelations = relations(requestCache, ({one}) => ({
+	user: one(users, {
+		fields: [requestCache.userId],
+		references: [users.id]
+	}),
 }));
 
 export const schoolMariadDbRelations = relations(schoolMariadDb, ({one}) => ({

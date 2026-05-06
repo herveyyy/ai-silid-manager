@@ -18,6 +18,11 @@
   --overlay-line: rgba(243, 231, 221, 0.05);
   --row-hover: rgba(243, 231, 221, 0.05);
   --shadow-inset: rgba(243, 231, 221, 0.06);
+  --chart-1: #d8a36d;
+  --chart-2: #9fd3a5;
+  --chart-3: #f19a8f;
+  --chart-4: #b39d90;
+  --chart-5: #d9c7ba;
   color-scheme: dark;
 }
 
@@ -39,6 +44,11 @@
   --overlay-line: rgba(99, 67, 49, 0.07);
   --row-hover: rgba(99, 67, 49, 0.06);
   --shadow-inset: rgba(99, 67, 49, 0.08);
+  --chart-1: #8a5a3b;
+  --chart-2: #5f8a62;
+  --chart-3: #b45e52;
+  --chart-4: #7e6351;
+  --chart-5: #5f4533;
   color-scheme: light;
 }
 
