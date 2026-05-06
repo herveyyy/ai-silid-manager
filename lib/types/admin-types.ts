@@ -2,6 +2,7 @@ import {
     aiModels,
     attachments,
     classrooms,
+    dbErrorLogger,
     schools,
     users,
 } from "@/drizzle/schema";
@@ -189,4 +190,35 @@ export type UserOverviewDTO = {
         admin: number;
         partner: number;
     };
+};
+
+export type SelectDbErrorLog = typeof dbErrorLogger.$inferSelect;
+export type DbErrorLog = SelectDbErrorLog;
+
+export type DbErrorLogFilters = {
+    search?: string;
+    referenceTable?: string;
+    applicationName?: string;
+    sqlState?: string;
+    /** ISO date string (YYYY-MM-DD) inclusive lower bound on created_at */
+    createdAtFrom?: string;
+    /** ISO date string (YYYY-MM-DD) inclusive upper bound on created_at */
+    createdAtTo?: string;
+};
+
+export type PaginatedDbErrorLogsDTO = {
+    rows: DbErrorLog[];
+    total: number;
+    page: number;
+    limit: number;
+    offset: number;
+};
+
+export type DbErrorLogStatsDTO = {
+    totalCount: number;
+    last24hCount: number;
+    topReferenceTable: { name: string; count: number } | null;
+    distinctReferenceTables: string[];
+    distinctApplicationNames: string[];
+    distinctSqlStates: string[];
 };

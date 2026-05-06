@@ -11,6 +11,7 @@ const nav = [
     { href: "/dashboard/schools", label: "Schools" },
     { href: "/dashboard/storage", label: "Storage" },
     { href: "/dashboard/ai", label: "AI" },
+    { href: "/dashboard/db-error-logger", label: "DB Error Logger" },
 ] as const;
 
 export function AdminShell({

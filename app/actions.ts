@@ -31,6 +31,10 @@ import { CreateAiModelUsecase } from "@/db/usecase/ai-models/create_ai_model.use
 import { UpdateAiModelUsecase } from "@/db/usecase/ai-models/update_ai_model.usecase";
 import { requireDashboardAccess } from "@/lib/auth/require-dashboard-access";
 import { GetGlobalPromptOverviewUsecase } from "@/db/usecase/prompts/get_global_prompt_overview.usecase";
+import { DbErrorLoggerController } from "@/db/controller/db-error-logger/db-error-logger.controller";
+import { DbErrorLoggerService } from "@/db/service/db-error-logger.service";
+import { GetDbErrorLogsUsecase } from "@/db/usecase/db-error-logger/get_db_error_logs.usecase";
+import { GetDbErrorLogStatsUsecase } from "@/db/usecase/db-error-logger/get_db_error_log_stats.usecase";
 
 export async function createSchoolsController(): Promise<SchoolsController> {
     await requireDashboardAccess();
@@ -92,6 +96,16 @@ export async function createAiModelsController(): Promise<AiModelsController> {
             new GetAiModelsUsecase(),
             new CreateAiModelUsecase(),
             new UpdateAiModelUsecase(),
+        ),
+    );
+}
+
+export async function createDbErrorLoggerController(): Promise<DbErrorLoggerController> {
+    await requireDashboardAccess();
+    return new DbErrorLoggerController(
+        new DbErrorLoggerService(
+            new GetDbErrorLogsUsecase(),
+            new GetDbErrorLogStatsUsecase(),
         ),
     );
 }
