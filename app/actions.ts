@@ -35,6 +35,7 @@ import { DbErrorLoggerController } from "@/db/controller/db-error-logger/db-erro
 import { DbErrorLoggerService } from "@/db/service/db-error-logger.service";
 import { GetDbErrorLogsUsecase } from "@/db/usecase/db-error-logger/get_db_error_logs.usecase";
 import { GetDbErrorLogStatsUsecase } from "@/db/usecase/db-error-logger/get_db_error_log_stats.usecase";
+import { CreateUsersUsecase } from "@/db/usecase/user/create_users.usecase";
 
 export async function createSchoolsController(): Promise<SchoolsController> {
     await requireDashboardAccess();
@@ -56,6 +57,7 @@ export async function createUsersController(): Promise<UsersController> {
         new UserService(
             new GetUserByCredsUsecase(),
             new GetUserOverviewUsecase(),
+            new CreateUsersUsecase(),
         ),
     );
 }

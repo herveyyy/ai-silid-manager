@@ -768,3 +768,7 @@ export const users = mysqlTable("users", {
 (table) => [
 	primaryKey({ columns: [table.id], name: "users_id"}),
 ]);
+
+/** MySQL `mysqlEnum` columns expose `.enumValues` (replaces pg `pgEnum` exports). */
+export const attachmentType = attachments.parentType;
+export const userRoleType = users.role;
