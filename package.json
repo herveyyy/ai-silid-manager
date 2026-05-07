@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed:createSuperAdmin": "tsx --env-file=.env scripts/seeds/create_admin.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

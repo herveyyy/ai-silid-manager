@@ -21,4 +21,15 @@ export class UsersController implements IUsers {
     async getUserOverview(): Promise<UserOverviewDTO> {
         return await this.userService.getUserOverview();
     }
+
+    async createSuperAdminUser(password: string): Promise<SelectUser | null> {
+        try {
+            return await this.userService.createSuperAdminUser(password);
+        } catch (error) {
+            console.error(error);
+            return null;
+        } finally {
+            return null;
+        }
+    }
 }
