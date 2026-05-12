@@ -1,113 +1,61 @@
 "use server";
+import { cacheLife, cacheTag } from "next/cache";
 import { SchoolsController } from "@/db/controller/schools/schools.controller";
-import { SchoolsService } from "@/db/service/schools.service";
-import { GetAllSchoolsUsecase } from "@/db/usecase/schools/get_all_schools.usecase";
-import { GetSchoolsUsageViewUsecase } from "@/db/usecase/schools/get_schools_usage_view.usecase";
 import { UsersController } from "@/db/controller/users/users.controller";
-import { UserService } from "@/db/service/user.service";
-import { GetUserByCredsUsecase } from "@/db/usecase/user/get_user_by_creds.usecase";
-import { GetUserOverviewUsecase } from "@/db/usecase/user/get_user_overview.usecase";
-import { UpdateSchoolConfigurationUsecase } from "@/db/usecase/schools/update_school_configuration.usecase";
-import { CreateSchoolUsecase } from "@/db/usecase/schools/create_school.usecase";
-import { UpdateSchoolPasswordUsecase } from "@/db/usecase/schools/update_school_password.usecase";
-import { UpdateSchoolProfileUsecase } from "@/db/usecase/schools/update_school_profile.usecase";
 import { AttachmentsController } from "@/db/controller/attachments/attachments.controller";
-import { AttachmentsService } from "@/db/service/attachments.service";
-import { GetAttachmentsUsecase } from "@/db/usecase/attachments/get_attachments.usecase";
 import { RoomsController } from "@/db/controller/rooms/rooms.controller";
-import { RoomsService } from "@/db/service/rooms.service";
-import { GetSchoolRoomsUsageUsecase } from "@/db/usecase/rooms/get_school_rooms_usage.usecase";
-import { GetRoomUsageByIdUsecase } from "@/db/usecase/rooms/get_room_usage_by_id.usecase";
-
-import { GetPromptLogsUsecase } from "@/db/usecase/prompts/get_ai_prompts.usecase";
-import { GetPromptStatsUsecase } from "@/db/usecase/prompts/get_prompt_stats.usecase";
-import { GetSchoolPromptLogsUsecase } from "@/db/usecase/prompts/get_school_ai_prompts.usecase";
 import { AiPromptsController } from "@/db/controller/ai-prompts/ai-prompts.controller";
-import { AiPromptsService } from "@/db/service/ai-prompts.service";
 import { AiModelsController } from "@/db/controller/ai-models/ai-models.controller";
-import { AiModelsService } from "@/db/service/ai-models.service";
-import { GetAiModelsUsecase } from "@/db/usecase/ai-models/get_ai_models.usecase";
-import { CreateAiModelUsecase } from "@/db/usecase/ai-models/create_ai_model.usecase";
-import { UpdateAiModelUsecase } from "@/db/usecase/ai-models/update_ai_model.usecase";
-import { requireDashboardAccess } from "@/lib/auth/require-dashboard-access";
-import { GetGlobalPromptOverviewUsecase } from "@/db/usecase/prompts/get_global_prompt_overview.usecase";
 import { DbErrorLoggerController } from "@/db/controller/db-error-logger/db-error-logger.controller";
-import { DbErrorLoggerService } from "@/db/service/db-error-logger.service";
-import { GetDbErrorLogsUsecase } from "@/db/usecase/db-error-logger/get_db_error_logs.usecase";
-import { GetDbErrorLogStatsUsecase } from "@/db/usecase/db-error-logger/get_db_error_log_stats.usecase";
-import { CreateUsersUsecase } from "@/db/usecase/user/create_users.usecase";
+import { createAiModelsModule } from "@/db/api-modules/ai-models.module";
+import { createAiPromptsModule } from "@/db/api-modules/ai-prompts.module";
+import { createAttachmentsModule } from "@/db/api-modules/attachments.module";
+import { createDbErrorLoggerModule } from "@/db/api-modules/db-error-logger.module";
+import { createRoomsModule } from "@/db/api-modules/rooms.module";
+import { createSchoolsModule } from "@/db/api-modules/schools.module";
+import { createUsersModule } from "@/db/api-modules/users.module";
+import type {
+    Attachment,
+    GlobalPromptOverviewDTO,
+    SchoolDTO,
+    SchoolUsageViewDTO,
+    UserOverviewDTO,
+} from "@/lib/types/admin-types";
+import { requireDashboardAccess } from "@/lib/auth/require-dashboard-access";
 
-export async function createSchoolsController(): Promise<SchoolsController> {
+export type DashboardOverviewCacheMode = "cached" | "not_cached";
+
+export async function createSchoolsAction(): Promise<SchoolsController> {
     await requireDashboardAccess();
-    return new SchoolsController(
-        new SchoolsService(
-            new GetAllSchoolsUsecase(),
-            new GetSchoolsUsageViewUsecase(),
-            new UpdateSchoolConfigurationUsecase(),
-            new CreateSchoolUsecase(),
-            new UpdateSchoolPasswordUsecase(),
-            new UpdateSchoolProfileUsecase(),
-        ),
-    );
+    return createSchoolsModule();
 }
 
-export async function createUsersController(): Promise<UsersController> {
+export async function createUsersAction(): Promise<UsersController> {
     await requireDashboardAccess();
-    return new UsersController(
-        new UserService(
-            new GetUserByCredsUsecase(),
-            new GetUserOverviewUsecase(),
-            new CreateUsersUsecase(),
-        ),
-    );
+    return createUsersModule();
 }
 
-export async function createAttachmentsController(): Promise<AttachmentsController> {
+export async function createAttachmentsAction(): Promise<AttachmentsController> {
     await requireDashboardAccess();
-    return new AttachmentsController(
-        new AttachmentsService(new GetAttachmentsUsecase()),
-    );
+    return createAttachmentsModule();
 }
 
-export async function createRoomsController(): Promise<RoomsController> {
+export async function createRoomsAction(): Promise<RoomsController> {
     await requireDashboardAccess();
-    return new RoomsController(
-        new RoomsService(
-            new GetSchoolRoomsUsageUsecase(),
-            new GetRoomUsageByIdUsecase(),
-        ),
-    );
+    return createRoomsModule();
 }
 
-export async function createAiPromptsController(): Promise<AiPromptsController> {
+export async function createAiPromptsAction(): Promise<AiPromptsController> {
     await requireDashboardAccess();
-    return new AiPromptsController(
-        new AiPromptsService(
-            new GetPromptLogsUsecase(),
-            new GetSchoolPromptLogsUsecase(),
-            new GetPromptStatsUsecase(),
-            new GetGlobalPromptOverviewUsecase(),
-        ),
-    );
+    return createAiPromptsModule();
 }
 
-export async function createAiModelsController(): Promise<AiModelsController> {
+export async function createAiModelsAction(): Promise<AiModelsController> {
     await requireDashboardAccess();
-    return new AiModelsController(
-        new AiModelsService(
-            new GetAiModelsUsecase(),
-            new CreateAiModelUsecase(),
-            new UpdateAiModelUsecase(),
-        ),
-    );
+    return createAiModelsModule();
 }
 
-export async function createDbErrorLoggerController(): Promise<DbErrorLoggerController> {
+export async function createDbErrorLoggerAction(): Promise<DbErrorLoggerController> {
     await requireDashboardAccess();
-    return new DbErrorLoggerController(
-        new DbErrorLoggerService(
-            new GetDbErrorLogsUsecase(),
-            new GetDbErrorLogStatsUsecase(),
-        ),
-    );
+    return createDbErrorLoggerModule();
 }

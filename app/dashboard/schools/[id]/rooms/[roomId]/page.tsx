@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminPanel } from "@/components/molecules/admin-panel";
-import { createRoomsController, createSchoolsController } from "@/app/actions";
+import { createRoomsAction, createSchoolsAction } from "@/app/actions";
+import type { SchoolDTO } from "@/lib/types/admin-types";
 import { formatStorageSize } from "@/lib/storage.utils";
 
 export default async function RoomProfilePage({
@@ -10,14 +11,14 @@ export default async function RoomProfilePage({
   params: Promise<{ id: string; roomId: string }>;
 }) {
   const { id, roomId } = await params;
-  const schoolsController = await createSchoolsController();
-  const roomsController = await createRoomsController();
+  const schoolsController = await createSchoolsAction();
+  const roomsController = await createRoomsAction();
   const [schools, room] = await Promise.all([
     schoolsController.getAllSchools(),
     roomsController.getRoomUsageById(id, roomId),
   ]);
 
-  const school = schools.find((entry) => entry.id === id);
+  const school = schools.find((entry: SchoolDTO) => entry.id === id);
   if (!school) notFound();
 
   if (!room) notFound();

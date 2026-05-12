@@ -1,4 +1,4 @@
-import { createDbErrorLoggerController } from "@/app/actions";
+import { createDbErrorLoggerAction } from "@/app/actions";
 import { DbErrorLoggerConsole } from "@/components/organisms/db-error-logger-console";
 import type { DbErrorLogFilters } from "@/lib/types/admin-types";
 
@@ -42,7 +42,7 @@ export default async function DbErrorLoggerPage({
     createdAtTo: resolvedSearchParams.createdAtTo || undefined,
   };
 
-  const controller = await createDbErrorLoggerController();
+  const controller = await createDbErrorLoggerAction();
   const [paginatedLogs, stats] = await Promise.all([
     controller.getPaginatedDbErrorLogs(page, offset, limit, filters),
     controller.getDbErrorLogStats(),

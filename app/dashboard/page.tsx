@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import { SchoolsDirectory } from "@/components/organisms/schools-directory";
 import { SchoolsFleetAiOverview } from "@/components/organisms/schools-fleet-ai-overview";
@@ -7,25 +6,21 @@ import { AdminPanel } from "@/components/molecules/admin-panel";
 import { AdminStatCard } from "@/components/molecules/admin-stat-card";
 import { totalAttachmentBytes } from "@/lib/admin-mock-data";
 import {
-  createAiPromptsController,
-  createAttachmentsController,
-  createSchoolsController,
-  createUsersController,
-} from "@/app/actions";
+  getDashboardSchools,
+  getDashboardSchoolsUsage,
+  getDashboardPromptOverview,
+  getDashboardAttachments,
+  getDashboardUserOverview,
+} from "@/app/dashboard/actions";
 
 export default async function DashboardPage() {
-  const schoolsController = await createSchoolsController();
-  const aiPromptsController = await createAiPromptsController();
-  const attachmentsController = await createAttachmentsController();
-  const usersController = await createUsersController();
-
   const [schools, promptOverview, attachmentRows, userOverview, schoolsUsage] =
     await Promise.all([
-      schoolsController.getAllSchools(),
-      aiPromptsController.getGlobalPromptOverview(),
-      attachmentsController.getAttachments(),
-      usersController.getUserOverview(),
-      schoolsController.getSchoolsUsageView(),
+      getDashboardSchools(undefined, "cached"),
+      getDashboardPromptOverview(undefined, "cached"),
+      getDashboardAttachments(undefined, "cached"),
+      getDashboardUserOverview(undefined, "cached"),
+      getDashboardSchoolsUsage(undefined, "cached"),
     ]);
 
   const activeAttachments = attachmentRows.filter(

@@ -1,4 +1,4 @@
-import { createAiModelsController, createAiPromptsController } from "@/app/actions";
+import { createAiModelsAction, createAiPromptsAction } from "@/app/actions";
 import { AiConsole } from "@/components/organisms/ai-console";
 import type { AiConsoleProps } from "@/components/organisms/ai-console";
 
@@ -24,8 +24,8 @@ export default async function AiPage({
   const page = parsePositiveInt(resolvedSearchParams.page, 1);
   const limit = parsePositiveInt(resolvedSearchParams.limit, 10);
   const offset = parseNonNegativeInt(resolvedSearchParams.offset, 0);
-  const aiPromptsController = await createAiPromptsController();
-  const aiModelsController = await createAiModelsController();
+  const aiPromptsController = await createAiPromptsAction();
+  const aiModelsController = await createAiModelsAction();
   const [promptLogs, paginatedPromptLogs, aiModels] = await Promise.all([
     aiPromptsController.getAIPrompts(),
     aiPromptsController.getPaginatedAIPrompts(page, offset, limit),

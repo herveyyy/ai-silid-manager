@@ -1,6 +1,6 @@
 "use server";
 
-import { createSchoolsController } from "@/app/actions";
+import { createSchoolsAction } from "@/app/actions";
 import { StoredSchoolConfig } from "@/lib/school-config-storage";
 import { revalidatePath } from "next/cache";
 const SCHOOL_SECRET_MAX = 100;
@@ -61,7 +61,7 @@ export async function updateSchoolConfigurationAction(
     }
 
     try {
-        const schoolsController = await createSchoolsController();
+        const schoolsController = await createSchoolsAction();
         await schoolsController.updateSchoolConfiguration(schoolId, {
             aiFeat: Boolean(data.aiFeat),
             defaultAiModelId,
@@ -135,7 +135,7 @@ export async function updateSchoolProfileAction(
     const username = usernameRaw === "" ? null : usernameRaw;
 
     try {
-        const schoolsController = await createSchoolsController();
+        const schoolsController = await createSchoolsAction();
         await schoolsController.updateSchoolProfile(schoolId, {
             name,
             schoolCode,
@@ -166,7 +166,7 @@ export async function updateSchoolPasswordAction(
     }
 
     try {
-        const schoolsController = await createSchoolsController();
+        const schoolsController = await createSchoolsAction();
 
         if ("removeCredential" in form) {
             await schoolsController.updateSchoolPassword(schoolId, null);
@@ -281,7 +281,7 @@ export async function createSchoolAction(form: {
         passwordRaw === "" ? null : passwordRaw;
 
     try {
-        const schoolsController = await createSchoolsController();
+        const schoolsController = await createSchoolsAction();
         const school = await schoolsController.createSchool({
             name,
             schoolCode,

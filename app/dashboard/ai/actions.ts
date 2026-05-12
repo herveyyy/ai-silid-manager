@@ -1,6 +1,6 @@
 "use server";
 
-import { createAiModelsController } from "@/app/actions";
+import { createAiModelsAction } from "@/app/actions";
 import type { AiModelMutationInput } from "@/lib/types/admin-types";
 import { revalidatePath } from "next/cache";
 
@@ -36,7 +36,7 @@ export async function createAiModelAction(
     }
 
     try {
-        const controller = await createAiModelsController();
+        const controller = await createAiModelsAction();
         await controller.createAiModel(normalized);
         revalidatePath("/dashboard/ai");
         return { success: true, message: "AI model created." };
@@ -57,7 +57,7 @@ export async function updateAiModelAction(
     }
 
     try {
-        const controller = await createAiModelsController();
+        const controller = await createAiModelsAction();
         const updated = await controller.updateAiModel(modelId, normalized);
 
         if (!updated) {

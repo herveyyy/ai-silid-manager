@@ -1,4 +1,4 @@
-import { createAttachmentsController } from "@/app/actions";
+import { createAttachmentsAction } from "@/app/actions";
 import { StorageConsole } from "@/components/organisms/storage-console";
 import { attachmentType } from "@/lib/types/admin-types";
 export default async function StoragePage({
@@ -21,7 +21,7 @@ export default async function StoragePage({
   const page = parsePositiveInt(resolvedSearchParams.page, 1);
   const limit = parsePositiveInt(resolvedSearchParams.limit, 10);
   const offset = parseNonNegativeInt(resolvedSearchParams.offset, 0);
-  const attachmentsController = await createAttachmentsController();
+  const attachmentsController = await createAttachmentsAction();
   const [rows, paginatedAttachments] = await Promise.all([
     attachmentsController.getAttachments(),
     attachmentsController.getPaginatedAttachments(page, offset, limit),

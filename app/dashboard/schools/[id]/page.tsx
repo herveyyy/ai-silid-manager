@@ -4,11 +4,16 @@ import { AdminPanel } from "@/components/molecules/admin-panel";
 import { SchoolProfileSettings } from "@/components/organisms/school-profile-settings";
 import { SchoolRoomsTable } from "@/components/organisms/school-rooms-table";
 import {
-  createAiModelsController,
-  createAiPromptsController,
-  createRoomsController,
-  createSchoolsController,
+  createAiModelsAction,
+  createAiPromptsAction,
+  createRoomsAction,
+  createSchoolsAction,
 } from "@/app/actions";
+import type {
+  PromptLog,
+  SchoolDTO,
+  SchoolUsageViewDTO,
+} from "@/lib/types/admin-types";
 import { buildPromptDailyStats } from "@/lib/prompt-daily-stats";
 import { storageLimitMbToBytes } from "@/lib/storage.utils";
 import { SchoolPromptMetricsChart } from "@/components/organisms/school-prompt-metrics-chart";
@@ -31,10 +36,10 @@ export default async function SchoolProfilePage({
   const page = parsePositiveInt(resolvedSearchParams.page, 1);
   const limit = parsePositiveInt(resolvedSearchParams.limit, 10);
   const offset = parsePositiveInt(resolvedSearchParams.offset, 0);
-  const schoolsController = await createSchoolsController();
-  const aiModelsController = await createAiModelsController();
-  const aiPromptsController = await createAiPromptsController();
-  const roomsController = await createRoomsController();
+  const schoolsController = await createSchoolsAction();
+  const aiModelsController = await createAiModelsAction();
+  const aiPromptsController = await createAiPromptsAction();
+  const roomsController = await createRoomsAction();
   const [schools, report, aiModels, promptLogs, paginatedRooms] = await Promise.all([
     schoolsController.getAllSchools(),
     schoolsController.getSchoolsUsageView(),
@@ -43,10 +48,12 @@ export default async function SchoolProfilePage({
     roomsController.getSchoolRoomsUsage(id, page, offset, limit),
   ]);
 
-  const school = schools.find((entry) => entry.id === id);
+  const school = schools.find((entry: SchoolDTO) => entry.id === id);
   if (!school) notFound();
 
-  const schoolReport = report.find((entry) => entry.id === school.id);
+  const schoolReport = report.find(
+    (entry: SchoolUsageViewDTO) => entry.id === school.id,
+  );
   const metrics = {
     storageUsedBytes: Number(schoolReport?.storageUsedBytes ?? 0),
     tokensUsed: Number(schoolReport?.tokensUsed ?? 0),
@@ -108,7 +115,7 @@ export default async function SchoolProfilePage({
         />
 
         <div className="mt-6 divide-y md:hidden" style={{ borderColor: "var(--border)" }}>
-          {promptLogs.slice(0, 12).map((row) => (
+          {promptLogs.slice(0, 12).map((row: PromptLog) => (
             <article key={row.id} className="space-y-4 py-4">
               <div className="min-w-0">
                 <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
@@ -205,7 +212,7 @@ export default async function SchoolProfilePage({
               </tr>
             </thead>
             <tbody>
-              {promptLogs.slice(0, 12).map((row) => (
+              {promptLogs.slice(0, 12).map((row: PromptLog) => (
                 <tr
                   key={row.id}
                   className="border-b align-top text-(--muted-strong)"

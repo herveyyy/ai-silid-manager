@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LoginForm } from "../../components/organisms/login-form";
+import { LoginForm } from "@/components/organisms/login-form";
 
 export const metadata: Metadata = {
   title: "AUTH.01 // System Access",
