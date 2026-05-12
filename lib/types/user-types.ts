@@ -1,6 +1,5 @@
 import { users } from "@/drizzle/schema";
-import { UserRole } from "@/lib/auth/dashboard-roles";
-
+export type UserRole = (typeof users.role.enumValues)[number];
 export type InsertUser = typeof users.$inferInsert;
 export type SelectUser = typeof users.$inferSelect;
 export type User = SelectUser;

@@ -768,3 +768,4 @@ export const users = mysqlTable("users", {
 	(table) => [
 		primaryKey({ columns: [table.id], name: "users_id" }),
 	]);
+export type UserRole = (typeof users.role.enumValues)[number];
