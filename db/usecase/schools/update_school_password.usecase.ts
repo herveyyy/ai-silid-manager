@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { schools } from "@/drizzle/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export class UpdateSchoolPasswordUsecase {
     private db = db;
@@ -11,7 +11,7 @@ export class UpdateSchoolPasswordUsecase {
                 .update(schools)
                 .set({
                     password,
-                    updatedAt: new Date().toISOString(),
+                    updatedAt: sql`(now(3))`,
                 })
                 .where(eq(schools.id, schoolId));
         } catch (error) {

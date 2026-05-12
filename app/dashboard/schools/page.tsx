@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AdminPanel } from "@/components/molecules/admin-panel";
 import { AddSchoolModal } from "@/components/organisms/add-school-modal";
 import { SchoolsFleetTable } from "@/components/organisms/schools-fleet-table";
-import { createSchoolsAction } from "@/app/actions";
+import { getSchoolsPaginatedUsage } from "@/app/dashboard/schools/queries";
 import { storageLimitMbToBytes } from "@/lib/storage.utils";
 
 export default async function SchoolsListPage({
@@ -25,11 +25,9 @@ export default async function SchoolsListPage({
   const page = parsePositiveInt(resolvedSearchParams.page, 1);
   const limit = parsePositiveInt(resolvedSearchParams.limit, 10);
   const offset = parseNonNegativeInt(resolvedSearchParams.offset, 0);
-  const schoolsController = await createSchoolsAction();
-  const paginatedReport = await schoolsController.getPaginatedSchoolsUsageView(
-    page,
-    offset,
-    limit,
+  const paginatedReport = await getSchoolsPaginatedUsage(
+    { page, offset, limit },
+    "cached",
   );
   const uniqueRows = Array.from(
     new Map(paginatedReport.rows.map((school) => [school.id, school])).values(),

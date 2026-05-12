@@ -1,8 +1,10 @@
 "use server";
 
+
+import { revalidatePath, updateTag } from "next/cache";
+import { SCHOOLS_FLEET_LIST_CACHE_TAG } from "./cached-actions";
 import { createSchoolsAction } from "@/app/actions";
 import { StoredSchoolConfig } from "@/lib/school-config-storage";
-import { revalidatePath } from "next/cache";
 
 const SCHOOL_SECRET_MAX = 100;
 const SCHOOL_API_KEY_MAX = 100;
@@ -12,6 +14,13 @@ const USERNAME_MAX = 100;
 const NAME_MAX = 500;
 const SITE_MAX = 2000;
 
+function revalidateSchoolsUi(schoolId?: string) {
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/schools");
+    if (schoolId) revalidatePath(`/dashboard/schools/${schoolId}`);
+    updateTag(SCHOOLS_FLEET_LIST_CACHE_TAG);
+}
+
 export async function updateSchoolConfigurationAction(
     schoolId: string,
     data: StoredSchoolConfig,
@@ -20,7 +29,7 @@ export async function updateSchoolConfigurationAction(
     const storageLimit = Number(data.storageLimit);
     const defaultAiModelId =
         typeof data.defaultAiModelId === "string" &&
-        data.defaultAiModelId.trim() !== ""
+            data.defaultAiModelId.trim() !== ""
             ? data.defaultAiModelId
             : null;
 
@@ -74,9 +83,7 @@ export async function updateSchoolConfigurationAction(
             apiKey,
         });
 
-        revalidatePath("/dashboard");
-        revalidatePath("/dashboard/schools");
-        revalidatePath(`/dashboard/schools/${schoolId}`);
+        revalidateSchoolsUi(schoolId);
 
         return {
             success: true,
@@ -143,9 +150,7 @@ export async function updateSchoolProfileAction(
             site,
             username,
         });
-        revalidatePath("/dashboard");
-        revalidatePath("/dashboard/schools");
-        revalidatePath(`/dashboard/schools/${schoolId}`);
+        revalidateSchoolsUi(schoolId);
         return { success: true, message: "School info saved." };
     } catch (error) {
         console.error(error);
@@ -171,9 +176,7 @@ export async function updateSchoolPasswordAction(
 
         if ("removeCredential" in form) {
             await schoolsController.updateSchoolPassword(schoolId, null);
-            revalidatePath("/dashboard");
-            revalidatePath("/dashboard/schools");
-            revalidatePath(`/dashboard/schools/${schoolId}`);
+            revalidateSchoolsUi(schoolId);
             return { success: true, message: "Stored password removed." };
         }
 
@@ -196,9 +199,7 @@ export async function updateSchoolPasswordAction(
         }
 
         await schoolsController.updateSchoolPassword(schoolId, newPassword);
-        revalidatePath("/dashboard");
-        revalidatePath("/dashboard/schools");
-        revalidatePath(`/dashboard/schools/${schoolId}`);
+        revalidateSchoolsUi(schoolId);
         return { success: true, message: "Password updated." };
     } catch (error) {
         console.error(error);
@@ -292,9 +293,7 @@ export async function createSchoolAction(form: {
             apiKey,
         });
 
-        revalidatePath("/dashboard");
-        revalidatePath("/dashboard/schools");
-        revalidatePath(`/dashboard/schools/${school.id}`);
+        revalidateSchoolsUi(school.id);
 
         return {
             success: true,

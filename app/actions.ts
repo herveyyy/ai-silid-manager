@@ -14,16 +14,7 @@ import { createDbErrorLoggerModule } from "@/db/api-modules/db-error-logger.modu
 import { createRoomsModule } from "@/db/api-modules/rooms.module";
 import { createSchoolsModule } from "@/db/api-modules/schools.module";
 import { createUsersModule } from "@/db/api-modules/users.module";
-import type {
-    Attachment,
-    GlobalPromptOverviewDTO,
-    SchoolDTO,
-    SchoolUsageViewDTO,
-    UserOverviewDTO,
-} from "@/lib/types/admin-types";
 import { requireDashboardAccess } from "@/lib/auth/require-dashboard-access";
-
-export type DashboardOverviewCacheMode = "cached" | "not_cached";
 
 export async function createSchoolsAction(): Promise<SchoolsController> {
     await requireDashboardAccess();

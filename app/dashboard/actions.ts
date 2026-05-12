@@ -1,54 +1,32 @@
+
 import { createAiPromptsModule } from "@/db/api-modules/ai-prompts.module";
 import { createAttachmentsModule } from "@/db/api-modules/attachments.module";
 import { createSchoolsModule } from "@/db/api-modules/schools.module";
 import { createUsersModule } from "@/db/api-modules/users.module";
 import { requireDashboardAccess } from "@/lib/auth/require-dashboard-access";
-import { Attachment, GlobalPromptOverviewDTO, SchoolDTO, SchoolUsageViewDTO, UserOverviewDTO } from "@/lib/types/admin-types";
-import { DashboardOverviewCacheMode } from "../actions";
-import { cacheLife, cacheTag } from "next/cache";
+import type {
+    Attachment,
+    GlobalPromptOverviewDTO,
+    SchoolDTO,
+    SchoolUsageViewDTO,
+    UserOverviewDTO,
+} from "@/lib/types/admin-types";
+import {
+    getDashboardAttachmentsCached,
+    getDashboardPromptOverviewCached,
+    getDashboardSchoolsCached,
+    getDashboardSchoolsUsageCached,
+    getDashboardUserOverviewCached,
+} from "./cached-actions";
 
-
-async function dashboardSchoolsRemoteCached() {
-    "use cache: remote";
-    cacheTag("dashboard-schools");
-    cacheLife({ expire: 60 });
-    return createSchoolsModule().getAllSchools();
-}
-
-async function dashboardSchoolsUsageRemoteCached() {
-    "use cache: remote";
-    cacheTag("dashboard-schools-usage");
-    cacheLife({ expire: 60 });
-    return createSchoolsModule().getSchoolsUsageView();
-}
-
-async function dashboardPromptOverviewRemoteCached() {
-    "use cache: remote";
-    cacheTag("dashboard-prompt-overview");
-    cacheLife({ expire: 60 });
-    return createAiPromptsModule().getGlobalPromptOverview();
-}
-
-async function dashboardAttachmentsRemoteCached() {
-    "use cache: remote";
-    cacheTag("dashboard-attachments");
-    cacheLife({ expire: 60 });
-    return createAttachmentsModule().getAttachments();
-}
-
-async function dashboardUserOverviewRemoteCached() {
-    "use cache: remote";
-    cacheTag("dashboard-users-overview");
-    cacheLife({ expire: 60 });
-    return createUsersModule().getUserOverview();
-}
+export type DashboardOverviewCacheMode = "cached" | "not_cached";
 
 export async function getDashboardSchools(
     _main: unknown,
     cache: DashboardOverviewCacheMode = "not_cached",
 ): Promise<SchoolDTO[]> {
     await requireDashboardAccess();
-    if (cache === "cached") return dashboardSchoolsRemoteCached();
+    if (cache === "cached") return getDashboardSchoolsCached();
     return createSchoolsModule().getAllSchools();
 }
 
@@ -57,7 +35,7 @@ export async function getDashboardSchoolsUsage(
     cache: DashboardOverviewCacheMode = "not_cached",
 ): Promise<SchoolUsageViewDTO[]> {
     await requireDashboardAccess();
-    if (cache === "cached") return dashboardSchoolsUsageRemoteCached();
+    if (cache === "cached") return getDashboardSchoolsUsageCached();
     return createSchoolsModule().getSchoolsUsageView();
 }
 
@@ -66,7 +44,7 @@ export async function getDashboardPromptOverview(
     cache: DashboardOverviewCacheMode = "not_cached",
 ): Promise<GlobalPromptOverviewDTO> {
     await requireDashboardAccess();
-    if (cache === "cached") return dashboardPromptOverviewRemoteCached();
+    if (cache === "cached") return getDashboardPromptOverviewCached();
     return createAiPromptsModule().getGlobalPromptOverview();
 }
 
@@ -75,7 +53,7 @@ export async function getDashboardAttachments(
     cache: DashboardOverviewCacheMode = "not_cached",
 ): Promise<Attachment[]> {
     await requireDashboardAccess();
-    if (cache === "cached") return dashboardAttachmentsRemoteCached();
+    if (cache === "cached") return getDashboardAttachmentsCached();
     return createAttachmentsModule().getAttachments();
 }
 
@@ -84,6 +62,6 @@ export async function getDashboardUserOverview(
     cache: DashboardOverviewCacheMode = "not_cached",
 ): Promise<UserOverviewDTO> {
     await requireDashboardAccess();
-    if (cache === "cached") return dashboardUserOverviewRemoteCached();
+    if (cache === "cached") return getDashboardUserOverviewCached();
     return createUsersModule().getUserOverview();
 }

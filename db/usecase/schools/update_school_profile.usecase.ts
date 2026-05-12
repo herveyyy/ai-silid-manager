@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { schools } from "@/drizzle/schema";
 import type { UpdateSchoolProfilePayload } from "@/lib/types/admin-types";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export class UpdateSchoolProfileUsecase {
     private db = db;
@@ -18,7 +18,7 @@ export class UpdateSchoolProfileUsecase {
                     schoolCode: data.schoolCode,
                     site: data.site,
                     username: data.username,
-                    updatedAt: new Date().toISOString(),
+                    updatedAt: sql`(now(3))`,
                 })
                 .where(eq(schools.id, schoolId));
         } catch (error) {

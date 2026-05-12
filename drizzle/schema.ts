@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm"
 export const activities = mysqlTable("activities", {
 	id: char({ length: 36 }).notNull(),
 	classCardId: char({ length: 36 }).references(() => classCard.id),
-	type: mysqlEnum(['assignment','quiz','materials']).notNull(),
+	type: mysqlEnum(['assignment', 'quiz', 'materials']).notNull(),
 	options: json(),
 	title: text().notNull(),
 	points: int().notNull(),
@@ -22,9 +22,9 @@ export const activities = mysqlTable("activities", {
 	createdBy: char({ length: 36 }).references(() => users.id),
 	meetingLink: text(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "activities_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "activities_id" }),
+	]);
 
 export const activityBadge = mysqlTable("activity_badge", {
 	id: char({ length: 36 }).notNull(),
@@ -33,9 +33,9 @@ export const activityBadge = mysqlTable("activity_badge", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	createdBy: char("created_by", { length: 36 }).notNull().references(() => users.id),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "activity_badge_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "activity_badge_id" }),
+	]);
 
 export const activityWithTags = mysqlTable("activity_with_tags", {
 	id: char({ length: 36 }).notNull(),
@@ -43,9 +43,9 @@ export const activityWithTags = mysqlTable("activity_with_tags", {
 	tagId: char({ length: 36 }).references(() => tags.id),
 	createdAt: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "activity_with_tags_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "activity_with_tags_id" }),
+	]);
 
 export const aiModels = mysqlTable("ai_models", {
 	id: char({ length: 36 }).notNull(),
@@ -57,16 +57,16 @@ export const aiModels = mysqlTable("ai_models", {
 	inCostValue: text("in_cost_value"),
 	outCostValue: text("out_cost_value"),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "ai_models_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "ai_models_id" }),
+	]);
 
 export const attachments = mysqlTable("attachments", {
 	id: char({ length: 36 }).notNull(),
 	parentId: text("parent_id").notNull(),
 	filePath: varchar("file_path", { length: 255 }).default('').notNull(),
 	fileType: varchar("file_type", { length: 255 }).default('').notNull(),
-	parentType: mysqlEnum(['question','section-question','student-answer','class-card','post-comment','profile','post','quiz-evidence','assignment','materials','attendance','school-badge','chatbox','chatbox-message','content','content-question']),
+	parentType: mysqlEnum(['question', 'section-question', 'student-answer', 'class-card', 'post-comment', 'profile', 'post', 'quiz-evidence', 'assignment', 'materials', 'attendance', 'school-badge', 'chatbox', 'chatbox-message', 'content', 'content-question']),
 	isDeleted: tinyint("is_deleted").default(0),
 	isUsed: tinyint("is_used").default(1),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
@@ -75,20 +75,20 @@ export const attachments = mysqlTable("attachments", {
 	fileSize: decimal("file_size", { precision: 20, scale: 6 }).default('0.000000'),
 	fileName: varchar("file_name", { length: 255 }).default('').notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "attachments_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "attachments_id" }),
+	]);
 
 export const attendance = mysqlTable("attendance", {
 	id: char({ length: 36 }).notNull(),
 	userId: char("user_id", { length: 36 }).notNull().references(() => users.id),
 	classCardId: char("class_card_id", { length: 36 }).notNull().references(() => classCard.id),
-	type: mysqlEnum(['in','out']).notNull(),
+	type: mysqlEnum(['in', 'out']).notNull(),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "attendance_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "attendance_id" }),
+	]);
 
 export const certificateFormat = mysqlTable("certificate_format", {
 	id: char({ length: 36 }).notNull(),
@@ -97,9 +97,9 @@ export const certificateFormat = mysqlTable("certificate_format", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "certificate_format_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "certificate_format_id" }),
+	]);
 
 export const certificates = mysqlTable("certificates", {
 	id: char({ length: 36 }).notNull(),
@@ -111,9 +111,9 @@ export const certificates = mysqlTable("certificates", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "certificates_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "certificates_id" }),
+	]);
 
 export const chatbox = mysqlTable("chatbox", {
 	id: char({ length: 36 }).notNull(),
@@ -124,9 +124,9 @@ export const chatbox = mysqlTable("chatbox", {
 	updatedAt: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	archive: tinyint().default(0),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "chatbox_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "chatbox_id" }),
+	]);
 
 export const chatboxMembers = mysqlTable("chatbox_members", {
 	id: char({ length: 36 }).notNull(),
@@ -137,9 +137,9 @@ export const chatboxMembers = mysqlTable("chatbox_members", {
 	lastSeen: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 	lastMessageId: char({ length: 36 }).references(() => chatboxMessages.id),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "chatbox_members_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "chatbox_members_id" }),
+	]);
 
 export const chatboxMessages = mysqlTable("chatbox_messages", {
 	id: char({ length: 36 }).notNull(),
@@ -151,9 +151,9 @@ export const chatboxMessages = mysqlTable("chatbox_messages", {
 	updatedAt: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 	pinned: tinyint().default(0),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "chatbox_messages_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "chatbox_messages_id" }),
+	]);
 
 export const classCard = mysqlTable("class_card", {
 	id: char({ length: 36 }).notNull(),
@@ -172,9 +172,9 @@ export const classCard = mysqlTable("class_card", {
 	meetingLink: text("meeting_link"),
 	requestPosting: tinyint("request_posting").default(0).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "class_card_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "class_card_id" }),
+	]);
 
 export const classWorkCategory = mysqlTable("class_work_category", {
 	id: char({ length: 36 }).notNull(),
@@ -185,9 +185,9 @@ export const classWorkCategory = mysqlTable("class_work_category", {
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	archive: tinyint().default(0).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "class_work_category_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "class_work_category_id" }),
+	]);
 
 export const classrooms = mysqlTable("classrooms", {
 	id: char({ length: 36 }).notNull(),
@@ -199,9 +199,9 @@ export const classrooms = mysqlTable("classrooms", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "classrooms_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "classrooms_id" }),
+	]);
 
 export const contentQuestions = mysqlTable("content_questions", {
 	id: char({ length: 36 }).notNull(),
@@ -214,17 +214,17 @@ export const contentQuestions = mysqlTable("content_questions", {
 	createdBy: char("created_by", { length: 36 }).references(() => users.id),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
-	questionType: mysqlEnum("question_type", ['multiple-choice','true-false','identification','essay','enumeration','matching','attachments']),
+	questionType: mysqlEnum("question_type", ['multiple-choice', 'true-false', 'identification', 'essay', 'enumeration', 'matching', 'attachments']),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "content_questions_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "content_questions_id" }),
+	]);
 
 export const contents = mysqlTable("contents", {
 	id: char({ length: 36 }).notNull(),
 	lessonId: char("lesson_id", { length: 36 }).notNull().references(() => lessons.id),
 	content: text().notNull(),
-	contentType: mysqlEnum("content_type", ['question','exercise','content']).notNull(),
+	contentType: mysqlEnum("content_type", ['question', 'exercise', 'content']).notNull(),
 	options: json(),
 	duration: int().notNull(),
 	order: int().notNull(),
@@ -232,9 +232,9 @@ export const contents = mysqlTable("contents", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "contents_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "contents_id" }),
+	]);
 
 export const course = mysqlTable("course", {
 	id: char({ length: 36 }).notNull(),
@@ -245,51 +245,51 @@ export const course = mysqlTable("course", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	createdBy: char("created_by", { length: 36 }).references(() => users.id),
-	status: mysqlEnum(['draft','published','archived']).default('draft').notNull(),
+	status: mysqlEnum(['draft', 'published', 'archived']).default('draft').notNull(),
 	referenceUrl: text("reference_url"),
 	urlReference: text("url_reference"),
 	schoolCodes: json(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "course_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "course_id" }),
+	]);
 
 export const courseLevelTag = mysqlTable("course_level_tag", {
 	id: char({ length: 36 }).notNull(),
 	courseId: char("course_id", { length: 36 }).notNull().references(() => course.id),
 	levelTagId: char("level_tag_id", { length: 36 }).notNull().references(() => levelTags.id),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "course_level_tag_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "course_level_tag_id" }),
+	]);
 
 export const coursePermission = mysqlTable("course_permission", {
 	id: char({ length: 36 }).notNull(),
 	courseId: char("course_id", { length: 36 }).notNull().references(() => course.id),
 	userId: char("user_id", { length: 36 }).notNull().references(() => users.id),
-	accessRole: mysqlEnum(['admin','editor','viewer']).notNull(),
+	accessRole: mysqlEnum(['admin', 'editor', 'viewer']).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "course_permission_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "course_permission_id" }),
+	]);
 
 export const courseSchool = mysqlTable("course_school", {
 	id: char({ length: 36 }).notNull(),
 	courseId: char("course_id", { length: 36 }).notNull().references(() => course.id),
 	schoolId: char("school_id", { length: 36 }).notNull().references(() => schools.id),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "course_school_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "course_school_id" }),
+	]);
 
 export const courseTopic = mysqlTable("course_topic", {
 	id: char({ length: 36 }).notNull(),
 	courseId: char("course_id", { length: 36 }).notNull().references(() => course.id),
 	topicId: char("topic_id", { length: 36 }).notNull().references(() => topics.id),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "course_topic_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "course_topic_id" }),
+	]);
 
 export const dataMigration = mysqlTable("data_migration", {
 	id: char({ length: 36 }).notNull(),
@@ -299,9 +299,9 @@ export const dataMigration = mysqlTable("data_migration", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "data_migration_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "data_migration_id" }),
+	]);
 
 export const dbErrorLogger = mysqlTable("db_error_logger", {
 	id: bigint({ mode: "number", unsigned: true }).autoincrement().notNull(),
@@ -314,9 +314,9 @@ export const dbErrorLogger = mysqlTable("db_error_logger", {
 	applicationName: varchar("application_name", { length: 100 }),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(CURRENT_TIMESTAMP(3))`),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "db_error_logger_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "db_error_logger_id" }),
+	]);
 
 export const departments = mysqlTable("departments", {
 	id: char({ length: 36 }).notNull(),
@@ -324,9 +324,9 @@ export const departments = mysqlTable("departments", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "departments_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "departments_id" }),
+	]);
 
 export const grading = mysqlTable("grading", {
 	id: char({ length: 36 }).notNull(),
@@ -336,9 +336,9 @@ export const grading = mysqlTable("grading", {
 	createdAt: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "grading_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "grading_id" }),
+	]);
 
 export const lessons = mysqlTable("lessons", {
 	id: char({ length: 36 }).notNull(),
@@ -353,14 +353,14 @@ export const lessons = mysqlTable("lessons", {
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	urlReference: text("url_reference"),
 },
-(table) => [
-	foreignKey({
+	(table) => [
+		foreignKey({
 			columns: [table.prerequisiteLessonId],
 			foreignColumns: [table.id],
 			name: "lessons_prerequisite_lesson_id_lessons_id_fk"
 		}),
-	primaryKey({ columns: [table.id], name: "lessons_id"}),
-]);
+		primaryKey({ columns: [table.id], name: "lessons_id" }),
+	]);
 
 export const levelTags = mysqlTable("level_tags", {
 	id: char({ length: 36 }).notNull(),
@@ -368,9 +368,9 @@ export const levelTags = mysqlTable("level_tags", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "level_tags_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "level_tags_id" }),
+	]);
 
 export const notification = mysqlTable("notification", {
 	id: char({ length: 36 }).notNull(),
@@ -380,18 +380,18 @@ export const notification = mysqlTable("notification", {
 	image: text(),
 	link: text(),
 	isRead: tinyint("is_read").default(0),
-	type: mysqlEnum(['chatbox','activity','activity-bank','assignment','quiz','materials','class-card','post','quiz-evidence','attendance','school-badge','grade']).notNull(),
+	type: mysqlEnum(['chatbox', 'activity', 'activity-bank', 'assignment', 'quiz', 'materials', 'class-card', 'post', 'quiz-evidence', 'attendance', 'school-badge', 'grade']).notNull(),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "notification_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "notification_id" }),
+	]);
 
 export const notificationDevice = mysqlTable("notification_device", {
 	id: char({ length: 36 }).notNull(),
 	userId: char({ length: 36 }).notNull().references(() => users.id),
-	deviceType: mysqlEnum("device_type", ['android','ios','web']).notNull(),
+	deviceType: mysqlEnum("device_type", ['android', 'ios', 'web']).notNull(),
 	endpoint: text().notNull(),
 	p256Dh: text().notNull(),
 	auth: text().notNull(),
@@ -399,9 +399,9 @@ export const notificationDevice = mysqlTable("notification_device", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "notification_device_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "notification_device_id" }),
+	]);
 
 export const participants = mysqlTable("participants", {
 	id: char({ length: 36 }).notNull(),
@@ -412,9 +412,9 @@ export const participants = mysqlTable("participants", {
 	enabled: tinyint().default(1).notNull(),
 	hasPermit: tinyint("has_permit").default(1).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "participants_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "participants_id" }),
+	]);
 
 export const post = mysqlTable("post", {
 	id: char({ length: 36 }).notNull(),
@@ -423,16 +423,16 @@ export const post = mysqlTable("post", {
 	pinned: tinyint().default(0),
 	isScheduledPost: tinyint().default(0),
 	schedulePost: datetime({ mode: 'string', fsp: 3 }),
-	userPostType: mysqlEnum(['student','teacher','admin','partner']),
+	userPostType: mysqlEnum(['student', 'teacher', 'admin', 'partner']),
 	archive: tinyint().default(0),
 	createdAt: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 	updatedAt: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 	createdBy: char({ length: 36 }).references(() => users.id),
 	isRequestPosting: tinyint().default(0),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "post_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "post_id" }),
+	]);
 
 export const postComment = mysqlTable("post_comment", {
 	id: char({ length: 36 }).notNull(),
@@ -442,9 +442,9 @@ export const postComment = mysqlTable("post_comment", {
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	createdBy: char({ length: 36 }).references(() => users.id),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "post_comment_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "post_comment_id" }),
+	]);
 
 export const prompt = mysqlTable("prompt", {
 	id: char({ length: 36 }).notNull(),
@@ -463,9 +463,9 @@ export const prompt = mysqlTable("prompt", {
 	bypassedProcess: tinyint("bypassed_process").default(0).notNull(),
 	costValue: text("cost_value"),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "prompt_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "prompt_id" }),
+	]);
 
 export const questions = mysqlTable("questions", {
 	id: char({ length: 36 }).notNull(),
@@ -473,7 +473,7 @@ export const questions = mysqlTable("questions", {
 	activitiesId: char({ length: 36 }).references(() => activities.id),
 	description: text(),
 	points: int().default(0),
-	type: mysqlEnum(['multiple-choice','true-false','identification','essay','enumeration','matching','attachments']),
+	type: mysqlEnum(['multiple-choice', 'true-false', 'identification', 'essay', 'enumeration', 'matching', 'attachments']),
 	checkForPunctuationsAndSpecialChar: tinyint().default(0),
 	checkForCaseSensitiveAnswers: tinyint().default(0),
 	shuffleChoicesDuringTest: tinyint().default(0),
@@ -484,20 +484,20 @@ export const questions = mysqlTable("questions", {
 	createdAt: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 	updatedAt: datetime({ mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "questions_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "questions_id" }),
+	]);
 
 export const quizEvidence = mysqlTable("quiz_evidence", {
 	id: char({ length: 36 }).notNull(),
 	studentActivityId: char("student_activity_id", { length: 36 }).notNull().references(() => studentActivity.id),
 	description: text(),
-	evidenceCaptureType: mysqlEnum("evidence_capture_type", ['front','screen']).notNull(),
+	evidenceCaptureType: mysqlEnum("evidence_capture_type", ['front', 'screen']).notNull(),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "quiz_evidence_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "quiz_evidence_id" }),
+	]);
 
 export const requestCache = mysqlTable("request_cache", {
 	id: char({ length: 36 }).notNull(),
@@ -506,9 +506,9 @@ export const requestCache = mysqlTable("request_cache", {
 	userId: char("user_id", { length: 36 }).references(() => users.id),
 	schoolCode: char("school_code", { length: 50 }),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "request_cache_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "request_cache_id" }),
+	]);
 
 export const schoolBadge = mysqlTable("school_badge", {
 	id: char({ length: 36 }).notNull(),
@@ -524,9 +524,9 @@ export const schoolBadge = mysqlTable("school_badge", {
 	limit: int().default(9999),
 	default: tinyint().default(0).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "school_badge_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "school_badge_id" }),
+	]);
 
 export const schoolMariadDb = mysqlTable("school_mariad_db", {
 	id: char({ length: 36 }).notNull(),
@@ -539,9 +539,9 @@ export const schoolMariadDb = mysqlTable("school_mariad_db", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "school_mariad_db_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "school_mariad_db_id" }),
+	]);
 
 export const schools = mysqlTable("schools", {
 	id: char({ length: 36 }).notNull(),
@@ -561,9 +561,9 @@ export const schools = mysqlTable("schools", {
 	storageLimit: int("storage_limit").default(10000).notNull(),
 	defaultAiModelId: char("default_ai_model_id", { length: 36 }).references(() => aiModels.id),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "schools_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "schools_id" }),
+	]);
 
 export const sectionQuestions = mysqlTable("sectionQuestions", {
 	id: char({ length: 36 }).notNull(),
@@ -576,9 +576,9 @@ export const sectionQuestions = mysqlTable("sectionQuestions", {
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	activitiesId: char({ length: 36 }).references(() => activities.id),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "sectionQuestions_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "sectionQuestions_id" }),
+	]);
 
 export const sections = mysqlTable("sections", {
 	id: char({ length: 36 }).notNull(),
@@ -588,9 +588,9 @@ export const sections = mysqlTable("sections", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "sections_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "sections_id" }),
+	]);
 
 export const studentActivity = mysqlTable("student_activity", {
 	id: char({ length: 36 }).notNull(),
@@ -610,9 +610,9 @@ export const studentActivity = mysqlTable("student_activity", {
 	feedback: json(),
 	teacherFeedback: json(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "student_activity_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "student_activity_id" }),
+	]);
 
 export const studentAnswers = mysqlTable("student_answers", {
 	id: char({ length: 36 }).notNull(),
@@ -623,9 +623,9 @@ export const studentAnswers = mysqlTable("student_answers", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "student_answers_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "student_answers_id" }),
+	]);
 
 export const studentBadge = mysqlTable("student_badge", {
 	id: char({ length: 36 }).notNull(),
@@ -636,9 +636,9 @@ export const studentBadge = mysqlTable("student_badge", {
 	createdBy: char("created_by", { length: 36 }).notNull().references(() => users.id),
 	classCardId: char("class_card_id", { length: 36 }).references(() => classCard.id),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "student_badge_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "student_badge_id" }),
+	]);
 
 export const studentHubFlashCard = mysqlTable("student_hub_flash_card", {
 	id: char({ length: 36 }).notNull(),
@@ -647,9 +647,9 @@ export const studentHubFlashCard = mysqlTable("student_hub_flash_card", {
 	questionAnswer: text("question_answer").notNull(),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "student_hub_flash_card_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "student_hub_flash_card_id" }),
+	]);
 
 export const studentHubNote = mysqlTable("student_hub_note", {
 	id: char({ length: 36 }).notNull(),
@@ -660,9 +660,9 @@ export const studentHubNote = mysqlTable("student_hub_note", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "student_hub_note_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "student_hub_note_id" }),
+	]);
 
 export const subjects = mysqlTable("subjects", {
 	id: char({ length: 36 }).notNull(),
@@ -672,18 +672,18 @@ export const subjects = mysqlTable("subjects", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "subjects_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "subjects_id" }),
+	]);
 
 export const tags = mysqlTable("tags", {
 	id: char({ length: 36 }).notNull(),
 	name: text(),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "tags_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "tags_id" }),
+	]);
 
 export const takersAnswers = mysqlTable("takers_answers", {
 	id: char({ length: 36 }).notNull(),
@@ -694,9 +694,9 @@ export const takersAnswers = mysqlTable("takers_answers", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "takers_answers_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "takers_answers_id" }),
+	]);
 
 export const takersFeedback = mysqlTable("takers_feedback", {
 	id: char({ length: 36 }).notNull(),
@@ -707,9 +707,9 @@ export const takersFeedback = mysqlTable("takers_feedback", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "takers_feedback_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "takers_feedback_id" }),
+	]);
 
 export const takersProgress = mysqlTable("takers_progress", {
 	id: char({ length: 36 }).notNull(),
@@ -719,9 +719,9 @@ export const takersProgress = mysqlTable("takers_progress", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "takers_progress_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "takers_progress_id" }),
+	]);
 
 export const takersTopics = mysqlTable("takers_topics", {
 	id: char({ length: 36 }).notNull(),
@@ -729,9 +729,9 @@ export const takersTopics = mysqlTable("takers_topics", {
 	userId: char("user_id", { length: 36 }).notNull().references(() => users.id),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "takers_topics_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "takers_topics_id" }),
+	]);
 
 export const term = mysqlTable("term", {
 	id: char({ length: 36 }).notNull(),
@@ -741,9 +741,9 @@ export const term = mysqlTable("term", {
 	createdBy: char("created_by", { length: 36 }).references(() => users.id),
 	archive: tinyint().default(0).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "term_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "term_id" }),
+	]);
 
 export const topics = mysqlTable("topics", {
 	id: char({ length: 36 }).notNull(),
@@ -752,23 +752,19 @@ export const topics = mysqlTable("topics", {
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "topics_id"}),
-]);
+	(table) => [
+		primaryKey({ columns: [table.id], name: "topics_id" }),
+	]);
 
 export const users = mysqlTable("users", {
 	id: char({ length: 36 }).notNull(),
 	name: text().notNull(),
 	email: text().notNull(),
-	role: mysqlEnum(['student','teacher','admin','partner']).notNull(),
+	role: mysqlEnum(['student', 'teacher', 'admin', 'partner']).notNull(),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 	imageUrl: text(),
 	password: text(),
 },
-(table) => [
-	primaryKey({ columns: [table.id], name: "users_id"}),
-]);
-
-/** MySQL `mysqlEnum` columns expose `.enumValues` (replaces pg `pgEnum` exports). */
-export const attachmentType = attachments.parentType;
-export const userRoleType = users.role;
+	(table) => [
+		primaryKey({ columns: [table.id], name: "users_id" }),
+	]);
