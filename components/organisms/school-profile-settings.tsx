@@ -25,6 +25,7 @@ export function SchoolProfileSettings({
 }) {
   const router = useRouter();
   const [aiFeat, setAiFeat] = useState(school.aiFeat);
+  const [enrichmentFeat, setEnrichmentFeat] = useState(school.enrichmentFeat);
   const [unlimitedStorage, setUnlimitedStorage] = useState(
     school.unlimitedStorage,
   );
@@ -58,6 +59,7 @@ export function SchoolProfileSettings({
   useEffect(() => {
     setTimeout(() => {
       setAiFeat(school.aiFeat);
+      setEnrichmentFeat(school.enrichmentFeat);
       setDefaultAiModelId(school.defaultAiModelId ?? "");
       setUnlimitedStorage(school.unlimitedStorage);
       setUnlimitedToken(school.unlimitedToken);
@@ -116,6 +118,7 @@ export function SchoolProfileSettings({
     startConfigTransition(async () => {
       const result = await updateSchoolConfigurationAction(school.id, {
         aiFeat,
+        enrichmentFeat,
         defaultAiModelId: defaultAiModelId || null,
         unlimitedStorage,
         unlimitedToken,
@@ -141,6 +144,7 @@ export function SchoolProfileSettings({
     });
   }, [
     aiFeat,
+    enrichmentFeat,
     apiKeyInput,
     defaultAiModelId,
     router,
@@ -433,6 +437,21 @@ export function SchoolProfileSettings({
                   className="h-4 w-4 accent-(--accent)"
                 />
                 {aiFeat ? "Enabled" : "Disabled"}
+              </label>
+            </div>
+
+            <div className="theme-panel border p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)">
+                Enrichment feature
+              </p>
+              <label className="mt-3 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.12em] text-foreground">
+                <input
+                  type="checkbox"
+                  checked={enrichmentFeat}
+                  onChange={(e) => setEnrichmentFeat(e.target.checked)}
+                  className="h-4 w-4 accent-(--accent)"
+                />
+                {enrichmentFeat ? "Enabled" : "Disabled"}
               </label>
             </div>
 

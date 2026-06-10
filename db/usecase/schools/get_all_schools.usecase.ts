@@ -20,6 +20,7 @@ export class GetAllSchoolsUsecase {
                     secret: schools.secret,
                     apiKey: schools.apiKey,
                     aiFeat: schools.aiFeat,
+                    enrichmentFeat: schools.enrichmentFeat,
                     unlimitedStorage: schools.unlimitedStorage,
                     unlimitedToken: schools.unlimitedToken,
                     tokenLimit: schools.tokenLimit,
@@ -35,6 +36,7 @@ export class GetAllSchoolsUsecase {
             return rows.map((row) => ({
                 ...row,
                 aiFeat: Boolean(row.aiFeat),
+                enrichmentFeat: Boolean(row.enrichmentFeat),
                 unlimitedStorage: Boolean(row.unlimitedStorage),
                 unlimitedToken: Boolean(row.unlimitedToken),
             }));

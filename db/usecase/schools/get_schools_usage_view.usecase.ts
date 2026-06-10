@@ -90,6 +90,7 @@ export class GetSchoolsUsageViewUsecase {
                 schoolCode: schools.schoolCode,
                 site: schools.site,
                 aiFeat: schools.aiFeat,
+                enrichmentFeat: schools.enrichmentFeat,
                 unlimitedStorage: schools.unlimitedStorage,
                 unlimitedToken: schools.unlimitedToken,
                 storageLimit: schools.storageLimit,
@@ -123,6 +124,7 @@ export class GetSchoolsUsageViewUsecase {
             return raw.map((row) => ({
                 ...row,
                 aiFeat: Boolean(row.aiFeat),
+                enrichmentFeat: Boolean(row.enrichmentFeat),
                 unlimitedStorage: Boolean(row.unlimitedStorage),
                 unlimitedToken: Boolean(row.unlimitedToken),
             }));
@@ -158,6 +160,7 @@ export class GetSchoolsUsageViewUsecase {
             const rows = rawRows.map((row) => ({
                 ...row,
                 aiFeat: Boolean(row.aiFeat),
+                enrichmentFeat: Boolean(row.enrichmentFeat),
                 unlimitedStorage: Boolean(row.unlimitedStorage),
                 unlimitedToken: Boolean(row.unlimitedToken),
             }));

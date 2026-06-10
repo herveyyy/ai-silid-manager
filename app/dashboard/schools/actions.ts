@@ -65,6 +65,7 @@ export async function updateSchoolConfigurationAction(
         const schoolsController = await createSchoolsAction();
         await schoolsController.updateSchoolConfiguration(schoolId, {
             aiFeat: Boolean(data.aiFeat),
+            enrichmentFeat: Boolean(data.enrichmentFeat),
             defaultAiModelId,
             unlimitedStorage: Boolean(data.unlimitedStorage),
             unlimitedToken: Boolean(data.unlimitedToken),
