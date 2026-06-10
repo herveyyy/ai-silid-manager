@@ -13,14 +13,16 @@ export type InsertSchool = typeof schools.$inferInsert;
 export type SelectSchool = typeof schools.$inferSelect;
 export type School = Omit<
     SelectSchool,
-    "aiFeat" | "unlimitedStorage" | "unlimitedToken"
+    "aiFeat" | "enrichmentFeat" | "unlimitedStorage" | "unlimitedToken"
 > & {
     aiFeat: boolean;
+    enrichmentFeat: boolean;
     unlimitedStorage: boolean;
     unlimitedToken: boolean;
 };
 export type SchoolDTO = Omit<School, "password"> & {
     passwordCredentialSet: boolean;
+    
 };
 
 export type CreateSchoolPayload = {
@@ -85,9 +87,9 @@ export type SchoolUsageViewDTO = {
     schoolCode: string;
     site: string;
     aiFeat: boolean;
+    enrichmentFeat: boolean;
     unlimitedStorage: boolean;
     unlimitedToken: boolean;
-    /** DB value is megabytes; multiply by 10⁶ for byte ceiling vs usage. */
     storageLimit: number;
     tokenLimit: number;
     storageUsedBytes: number;
@@ -124,7 +126,6 @@ export type PromptLog = {
     completedAt: string | null;
     tokenAiValue: number | null;
     creditsSpent: number | null;
-    /** `prompt.cost_value` — opaque text (e.g. serialized pricing snapshot). */
     costValue: string | null;
     status: string;
     createdBy: string;
@@ -168,15 +169,11 @@ export type GlobalPromptOverviewDTO = {
     avgEstCostPerDay: number;
     avgTokensPerPrompt: number;
     avgEstCostPerPrompt: number;
-    /** Rows where parsed cost_value > 0 (divisor for avg est. cost / prompt). */
     promptsWithRecordedCost: number;
-    /** Distinct days with summed parsed cost > 0, or 1 fallback when cost exists but no day buckets (divisor for avg est. cost / day). */
     daysWithRecordedCost: number;
     spanDays: number;
     periodLabel: string;
-    /** Days with ≥1 prompt (calendar). */
     trackedCalendarDays: number;
-    /** Daily chart shows last 90 days when history is longer. */
     dailySeriesTruncated: boolean;
     dailySeries: GlobalPromptOverviewDay[];
 };
@@ -200,9 +197,7 @@ export type DbErrorLogFilters = {
     referenceTable?: string;
     applicationName?: string;
     sqlState?: string;
-    /** ISO date string (YYYY-MM-DD) inclusive lower bound on created_at */
     createdAtFrom?: string;
-    /** ISO date string (YYYY-MM-DD) inclusive upper bound on created_at */
     createdAtTo?: string;
 };
 

@@ -505,6 +505,7 @@ export const requestCache = mysqlTable("request_cache", {
 	expiredDate: datetime({ mode: 'string', fsp: 3 }).notNull(),
 	userId: char("user_id", { length: 36 }).references(() => users.id),
 	schoolCode: char("school_code", { length: 50 }),
+	isClassSync: tinyint("is_class_sync").default(0),
 },
 	(table) => [
 		primaryKey({ columns: [table.id], name: "request_cache_id" }),
@@ -560,6 +561,7 @@ export const schools = mysqlTable("schools", {
 	tokenLimit: int("token_limit").default(10000).notNull(),
 	storageLimit: int("storage_limit").default(10000).notNull(),
 	defaultAiModelId: char("default_ai_model_id", { length: 36 }).references(() => aiModels.id),
+	enrichmentFeat: tinyint("enrichment_feat").default(0).notNull(),
 },
 	(table) => [
 		primaryKey({ columns: [table.id], name: "schools_id" }),
@@ -768,4 +770,3 @@ export const users = mysqlTable("users", {
 	(table) => [
 		primaryKey({ columns: [table.id], name: "users_id" }),
 	]);
-export type UserRole = (typeof users.role.enumValues)[number];

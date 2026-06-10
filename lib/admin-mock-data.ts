@@ -5,7 +5,6 @@ import type {
     SchoolDTO,
 } from "@/lib/types/admin-types";
 
-/** All tenants — mirrors `schools` rows (frontend mock). */
 export const mockSchools: SchoolDTO[] = [
     {
         id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -16,6 +15,7 @@ export const mockSchools: SchoolDTO[] = [
         createdAt: "2024-01-15T08:00:00.000Z",
         updatedAt: "2026-03-01T12:00:00.000Z",
         aiFeat: false,
+        enrichmentFeat: false,
         unlimitedStorage: false,
         unlimitedToken: false,
         tokenLimit: 0,
@@ -34,6 +34,7 @@ export const mockSchools: SchoolDTO[] = [
         createdAt: "2024-03-02T08:00:00.000Z",
         updatedAt: "2026-02-14T09:30:00.000Z",
         aiFeat: false,
+        enrichmentFeat: false,
         unlimitedStorage: false,
         unlimitedToken: false,
         tokenLimit: 0,
@@ -52,6 +53,7 @@ export const mockSchools: SchoolDTO[] = [
         createdAt: "2024-06-20T12:00:00.000Z",
         updatedAt: "2026-01-10T16:00:00.000Z",
         aiFeat: false,
+        enrichmentFeat: false,
         unlimitedStorage: false,
         unlimitedToken: false,
         tokenLimit: 0,
@@ -70,6 +72,7 @@ export const mockSchools: SchoolDTO[] = [
         createdAt: "2025-01-08T00:00:00.000Z",
         updatedAt: "2026-03-18T11:00:00.000Z",
         aiFeat: false,
+        enrichmentFeat: false,
         unlimitedStorage: false,
         unlimitedToken: false,
         tokenLimit: 0,
@@ -88,6 +91,7 @@ export const mockSchools: SchoolDTO[] = [
         createdAt: "2025-09-01T08:00:00.000Z",
         updatedAt: "2026-03-20T07:45:00.000Z",
         aiFeat: false,
+        enrichmentFeat: false,
         unlimitedStorage: false,
         unlimitedToken: false,
         tokenLimit: 0,

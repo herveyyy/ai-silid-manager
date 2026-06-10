@@ -47,6 +47,7 @@ export default async function SchoolsListPage({
       passwordCredentialSet: false,
       defaultAiModelId: null,
       aiFeat: school.aiFeat,
+      enrichmentFeat: school.enrichmentFeat,
       unlimitedStorage: school.unlimitedStorage,
       unlimitedToken: school.unlimitedToken,
       tokenLimit: Number(school.tokenLimit ?? 0),

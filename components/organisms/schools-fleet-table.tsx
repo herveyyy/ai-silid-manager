@@ -12,6 +12,10 @@ function shortId(id: string): string {
   return `${id.slice(0, 8)}…`;
 }
 
+function featureStatusLabel(enabled: boolean): string {
+  return enabled ? "Enabled" : "Disabled";
+}
+
 export function SchoolsFleetTable({
   rows,
   paginatedSchools,
@@ -79,6 +83,14 @@ export function SchoolsFleetTable({
                     {tokenLabel}
                   </dd>
                 </div>
+                <div className="theme-panel-strong border px-3 py-2">
+                  <dt className="uppercase tracking-[0.15em] text-(--muted)">
+                    enrichment
+                  </dt>
+                  <dd className="mt-1 text-foreground">
+                    {featureStatusLabel(school.enrichmentFeat)}
+                  </dd>
+                </div>
                 <div>
                   <dt className="font-mono text-[10px] uppercase tracking-[0.15em] text-(--muted)">
                     id
@@ -113,6 +125,9 @@ export function SchoolsFleetTable({
                 tokens
               </th>
               <th className="px-4 py-3 font-normal uppercase tracking-[0.15em]">
+                enrichment
+              </th>
+              <th className="px-4 py-3 font-normal uppercase tracking-[0.15em]">
                 id
               </th>
               <th className="px-4 py-3 font-normal uppercase tracking-[0.15em]">
@@ -145,6 +160,9 @@ export function SchoolsFleetTable({
                     title={tokenLabel}
                   >
                     {tokenLabel}
+                  </td>
+                  <td className="px-4 py-3 uppercase">
+                    {featureStatusLabel(school.enrichmentFeat)}
                   </td>
                   <td
                     className="px-4 py-3 text-(--muted)"

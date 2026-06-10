@@ -12,6 +12,7 @@ export class UpdateSchoolConfigurationUsecase {
                 .update(schools)
                 .set({
                     aiFeat: data.aiFeat ? 1 : 0,
+                    enrichmentFeat: data.enrichmentFeat ? 1 : 0,
                     unlimitedStorage: data.unlimitedStorage ? 1 : 0,
                     unlimitedToken: data.unlimitedToken ? 1 : 0,
                     tokenLimit: data.tokenLimit,
