@@ -17,8 +17,6 @@ export class GetAllSchoolsUsecase {
                     site: schools.site,
                     createdAt: schools.createdAt,
                     updatedAt: schools.updatedAt,
-                    secret: schools.secret,
-                    apiKey: schools.apiKey,
                     aiFeat: schools.aiFeat,
                     enrichmentFeat: schools.enrichmentFeat,
                     unlimitedStorage: schools.unlimitedStorage,
