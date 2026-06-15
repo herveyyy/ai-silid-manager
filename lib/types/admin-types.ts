@@ -20,9 +20,9 @@ export type School = Omit<
     unlimitedStorage: boolean;
     unlimitedToken: boolean;
 };
-export type SchoolDTO = Omit<School, "password"> & {
+export type SchoolDTO = Omit<School, "password" | "secret" | "apiKey"> & {
     passwordCredentialSet: boolean;
-    
+
 };
 
 export type CreateSchoolPayload = {
