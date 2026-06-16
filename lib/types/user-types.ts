@@ -19,3 +19,12 @@ export type UpdateUserPayload = {
     imageUrl: string;
     password: string;
 };
+
+/** Dashboard operator without credential fields. */
+export type DashboardAccessUserDTO = {
+    id: string;
+    name: string;
+    email: string;
+    role: UserRole;
+    createdAt: string | null;
+};

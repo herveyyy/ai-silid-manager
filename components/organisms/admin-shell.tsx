@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "../molecules/theme-toggle";
 import { signOut } from "next-auth/react";
+import { hasOwnerAccess } from "@/lib/auth/dashboard-roles";
 
 const nav = [
     { href: "/dashboard", label: "Dashboard" },
@@ -12,16 +13,23 @@ const nav = [
     { href: "/dashboard/storage", label: "Storage" },
     { href: "/dashboard/ai", label: "AI" },
     { href: "/dashboard/db-error-logger", label: "DB Error Logger" },
+    {
+        href: "/dashboard/user-access-control",
+        label: "User Access Control",
+        ownerOnly: true,
+    },
 ] as const;
 
 export function AdminShell({
     children,
     environmentLabel,
     isDatabaseConnected,
+    userRole,
 }: {
     children: React.ReactNode;
     environmentLabel: "LOCAL" | "STAGING" | "PROD";
     isDatabaseConnected: boolean;
+    userRole: string;
 }) {
     const pathname = usePathname();
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -68,7 +76,13 @@ export function AdminShell({
                     </div>
                 </div>
                 <nav className="flex flex-1 flex-col gap-0 p-2">
-                    {nav.map((item) => {
+                    {nav
+                        .filter((item) =>
+                            "ownerOnly" in item && item.ownerOnly
+                                ? hasOwnerAccess(userRole)
+                                : true,
+                        )
+                        .map((item) => {
                         const active =
                             item.href === "/dashboard"
                                 ? pathname === "/dashboard"

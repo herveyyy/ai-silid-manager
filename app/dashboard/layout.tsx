@@ -38,7 +38,8 @@ async function getDatabaseConnectionStatus(): Promise<boolean> {
 export default async function DashboardLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  await requireDashboardAccess();
+  const session = await requireDashboardAccess();
+  const userRole = (session.user as { role?: string }).role ?? "";
 
   const [environmentLabel, isDatabaseConnected] = await Promise.all([
     Promise.resolve(getEnvironmentLabel()),
@@ -49,6 +50,7 @@ export default async function DashboardLayout({
     <AdminShell
       environmentLabel={environmentLabel}
       isDatabaseConnected={isDatabaseConnected}
+      userRole={userRole}
     >
       {children}
     </AdminShell>

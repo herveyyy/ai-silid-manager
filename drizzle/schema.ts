@@ -762,7 +762,7 @@ export const users = mysqlTable("users", {
 	id: char({ length: 36 }).notNull(),
 	name: text().notNull(),
 	email: text().notNull(),
-	role: mysqlEnum(['student', 'teacher', 'admin', 'partner']).notNull(),
+	role: mysqlEnum(['student', 'teacher', 'admin', 'partner', 'owner']).notNull(),
 	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`),
 	imageUrl: text(),
 	password: text(),

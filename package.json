@@ -11,10 +11,12 @@
     "seed:createSuperAdmin": "tsx --env-file=.env scripts/seeds/create_admin.ts"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.13.5",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",
+    "google-auth-library": "^10.7.0",
     "mysql2": "^3.20.0",
     "next": "16.2.1",
     "next-auth": "^5.0.0-beta.30",

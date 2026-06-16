@@ -15,6 +15,7 @@ import { createRoomsModule } from "@/db/api-modules/rooms.module";
 import { createSchoolsModule } from "@/db/api-modules/schools.module";
 import { createUsersModule } from "@/db/api-modules/users.module";
 import { requireDashboardAccess } from "@/lib/auth/require-dashboard-access";
+import { requireOwnerAccess } from "@/lib/auth/require-owner-access";
 
 export async function createSchoolsAction(): Promise<SchoolsController> {
     await requireDashboardAccess();
@@ -23,6 +24,11 @@ export async function createSchoolsAction(): Promise<SchoolsController> {
 
 export async function createUsersAction(): Promise<UsersController> {
     await requireDashboardAccess();
+    return createUsersModule();
+}
+
+export async function createOwnerUsersAction(): Promise<UsersController> {
+    await requireOwnerAccess();
     return createUsersModule();
 }
 
