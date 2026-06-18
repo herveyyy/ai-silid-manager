@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "../molecules/theme-toggle";
-import { signOut } from "next-auth/react";
+import { signOutToLogin } from "@/lib/auth/client-sign-out";
 import { hasOwnerAccess } from "@/lib/auth/dashboard-roles";
 
 const nav = [
@@ -123,7 +123,7 @@ export function AdminShell({
                     <button
                         className="theme-link mt-3 inline-block font-mono text-[10px] uppercase tracking-[0.2em] text-(--muted)"
                         onClick={() => {
-                            signOut();
+                            void signOutToLogin();
                         }}
                     >
                         Sign out

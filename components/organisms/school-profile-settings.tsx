@@ -39,8 +39,8 @@ export function SchoolProfileSettings({
   const [storageLimitInput, setStorageLimitInput] = useState(
     String(school.storageLimit),
   );
-  const [apiKeyInput, setApiKeyInput] = useState(school.apiKey ?? "");
-  const [secretInput, setSecretInput] = useState(school.secret ?? "");
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [secretInput, setSecretInput] = useState("");
   const [configError, setConfigError] = useState<string | null>(null);
   const [configSavedFlash, setConfigSavedFlash] = useState(false);
   const [isConfigPending, startConfigTransition] = useTransition();
@@ -65,8 +65,6 @@ export function SchoolProfileSettings({
       setUnlimitedToken(school.unlimitedToken);
       setTokenLimitInput(String(school.tokenLimit));
       setStorageLimitInput(String(school.storageLimit));
-      setApiKeyInput(school.apiKey ?? "");
-      setSecretInput(school.secret ?? "");
       setNameInput(school.name);
       setSchoolCodeInput(school.schoolCode);
       setSiteInput(school.site);
@@ -77,9 +75,9 @@ export function SchoolProfileSettings({
   const storagePct =
     !unlimitedStorage && metrics.quotaStorageBytes > 0
       ? Math.min(
-          100,
-          (metrics.storageUsedBytes / metrics.quotaStorageBytes) * 100,
-        )
+        100,
+        (metrics.storageUsedBytes / metrics.quotaStorageBytes) * 100,
+      )
       : 0;
   const tokenPct =
     !unlimitedToken && metrics.quotaTokens > 0
@@ -98,19 +96,13 @@ export function SchoolProfileSettings({
       setConfigError("Enter valid non-negative numeric limits.");
       return;
     }
-    const apiKeyNorm = apiKeyInput.trim() === "" ? null : apiKeyInput.trim();
-    const secretNorm = secretInput.trim() === "" ? null : secretInput.trim();
-    if (
-      apiKeyNorm !== null &&
-      apiKeyNorm.length > 100
-    ) {
+    const apiKeyNorm = apiKeyInput.trim();
+    const secretNorm = secretInput.trim();
+    if (apiKeyNorm !== "" && apiKeyNorm.length > 100) {
       setConfigError("API key must be at most 100 characters.");
       return;
     }
-    if (
-      secretNorm !== null &&
-      secretNorm.length > 100
-    ) {
+    if (secretNorm !== "" && secretNorm.length > 100) {
       setConfigError("Secret must be at most 100 characters.");
       return;
     }
@@ -124,8 +116,8 @@ export function SchoolProfileSettings({
         unlimitedToken,
         tokenLimit: Math.floor(tokenLimit),
         storageLimit: Math.floor(storageLimit),
-        apiKey: apiKeyNorm,
-        secret: secretNorm,
+        ...(apiKeyNorm !== "" ? { apiKey: apiKeyNorm } : {}),
+        ...(secretNorm !== "" ? { secret: secretNorm } : {}),
       });
 
       if (!result.success) {
@@ -136,8 +128,8 @@ export function SchoolProfileSettings({
 
       setTokenLimitInput(String(Math.floor(tokenLimit)));
       setStorageLimitInput(String(Math.floor(storageLimit)));
-      setApiKeyInput(apiKeyNorm ?? "");
-      setSecretInput(secretNorm ?? "");
+      setApiKeyInput("");
+      setSecretInput("");
       setConfigSavedFlash(true);
       window.setTimeout(() => setConfigSavedFlash(false), 2200);
       router.refresh();
@@ -323,14 +315,14 @@ export function SchoolProfileSettings({
           </div>
           <div className="flex justify-between gap-4 border-b py-2 sm:col-span-2" style={{ borderColor: "var(--border)" }}>
             <dt className="text-(--muted)">api_key</dt>
-            <dd className="max-w-[min(100%,28rem)] break-all text-right text-(--muted-strong)">
-              {school.apiKey ?? "—"}
+            <dd className="text-(--muted-strong)">
+              {school.apiKeySet ? "Set" : "Not set"}
             </dd>
           </div>
           <div className="flex justify-between gap-4 border-b py-2 sm:col-span-2" style={{ borderColor: "var(--border)" }}>
             <dt className="text-(--muted)">secret</dt>
-            <dd className="max-w-[min(100%,28rem)] break-all text-right text-(--muted-strong)">
-              {school.secret ?? "—"}
+            <dd className="text-(--muted-strong)">
+              {school.secretSet ? "Set" : "Not set"}
             </dd>
           </div>
           <div className="flex justify-between gap-4 border-b py-2" style={{ borderColor: "var(--border)" }}>
@@ -474,7 +466,7 @@ export function SchoolProfileSettings({
               <p className="mt-3 font-mono text-[11px] text-(--muted)">
                 {defaultAiModelId
                   ? aiModels.find((model) => model.id === defaultAiModelId)
-                      ?.description ?? "Selected model"
+                    ?.description ?? "Selected model"
                   : "Use this school's preferred default AI model."}
               </p>
             </div>
@@ -492,7 +484,7 @@ export function SchoolProfileSettings({
                 />
                 {unlimitedStorage ? "Enabled" : "Disabled"}
               </label>
-           
+
             </div>
 
             <div className="theme-panel border p-4">
@@ -508,7 +500,7 @@ export function SchoolProfileSettings({
                 />
                 {unlimitedToken ? "Enabled" : "Disabled"}
               </label>
-            
+
             </div>
 
             <div className="theme-panel border p-4">
@@ -555,7 +547,7 @@ export function SchoolProfileSettings({
                 API key
               </p>
               <p className="mt-2 font-mono text-[11px] text-(--muted)">
-                Optional. Clear the field and save to remove. Max 100 characters.
+                Optional. Leave blank to keep the current value. Enter a new value to replace. Max 100 characters.
               </p>
               <input
                 type="text"
@@ -564,7 +556,7 @@ export function SchoolProfileSettings({
                 maxLength={100}
                 autoComplete="off"
                 className="theme-input mt-3 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
-                placeholder="—"
+                placeholder={school.apiKeySet ? "Replace API key…" : "Set API key…"}
               />
             </div>
 
@@ -573,7 +565,7 @@ export function SchoolProfileSettings({
                 Secret
               </p>
               <p className="mt-2 font-mono text-[11px] text-(--muted)">
-                Optional. Clear the field and save to remove. Max 100 characters.
+                Optional. Leave blank to keep the current value. Enter a new value to replace. Max 100 characters.
               </p>
               <input
                 type="text"
@@ -582,7 +574,7 @@ export function SchoolProfileSettings({
                 maxLength={100}
                 autoComplete="off"
                 className="theme-input mt-3 w-full border px-3 py-2.5 font-mono text-[13px] outline-none"
-                placeholder="—"
+                placeholder={school.secretSet ? "Replace secret…" : "Set secret…"}
               />
             </div>
           </div>

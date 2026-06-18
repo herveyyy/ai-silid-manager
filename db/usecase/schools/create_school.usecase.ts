@@ -29,8 +29,6 @@ export class CreateSchoolUsecase {
                     site: schools.site,
                     createdAt: schools.createdAt,
                     updatedAt: schools.updatedAt,
-                    secret: schools.secret,
-                    apiKey: schools.apiKey,
                     aiFeat: schools.aiFeat,
                     enrichmentFeat: schools.enrichmentFeat,
                     unlimitedStorage: schools.unlimitedStorage,
@@ -49,6 +47,8 @@ export class CreateSchoolUsecase {
             return {
                 ...row,
                 passwordCredentialSet: Boolean(data.password),
+                apiKeySet: Boolean(data.apiKey),
+                secretSet: Boolean(data.secret),
                 aiFeat: Boolean(row.aiFeat),
                 enrichmentFeat: Boolean(row.enrichmentFeat),
                 unlimitedStorage: Boolean(row.unlimitedStorage),

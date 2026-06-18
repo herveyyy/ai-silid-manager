@@ -17,6 +17,13 @@ import {
 } from "./lib/auth/login-rate-limit";
 import { verifyGoogleIdToken } from "./lib/auth/verify-google-id-token";
 
+if (process.env.NODE_ENV === "production" && !process.env.AUTH_URL) {
+    console.error(
+        "[auth] AUTH_URL is not set. Set it to your public origin (e.g. https://school-manager.silid.co). " +
+            "Auth redirects may otherwise target http://0.0.0.0:3000.",
+    );
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
     session: { strategy: "jwt" },
     trustHost: true,

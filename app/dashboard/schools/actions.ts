@@ -32,20 +32,24 @@ export async function updateSchoolConfigurationAction(
         data.apiKey != null && typeof data.apiKey === "string"
             ? data.apiKey.trim()
             : "";
-    const secret = secretRaw === "" ? null : secretRaw;
-    const apiKey = apiKeyRaw === "" ? null : apiKeyRaw;
 
-    if (secret !== null && secret.length > SCHOOL_SECRET_MAX) {
-        return {
-            success: false,
-            message: `Secret must be at most ${SCHOOL_SECRET_MAX} characters.`,
-        };
+    if (data.secret !== undefined) {
+        const secret = secretRaw === "" ? null : secretRaw;
+        if (secret !== null && secret.length > SCHOOL_SECRET_MAX) {
+            return {
+                success: false,
+                message: `Secret must be at most ${SCHOOL_SECRET_MAX} characters.`,
+            };
+        }
     }
-    if (apiKey !== null && apiKey.length > SCHOOL_API_KEY_MAX) {
-        return {
-            success: false,
-            message: `API key must be at most ${SCHOOL_API_KEY_MAX} characters.`,
-        };
+    if (data.apiKey !== undefined) {
+        const apiKey = apiKeyRaw === "" ? null : apiKeyRaw;
+        if (apiKey !== null && apiKey.length > SCHOOL_API_KEY_MAX) {
+            return {
+                success: false,
+                message: `API key must be at most ${SCHOOL_API_KEY_MAX} characters.`,
+            };
+        }
     }
 
     if (
@@ -63,7 +67,7 @@ export async function updateSchoolConfigurationAction(
 
     try {
         const schoolsController = await createSchoolsAction();
-        await schoolsController.updateSchoolConfiguration(schoolId, {
+        const payload: StoredSchoolConfig = {
             aiFeat: Boolean(data.aiFeat),
             enrichmentFeat: Boolean(data.enrichmentFeat),
             defaultAiModelId,
@@ -71,9 +75,15 @@ export async function updateSchoolConfigurationAction(
             unlimitedToken: Boolean(data.unlimitedToken),
             tokenLimit: Math.floor(tokenLimit),
             storageLimit: Math.floor(storageLimit),
-            secret,
-            apiKey,
-        });
+        };
+        if (data.apiKey !== undefined) {
+            payload.apiKey = apiKeyRaw === "" ? null : apiKeyRaw;
+        }
+        if (data.secret !== undefined) {
+            payload.secret = secretRaw === "" ? null : secretRaw;
+        }
+
+        await schoolsController.updateSchoolConfiguration(schoolId, payload);
 
         revalidatePath("/dashboard");
         revalidatePath("/dashboard/schools");

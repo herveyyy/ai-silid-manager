@@ -23,13 +23,13 @@ export async function verifyGoogleIdToken(
         const payload = ticket.getPayload();
         const email = payload?.email?.trim();
 
-        if (!email || payload.email_verified === false) {
+        if (!email || payload?.email_verified === false) {
             return null;
         }
 
         return {
             email,
-            name: payload.name,
+            name: payload?.name,
         };
     } catch (error) {
         console.error("Google ID token verification failed:", error);

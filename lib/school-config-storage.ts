@@ -1,19 +1,8 @@
-import type { SchoolDTO } from "@/lib/types/admin-types";
+import type { UpdateSchoolConfigurationPayload } from "@/lib/types/admin-types";
 
 export const SCHOOL_CONFIG_STORAGE_KEY = "silid-admin-school-config";
 
-export type StoredSchoolConfig = Pick<
-    SchoolDTO,
-    | "aiFeat"
-    | "enrichmentFeat"
-    | "defaultAiModelId"
-    | "unlimitedStorage"
-    | "unlimitedToken"
-    | "tokenLimit"
-    | "storageLimit"
-    | "secret"
-    | "apiKey"
->;
+export type StoredSchoolConfig = UpdateSchoolConfigurationPayload;
 
 export function readSchoolConfigOverride(
     schoolId: string,
