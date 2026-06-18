@@ -51,7 +51,7 @@ Add your production variables:
 ```
 DATABASE_URL=mysql://user:password@host:3306/silid_school_manager
 AUTH_SECRET=your-secret-here
-AUTH_URL=http://your-vm-ip:3000
+AUTH_URL=https://school-manager.silid.co
 APP_ENV=production
 ```
 
@@ -104,7 +104,7 @@ Environment variables are **not baked into the Docker image**. They live on the 
 |---|---|---|
 | `DATABASE_URL` | Yes | MySQL connection URL |
 | `AUTH_SECRET` | Yes | NextAuth session signing secret |
-| `AUTH_URL` | Yes | Public URL of the app (e.g. `http://your-vm-ip:3000`) |
+| `AUTH_URL` | Yes | Public browser URL (e.g. `https://school-manager.silid.co`). Do not use `0.0.0.0:3000` — that is the container bind address only. |
 | `APP_ENV` | No | `development`, `staging`, or `production` |
 
 To update env vars, edit `~/.env.silid` on the VM and restart the container:

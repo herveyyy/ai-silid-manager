@@ -1,4 +1,4 @@
-import { mysqlTable, mysqlSchema, AnyMySqlColumn, foreignKey, primaryKey, char, mysqlEnum, json, text, int, datetime, varchar, decimal, bigint, tinyint } from "drizzle-orm/mysql-core"
+import { mysqlTable, mysqlSchema, AnyMySqlColumn, foreignKey, primaryKey, char, mysqlEnum, json, text, int, datetime, varchar, decimal, bigint, unique, tinyint } from "drizzle-orm/mysql-core"
 import { sql } from "drizzle-orm"
 
 export const activities = mysqlTable("activities", {
@@ -370,6 +370,23 @@ export const levelTags = mysqlTable("level_tags", {
 },
 	(table) => [
 		primaryKey({ columns: [table.id], name: "level_tags_id" }),
+	]);
+
+export const migrationJob = mysqlTable("migration_job", {
+	id: char({ length: 36 }).notNull(),
+	userId: char("user_id", { length: 36 }).notNull(),
+	firebaseClassId: varchar("firebase_class_id", { length: 255 }).notNull(),
+	firebaseActivityId: varchar("firebase_activity_id", { length: 255 }).notNull(),
+	mysqlClassCardId: char("mysql_class_card_id", { length: 36 }).notNull(),
+	redisJobId: varchar("redis_job_id", { length: 255 }),
+	status: mysqlEnum(['pending', 'processing', 'completed', 'failed']).default('pending').notNull(),
+	errorLog: json("error_log"),
+	createdAt: datetime("created_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
+	updatedAt: datetime("updated_at", { mode: 'string', fsp: 3 }).default(sql`(now(3))`).notNull(),
+},
+	(table) => [
+		primaryKey({ columns: [table.id], name: "migration_job_id" }),
+		unique("migration_job_user_activity_uidx").on(table.userId, table.firebaseActivityId),
 	]);
 
 export const notification = mysqlTable("notification", {

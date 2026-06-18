@@ -1,6 +1,6 @@
 "use client";
 
-import { signOut } from "next-auth/react";
+import { signOutToLogin } from "@/lib/auth/client-sign-out";
 
 export function UnauthorizedSignOut() {
   return (
@@ -8,7 +8,7 @@ export function UnauthorizedSignOut() {
       type="button"
       className="theme-button-secondary inline-flex border px-5 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors"
       onClick={() => {
-        signOut({ callbackUrl: "/" });
+        void signOutToLogin();
       }}
     >
       Sign out

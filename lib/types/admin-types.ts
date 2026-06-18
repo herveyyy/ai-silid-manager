@@ -22,7 +22,24 @@ export type School = Omit<
 };
 export type SchoolDTO = Omit<School, "password" | "secret" | "apiKey"> & {
     passwordCredentialSet: boolean;
+    apiKeySet: boolean;
+    secretSet: boolean;
+};
 
+export type UpdateSchoolConfigurationPayload = Pick<
+    SchoolDTO,
+    | "aiFeat"
+    | "enrichmentFeat"
+    | "defaultAiModelId"
+    | "unlimitedStorage"
+    | "unlimitedToken"
+    | "tokenLimit"
+    | "storageLimit"
+> & {
+    /** Omit to leave unchanged; null to clear; string to replace. */
+    apiKey?: string | null;
+    /** Omit to leave unchanged; null to clear; string to replace. */
+    secret?: string | null;
 };
 
 export type CreateSchoolPayload = {

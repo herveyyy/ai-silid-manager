@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "install:git-hooks": "git config core.hooksPath .githooks",
     "seed:createSuperAdmin": "tsx --env-file=.env scripts/seeds/create_admin.ts"
   },
   "dependencies": {

@@ -28,6 +28,14 @@ export class GetAllSchoolsUsecase {
                         ${schools.password} is not null
                         and trim(coalesce(${schools.password}, '')) <> ''
                     )`,
+                    apiKeySet: sql<boolean>`(
+                        ${schools.apiKey} is not null
+                        and trim(coalesce(${schools.apiKey}, '')) <> ''
+                    )`,
+                    secretSet: sql<boolean>`(
+                        ${schools.secret} is not null
+                        and trim(coalesce(${schools.secret}, '')) <> ''
+                    )`,
                 })
                 .from(schools);
 
