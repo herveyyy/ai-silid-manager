@@ -49,9 +49,11 @@ function GoogleSignInButton({
     onError: (message: string | null) => void;
 }) {
     const router = useRouter();
-    const hiddenButtonRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const googleButtonHostRef = useRef<HTMLDivElement>(null);
     const { clientId, scriptLoadedSuccessfully } = useGoogleOAuth();
     const [isSigningIn, setIsSigningIn] = useState(false);
+    const [buttonWidth, setButtonWidth] = useState(0);
 
     const completeGoogleSignIn = useCallback(
         async (credential: string) => {
@@ -85,7 +87,31 @@ function GoogleSignInButton({
     );
 
     useEffect(() => {
-        if (!scriptLoadedSuccessfully || !hiddenButtonRef.current) {
+        const container = containerRef.current;
+        if (!container) {
+            return;
+        }
+
+        const updateWidth = () => {
+            setButtonWidth(container.offsetWidth);
+        };
+
+        updateWidth();
+
+        const observer = new ResizeObserver(updateWidth);
+        observer.observe(container);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, []);
+
+    useEffect(() => {
+        if (
+            !scriptLoadedSuccessfully ||
+            !googleButtonHostRef.current ||
+            buttonWidth <= 0
+        ) {
             return;
         }
 
@@ -126,41 +152,32 @@ function GoogleSignInButton({
             },
         });
 
-        google.accounts.id.renderButton(hiddenButtonRef.current, {
+        const host = googleButtonHostRef.current;
+        host.replaceChildren();
+
+        google.accounts.id.renderButton(host, {
             type: "standard",
             theme: "outline",
             size: "large",
-            width: 400,
+            width: buttonWidth,
         });
-    }, [clientId, completeGoogleSignIn, onError, scriptLoadedSuccessfully]);
-
-    function handleClick() {
-        if (disabled || isSigningIn || !scriptLoadedSuccessfully) {
-            return;
-        }
-
-        const googleButton = hiddenButtonRef.current?.querySelector(
-            '[role="button"]',
-        ) as HTMLElement | null;
-
-        if (!googleButton) {
-            onError("Google sign-in is still loading. Please try again.");
-            return;
-        }
-
-        googleButton.click();
-    }
+    }, [
+        buttonWidth,
+        clientId,
+        completeGoogleSignIn,
+        onError,
+        scriptLoadedSuccessfully,
+    ]);
 
     const isBusy = disabled || isSigningIn;
+    const googleButtonReady = scriptLoadedSuccessfully && buttonWidth > 0;
 
     return (
-        <div className="relative w-full">
-            <button
-                type="button"
-                disabled={isBusy || !scriptLoadedSuccessfully}
-                onClick={handleClick}
+        <div ref={containerRef} className="relative w-full">
+            <div
                 className={LOGIN_BUTTON_CLASS}
                 style={{ outlineColor: "var(--foreground)" }}
+                aria-hidden="true"
             >
                 {isSigningIn ? (
                     <>
@@ -176,12 +193,16 @@ function GoogleSignInButton({
                         Continue with Google
                     </>
                 )}
-            </button>
+            </div>
 
             <div
-                ref={hiddenButtonRef}
-                className="pointer-events-none absolute left-[-9999px] h-10 w-[400px] overflow-hidden opacity-0"
-                aria-hidden="true"
+                ref={googleButtonHostRef}
+                className="absolute inset-0 overflow-hidden opacity-0"
+                style={{
+                    pointerEvents:
+                        isBusy || !googleButtonReady ? "none" : "auto",
+                }}
+                aria-hidden={isBusy}
             />
         </div>
     );
