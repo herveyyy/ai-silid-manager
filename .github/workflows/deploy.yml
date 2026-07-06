@@ -1,46 +1,68 @@
-name: Build and Push to Huawei Cloud SWR
+name: Build and Deploy
 
 on:
   push:
     branches:
       - master
-  pull_request:
-    branches:
-      - master
-  workflow_dispatch:
-
-env:
-  HUAWEI_REGION: ap-southeast-2
-  SWR_ORGANIZATION: silid-v3-staging-1
-  SWR_REPOSITORY: school-monitoring-manager
+    tags:
+      - "v*"
 
 jobs:
-  build-and-push:
-    name: Build and Push Docker Image
+  setup:
+    name: Determine Environment
     runs-on: ubuntu-latest
-    
+    outputs:
+      environment: ${{ steps.ctx.outputs.environment }}
+    steps:
+      - name: Resolve deployment context
+        id: ctx
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-push:
+    name: Build and Push — ${{ needs.setup.outputs.environment }}
+    needs: setup
+    runs-on: ubuntu-latest
+    env:
+      HUAWEI_REGION: ap-southeast-2
+      SWR_REGISTRY: swr.ap-southeast-2.myhuaweicloud.com
+      SWR_LOGIN_USER: ${{ vars.SWR_LOGIN_USER }}
+      SWR_LOGIN_PASSWORD: ${{ secrets.SWR_LOGIN_PASSWORD }}
+      SWR_ORGANIZATION: ${{ needs.setup.outputs.environment == 'production' && vars.PROD_SWR_ORGANIZATION || vars.STAGING_SWR_ORGANIZATION }}
+      SWR_REPOSITORY: ${{ vars.SWR_REPOSITORY }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Login to Huawei Cloud SWR
-        run: docker login -u ap-southeast-2@${{ vars.SWR_LOGIN_USER }} -p ${{ secrets.SWR_LOGIN_PASSWORD }} swr.${{ env.HUAWEI_REGION }}.myhuaweicloud.com
+        run: |
+          docker login \
+            -u ${{ env.HUAWEI_REGION }}@${{ env.SWR_LOGIN_USER }} \
+            -p ${{ env.SWR_LOGIN_PASSWORD }} \
+            ${{ env.SWR_REGISTRY }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
           driver: docker
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: swr.${{ env.HUAWEI_REGION }}.myhuaweicloud.com/${{ env.SWR_ORGANIZATION }}/${{ env.SWR_REPOSITORY }}
+          images: ${{ env.SWR_REGISTRY }}/${{ env.SWR_ORGANIZATION }}/${{ env.SWR_REPOSITORY }}
           tags: |
             type=raw,value=latest
-            type=sha,prefix={{branch}}-
+            type=raw,value=${{ github.ref_name }},enable=${{ github.ref_type == 'tag' }}
+            type=sha,prefix=${{ needs.setup.outputs.environment }}-
 
       - name: Build and push Docker image
+        id: build-and-push
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -50,26 +72,27 @@ jobs:
           provenance: false
           platforms: linux/amd64
 
-      - name: Image digest
-        run: echo "Image pushed with digest ${{ steps.build-and-push.outputs.digest }}"
+      - name: Print image digest
+        run: echo "Pushed ${{ steps.build-and-push.outputs.digest }}"
 
   deploy:
-    name: Deploy to VM
-    needs: build-and-push
-    if: github.event_name == 'push'
+    name: Deploy to ${{ needs.setup.outputs.environment }}
+    needs: [setup, build-and-push]
     runs-on: ubuntu-latest
+    env:
+      VM_HOST: ${{ needs.setup.outputs.environment == 'production' && secrets.PROD_VM_HOST || secrets.STAGING_VM_HOST }}
+      VM_USERNAME: ${{ needs.setup.outputs.environment == 'production' && secrets.PROD_VM_USERNAME || secrets.STAGING_VM_USERNAME }}
+      VM_SSH_KEY: ${{ needs.setup.outputs.environment == 'production' && secrets.PROD_VM_SSH_KEY || secrets.STAGING_VM_SSH_KEY }}
 
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USERNAME }}
-          key: ${{ secrets.VM_SSH_KEY }}
+          host: ${{ env.VM_HOST }}
+          username: ${{ env.VM_USERNAME }}
+          key: ${{ env.VM_SSH_KEY }}
           script: |
             cd ~/silid-school-manager
-            git pull
             docker compose pull
-            docker compose up -d
+            docker compose up -d --no-deps app
             docker image prune -f
-
