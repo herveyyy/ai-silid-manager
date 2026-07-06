@@ -19,8 +19,22 @@ jobs:
         run: |
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
             echo "environment=production" >> $GITHUB_OUTPUT
+            echo ""
+            echo "========================================"
+            echo "  DEPLOYMENT TYPE : PRODUCTION"
+            echo "  TRIGGER         : Tag (${{ github.ref_name }})"
+            echo "  COMMIT          : ${{ github.sha }}"
+            echo "  TRIGGERED BY    : ${{ github.actor }}"
+            echo "========================================"
           else
             echo "environment=staging" >> $GITHUB_OUTPUT
+            echo ""
+            echo "========================================"
+            echo "  DEPLOYMENT TYPE : STAGING"
+            echo "  TRIGGER         : Push to master"
+            echo "  COMMIT          : ${{ github.sha }}"
+            echo "  TRIGGERED BY    : ${{ github.actor }}"
+            echo "========================================"
           fi
 
   build-and-push:
