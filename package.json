@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "install:git-hooks": "git config core.hooksPath .githooks",
-    "seed:createSuperAdmin": "tsx --env-file=.env scripts/seeds/create_admin.ts"
+    "seed:createSuperAdmin": "tsx --env-file=.env scripts/seeds/create_admin.ts",
+    "manage": "bun --env-file=.env scripts/manage.mts"
   },
   "dependencies": {
     "@react-oauth/google": "^0.13.5",
